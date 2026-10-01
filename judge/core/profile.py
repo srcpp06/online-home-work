@@ -24,6 +24,8 @@ class RunnerProfile:
     test_command: tuple[str, ...]
     test_import: str  # import that brings `group` into the combined test file
     parser: str
+    static_check: str | None  # checker run on student files before the tests, e.g. "dart_imports"
+    forbidden_imports: tuple[str, ...]  # e.g. ("dart:io", ...); what static_check rejects
     memory_mb: int
     cpus: float
     tmp_mb: int  # size of the /tmp tmpfs
@@ -51,6 +53,8 @@ class RunnerProfile:
             test_command=tuple(data["test_command"]),
             test_import=data["test_import"],
             parser=data["parser"],
+            static_check=data.get("static_check"),
+            forbidden_imports=tuple(data.get("forbidden_imports", ())),
             memory_mb=data["memory_mb"],
             cpus=data["cpus"],
             tmp_mb=data["tmp_mb"],

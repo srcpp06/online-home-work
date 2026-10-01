@@ -6,6 +6,8 @@
   "test_command": ["flutter", "test", "--no-pub", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],
   "test_import": "package:flutter_test/flutter_test.dart",
   "parser": "dart_json",
+  "static_check": "dart_imports",
+  "forbidden_imports": ["dart:io", "dart:ffi", "dart:isolate", "dart:mirrors", "dart:cli"],
   "memory_mb": 3072,
   "cpus": 1.5,
   "tmp_mb": 512,

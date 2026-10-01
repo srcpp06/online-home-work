@@ -18,6 +18,8 @@ def profile_data(**overrides: Any) -> dict[str, Any]:
         "test_command": ["dart", "test"],
         "test_import": "package:test/test.dart",
         "parser": "dart_json",
+        "static_check": "dart_imports",
+        "forbidden_imports": ["dart:io"],
         "memory_mb": 1024,
         "cpus": 1.0,
         "tmp_mb": 256,
@@ -34,6 +36,16 @@ def test_profile_reads_json_data() -> None:
     assert profile.lane == Lane.FAST
     assert profile.student_paths == ("lib",)
     assert profile.test_command == ("dart", "test")
+    assert profile.forbidden_imports == ("dart:io",)
+
+
+def test_static_check_is_optional() -> None:
+    data = profile_data()
+    del data["static_check"], data["forbidden_imports"]
+
+    profile = RunnerProfile.from_json_data(data)
+
+    assert (profile.static_check, profile.forbidden_imports) == (None, ())
 
 
 @pytest.mark.parametrize("slug", ["dart", "flutter"])
@@ -45,6 +57,10 @@ def test_shipped_profiles_are_valid(slug: str) -> None:
     assert profile.slug == slug
     assert profile.test_command[-1] == "test/_ohw_all_test.dart"
     assert "json" in profile.test_command
+    assert profile.static_check == "dart_imports"
+    assert {"dart:io", "dart:ffi", "dart:isolate", "dart:mirrors", "dart:cli"} == set(
+        profile.forbidden_imports
+    )
 
 
 def test_flutter_runs_in_the_heavy_lane() -> None:
