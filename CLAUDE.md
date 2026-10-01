@@ -112,6 +112,8 @@ make test-docker   # Docker talab qiladigan integration testlar (marker: docker)
 make lint          # ruff check, ruff format --check, djlint
 make check         # lint + test — har commitdan oldin
 make fixtures-dart # dart_json parser fixture'larini qayta yozib olish (Docker + internet)
+uv run python -m judge.cli build TASK.zip --profile dart        # task image
+uv run python -m judge.cli run TASK.zip YECHIM.zip --profile dart # tekshirish (--json, --log)
 ```
 
 ## Asosiy sozlamalar

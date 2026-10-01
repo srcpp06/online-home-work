@@ -16,7 +16,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest — `judge/infra/image_builder.py`, `judge/infra/sandbox.py`; isitilgan image yangi kodni tekshirishi dart va flutter'da integration test bilan isbotlangan (`make test-docker`)
 - [x] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash — `judge/infra/runner.py` + `judge/packaging/submission.py`; cheksiz sikl, xotira, chiqish oqimi, soxta JSON va butun loyiha zipi Docker testlarida tekshirilgan
 - [x] Statik import tekshiruvi (dart/flutter) — `judge/packaging/dart_imports.py`; 26 ta aylanib o'tish usuli haqiqiy Dart'da sinalgan va hammasi rad etiladi. Oqimga (`judge.cli run`) keyingi vazifada ulanadi
-- [ ] `python -m judge.cli build` va `python -m judge.cli run`
+- [x] `python -m judge.cli build` va `python -m judge.cli run` — `judge/cli.py`, `judge/config.py`, `judge_zip`; image o'z ma'lumotini label'da saqlaydi, `run --json` PoC o'lchovlari uchun
 - [ ] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7)
 - [ ] Lokal o'lchov (x86_64)
 - [ ] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga
