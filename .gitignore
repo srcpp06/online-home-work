@@ -16,6 +16,9 @@ htmlcov/
 /media/
 /staticfiles/
 
+# Dart / Flutter
+.dart_tool/
+
 # Editors and OS
 .idea/
 .vscode/

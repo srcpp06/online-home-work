@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help setup test test-docker lint format check fixtures-dart
+.PHONY: help setup test test-docker lint format check base-images fixtures-dart
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-14s %s\n", $$1, $$2}'
@@ -25,6 +25,9 @@ format: ## Fix lint issues and format code
 	$(UV) run ruff format .
 
 check: lint test ## lint + test, run before every commit
+
+base-images: ## Build and smoke-test profile base images (PROFILES="dart flutter")
+	scripts/build-base-images.sh $(PROFILES)
 
 fixtures-dart: ## Re-record dart_json parser fixtures (needs Docker and internet)
 	scripts/record-dart-json-fixtures.sh

@@ -1,0 +1,12 @@
+# Packages pre-fetched into the flutter base image's pub cache (SPEC §4).
+# One per line, in `flutter pub add` syntax: "dev:" marks a dev dependency.
+provider
+bloc
+flutter_bloc
+equatable
+dio
+http
+go_router
+get_it
+dev:mocktail
+dev:test

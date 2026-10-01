@@ -12,7 +12,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `judge/core`: event, verdict, manifest entity'lari — `events.py`, `manifest.py`, `progress.py` (oqimni manifest bilan solishtirish), `verdict.py` (`decide_verdict`, SPEC §3.4 tartibi)
 - [x] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar — `judge/parsers/dart_json.py`; Dart 3.13.5 dagi 8 ta haqiqiy chiqish (`make fixtures-dart`), fixture → verdict zanjiri testlangan
 - [x] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l) — `judge/packaging/zip_validator.py`; zararli zip'lar testda yasaladi, fuzz testi ikki xato topdi va ular tuzatildi
-- [ ] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan)
+- [x] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan) — `make base-images`; ikkalasi internetsiz uid 1000 bilan smoke-test qilinadi. Flutter'ning `apt-get` qadami sessiya muhitida tekshirilmadi (`deb.debian.org` bloklangan), lokal `make base-images` da tasdiqlanadi
 - [ ] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest
 - [ ] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash
 - [ ] Statik import tekshiruvi (dart/flutter)
