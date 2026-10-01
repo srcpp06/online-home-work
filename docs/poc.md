@@ -33,7 +33,6 @@ Loyihani olish va o'lchash:
 git clone https://github.com/srcpp06/online-home-work.git
 cd online-home-work
 git switch claude/peaceful-darwin-r5riyt
-cp .env.example .env
 make setup
 make base-images
 make check
@@ -41,6 +40,7 @@ make test-docker
 make poc
 ```
 
+- `make setup` — Python kutubxonalari, git hook'lar va `.env` (yo'q bo'lsa `.env.example` dan yaratiladi). Bir marta yetarli.
 - `make base-images` — Dart va Flutter base image'larini shu kompyuter arxitekturasida yig'adi (Flutter ~5 daqiqa, internet kerak).
 - `make test-docker` — hamma Docker testlari (~5 daqiqa); o'lchovdan oldin hammasi o'tishi kerak.
 - Docker Hub `429 Too Many Requests` desa: `docker login` qiling yoki biroz kutib qayta urining.
@@ -80,7 +80,6 @@ Qayta ulaning (`ssh ubuntu@<server-ip>`), keyin lokal kompyuterdagi kabi:
 git clone https://github.com/srcpp06/online-home-work.git
 cd online-home-work
 git switch claude/peaceful-darwin-r5riyt
-cp .env.example .env
 make setup
 make base-images
 make test-docker
@@ -89,6 +88,16 @@ make poc
 ```
 
 `make poc` ikki marta ishlatiladi: ikkinchi o'tish natijalar qanchalik barqarorligini ko'rsatadi. Ko'proq takrorlash kerak bo'lsa: `uv run python -m scripts.poc --repeat 5`.
+
+## Muammolar
+
+| Xabar | Sabab va yechim |
+|---|---|
+| `error: uv is not installed` | `sudo pacman -S uv` (serverda: `curl -LsSf https://astral.sh/uv/install.sh \| sh`, keyin qayta ulaning) |
+| `error: docker is not installed` | `sudo pacman -S docker docker-buildx` |
+| `error: can't reach the Docker daemon` | `sudo systemctl enable --now docker` va `sudo usermod -aG docker $USER`, keyin tizimdan chiqib qayta kiring |
+| `error: DART_VERSION is not set` (yoki boshqa sozlama) | `.env` eski: yetishmagan qatorni `.env.example` dan ko'chiring yoki `.env` ni o'chirib `make setup` qiling |
+| `429 Too Many Requests` | Docker Hub limiti: `docker login` yoki biroz kutib qayta urining |
 
 ## Natijani yuborish
 

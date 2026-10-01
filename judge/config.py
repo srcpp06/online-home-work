@@ -71,7 +71,7 @@ class JudgeConfig:
         if missing:
             raise ConfigError(
                 f"missing settings: {', '.join(missing)}. "
-                "Copy .env.example to .env (or set them in the environment)."
+                "Add them to .env from .env.example (`make setup` creates .env if it is missing)."
             )
 
         def number(name: str) -> int:

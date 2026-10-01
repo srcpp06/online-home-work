@@ -14,7 +14,7 @@ config() {
         value="$(grep -E "^${name}=" "$root/.env" | tail -n 1 | cut -d= -f2- || true)"
     fi
     if [[ -z "$value" ]]; then
-        echo "error: $name is not set. Copy .env.example to .env and set it there." >&2
+        echo "error: $name is not set. Add it to .env (see .env.example) or set it in the environment." >&2
         exit 1
     fi
     printf '%s' "$value"
