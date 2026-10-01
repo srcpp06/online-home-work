@@ -191,9 +191,14 @@ JUDGE_MAX_OUTPUT_KB=512
 SUBMISSION_COOLDOWN_S=60
 SUBMISSION_MAX_ACTIVE_PER_STUDENT=1
 SUBMISSION_MAX_ZIP_MB=5
+SUBMISSION_MAX_UNPACKED_MB=20       # zip ochilgandagi hajm (faqat olinadigan fayllar)
+SUBMISSION_MAX_FILES=500
 TASK_MAX_ZIP_MB=50
+TASK_MAX_UNPACKED_MB=200
+TASK_MAX_FILES=5000
 
-FLUTTER_VERSION=                    # aniq versiya, masalan stable tag
+DART_VERSION=3.13.5                 # dart base image: rasmiy dart:<versiya>
+FLUTTER_VERSION=3.47.5              # aniq stable versiya
 ```
 
 ## 7. Testlash strategiyasi
