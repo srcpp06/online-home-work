@@ -12,9 +12,15 @@ import pytest
 from judge.core.limits import time_limit_s
 from judge.core.manifest import Manifest, ManifestTest, Visibility
 from judge.core.verdict import Verdict
-from judge.infra.image_builder import BuildFailed, BuildResult, task_image_tag
+from judge.infra.image_builder import (
+    BuildFailed,
+    BuildResult,
+    load_build_result,
+    task_image_tag,
+)
 from judge.infra.runner import judge_submission
 from judge.infra.sandbox import Sandbox, SandboxLimits
+from judge.packaging.dart_imports import ImportRules
 from tests.judge.infra.support import (
     NODE,
     build,
@@ -52,11 +58,31 @@ def test_task_image_tag_is_deterministic() -> None:
 def test_dart_task_builds_with_manifest_and_time_limit(
     docker_client: docker.DockerClient, dart_task: BuildResult
 ) -> None:
-    assert dart_task.manifest == DART_MANIFEST
+    assert dart_task.task.manifest == DART_MANIFEST
     assert dart_task.solution_wall_ms > 0
-    assert dart_task.time_limit_s == time_limit_s(dart_task.solution_wall_ms, 20, 120)
-    assert docker_client.images.get(dart_task.image_tag)
+    assert dart_task.task.time_limit_s == time_limit_s(dart_task.solution_wall_ms, 20, 120)
+    assert docker_client.images.get(dart_task.task.image_tag)
     assert "$ dart pub get" in dart_task.log
+
+
+def test_image_carries_its_build_in_a_label(
+    docker_client: docker.DockerClient, dart_task: BuildResult
+) -> None:
+    loaded = load_build_result(docker_client, dart_task.task.image_tag)
+
+    assert loaded == BuildResult(dart_task.task, dart_task.solution_wall_ms)
+    assert loaded.task.import_rules == ImportRules(
+        package_name="cart",
+        allowed_packages=frozenset({"cart"}),
+        forbidden_dart=frozenset({"io", "ffi", "isolate", "mirrors", "cli"}),
+    )
+    config = docker_client.images.get(dart_task.task.image_tag).attrs["Config"]
+    assert config["User"] in ("ohw", "1000:1000")
+    assert config["WorkingDir"] == "/home/ohw/app"
+
+
+def test_missing_image_has_no_build(docker_client: docker.DockerClient) -> None:
+    assert load_build_result(docker_client, "ohw-task:no-such-image") is None
 
 
 def test_image_keeps_tests_and_cache_but_not_the_solution(
@@ -67,7 +93,7 @@ def test_image_keeps_tests_and_cache_but_not_the_solution(
         "&& test -f test/hidden/02_discount_test.dart && echo ok"
     )
     limits = SandboxLimits.for_profile(load_profile("dart"), NODE)
-    with Sandbox(docker_client, dart_task.image_tag, ["sh", "-c", script], limits) as sandbox:
+    with Sandbox(docker_client, dart_task.task.image_tag, ["sh", "-c", script], limits) as sandbox:
         run = sandbox.run(30)
 
     assert run.stdout.strip() == "ok", run.stderr
@@ -142,13 +168,13 @@ def test_flutter_task_builds_and_judges_new_code(
 ) -> None:
     result = build(docker_client, flutter_package(), "flutter", flutter_base_image, "flutter")
     try:
-        assert result.manifest == Manifest(
+        assert result.task.manifest == Manifest(
             (
                 ManifestTest("Tugma bosilganda son ortadi", 1, Visibility.PUBLIC),
                 ManifestTest("Ikki marta oshirilganda 2 boʻladi", 1, Visibility.HIDDEN),
             )
         )
-        assert 90 <= result.time_limit_s <= 300
+        assert 90 <= result.task.time_limit_s <= 300
         task, profile = task_image(result), load_profile("flutter")
         failing = judge_submission(docker_client, task, profile, NODE, flutter_lib("fail"))
         passing = judge_submission(docker_client, task, profile, NODE, flutter_lib("pass"))
@@ -158,4 +184,4 @@ def test_flutter_task_builds_and_judges_new_code(
         )
         assert passing.judgement.verdict == Verdict.ACCEPTED
     finally:
-        remove_image(docker_client, result.image_tag)
+        remove_image(docker_client, result.task.image_tag)

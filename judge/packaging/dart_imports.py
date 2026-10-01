@@ -16,7 +16,7 @@ import re
 import urllib.parse
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Self
+from typing import Any, Self
 
 from judge.core.profile import RunnerProfile
 from judge.packaging.task_package import TaskPackage
@@ -45,6 +45,21 @@ class ImportRules:
             package_name=package.package_name,
             allowed_packages=package.dependencies | {package.package_name},
             forbidden_dart=frozenset(forbidden),
+        )
+
+    def to_json_data(self) -> dict[str, Any]:
+        return {
+            "package_name": self.package_name,
+            "allowed_packages": sorted(self.allowed_packages),
+            "forbidden_dart": sorted(self.forbidden_dart),
+        }
+
+    @classmethod
+    def from_json_data(cls, data: dict[str, Any]) -> Self:
+        return cls(
+            package_name=data["package_name"],
+            allowed_packages=frozenset(data["allowed_packages"]),
+            forbidden_dart=frozenset(data["forbidden_dart"]),
         )
 
 

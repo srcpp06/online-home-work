@@ -10,6 +10,7 @@ import dataclasses
 import shlex
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from typing import Any, Self
 
 import docker
 
@@ -19,6 +20,7 @@ from judge.core.profile import RunnerProfile
 from judge.core.progress import RunProgress
 from judge.core.verdict import Judgement, RunOutcome, decide_verdict
 from judge.infra.sandbox import NodeSettings, Sandbox, SandboxLimits
+from judge.packaging.dart_imports import ImportRules
 from judge.packaging.zip_validator import ArchiveFile
 from judge.parsers import make_parser
 
@@ -35,6 +37,27 @@ class TaskImage:
     manifest: Manifest
     time_limit_s: int
     memory_limit_mb: int | None = None  # None: the profile's limit
+    import_rules: ImportRules | None = None  # None: the profile has no static check
+
+    def to_json_data(self) -> dict[str, Any]:
+        return {
+            "image_tag": self.image_tag,
+            "manifest": self.manifest.to_json_data(),
+            "time_limit_s": self.time_limit_s,
+            "memory_limit_mb": self.memory_limit_mb,
+            "import_rules": self.import_rules and self.import_rules.to_json_data(),
+        }
+
+    @classmethod
+    def from_json_data(cls, data: dict[str, Any]) -> Self:
+        rules = data.get("import_rules")
+        return cls(
+            image_tag=data["image_tag"],
+            manifest=Manifest.from_json_data(data["manifest"]),
+            time_limit_s=data["time_limit_s"],
+            memory_limit_mb=data.get("memory_limit_mb"),
+            import_rules=ImportRules.from_json_data(rules) if rules else None,
+        )
 
 
 @dataclass(frozen=True)

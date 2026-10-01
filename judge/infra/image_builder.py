@@ -9,6 +9,7 @@ No Dockerfile: each step is a sandbox container saved with commit.
 """
 
 import contextlib
+import json
 import shlex
 from dataclasses import dataclass
 
@@ -20,19 +21,26 @@ from judge.core.limits import time_limit_s
 from judge.core.manifest import Manifest, ManifestTest
 from judge.core.profile import RunnerProfile
 from judge.core.verdict import RunOutcome, Verdict, decide_verdict
+from judge.infra.runner import TaskImage
 from judge.infra.sandbox import ContainerRun, NodeSettings, Sandbox, SandboxLimits
 from judge.packaging.combined_tests import combined_test_file
+from judge.packaging.dart_imports import ImportRules
 from judge.packaging.task_package import TaskPackage, visibility_of
 from judge.parsers import make_parser
+
+# The image describes itself: everything judging needs is in this label.
+BUILD_LABEL = "ohw.build"
 
 
 @dataclass(frozen=True)
 class BuildResult:
-    image_tag: str
-    manifest: Manifest
+    task: TaskImage
     solution_wall_ms: int
-    time_limit_s: int
-    log: str
+    log: str = ""  # not kept in the image label
+
+    def label(self) -> dict[str, str]:
+        data = {"task": self.task.to_json_data(), "solution_wall_ms": self.solution_wall_ms}
+        return {BUILD_LABEL: json.dumps(data, ensure_ascii=False)}
 
 
 class BuildFailed(Exception):
@@ -44,9 +52,21 @@ class BuildFailed(Exception):
         self.log = log
 
 
-def task_image_tag(task_version_id: int, package_sha256: str) -> str:
+def task_image_tag(task_version_id: int | str, package_sha256: str) -> str:
     """Deterministic, so any node can rebuild the same image from the stored package."""
     return f"ohw-task:{task_version_id}-{package_sha256[:12]}"
+
+
+def load_build_result(client: docker.DockerClient, tag: str) -> BuildResult | None:
+    """The build saved in an image's label, or None if there is no such image."""
+    try:
+        labels = client.images.get(tag).labels or {}
+    except ImageNotFound:
+        return None
+    if BUILD_LABEL not in labels:
+        return None
+    data = json.loads(labels[BUILD_LABEL])
+    return BuildResult(TaskImage.from_json_data(data["task"]), data["solution_wall_ms"])
 
 
 def build_task_image(
@@ -118,16 +138,24 @@ def _warm_up(
             manifest = _check_warm_up(run, parser.compile_error, events, parser.test_files, profile)
         except BuildFailed as error:
             raise BuildFailed(error.errors, log.text) from None
+        task = TaskImage(
+            image_tag=tag,
+            manifest=manifest,
+            time_limit_s=time_limit_s(run.wall_ms, profile.min_time_s, profile.max_time_s),
+            import_rules=_import_rules(package, profile),
+        )
+        result = BuildResult(task, solution_wall_ms=run.wall_ms, log=log.text)
         repository, _, version = tag.partition(":")
-        sandbox.commit(repository, version or None)
+        sandbox.commit(repository, version or None, labels=result.label())
+    return result
 
-    return BuildResult(
-        image_tag=tag,
-        manifest=manifest,
-        solution_wall_ms=run.wall_ms,
-        time_limit_s=time_limit_s(run.wall_ms, profile.min_time_s, profile.max_time_s),
-        log=log.text,
-    )
+
+def _import_rules(package: TaskPackage, profile: RunnerProfile) -> ImportRules | None:
+    if profile.static_check is None:
+        return None
+    if profile.static_check != "dart_imports":
+        raise ValueError(f"unknown static check {profile.static_check!r}")
+    return ImportRules.for_task(package, profile)
 
 
 def _check_warm_up(

@@ -257,3 +257,7 @@ def test_allow_dart_io_lifts_only_dart_io() -> None:
 
     assert check("import 'dart:io';", rules=rules) == []
     assert check("import 'dart:ffi';", rules=rules) != []
+
+
+def test_rules_survive_json() -> None:
+    assert ImportRules.from_json_data(RULES.to_json_data()) == RULES

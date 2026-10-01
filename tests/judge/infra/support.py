@@ -81,7 +81,7 @@ def build(
 
 
 def task_image(result: BuildResult) -> TaskImage:
-    return TaskImage(result.image_tag, result.manifest, result.time_limit_s)
+    return result.task
 
 
 def remove_image(client: docker.DockerClient, tag: str) -> None:

@@ -210,9 +210,15 @@ class Sandbox:
             stderr=_text(stderr),
         )
 
-    def commit(self, repository: str | None = None, tag: str | None = None) -> str:
+    def commit(
+        self,
+        repository: str | None = None,
+        tag: str | None = None,
+        labels: dict[str, str] | None = None,
+    ) -> str:
         """Save the container's files as an image; returns the image id."""
-        return self.container.commit(repository=repository, tag=tag).id
+        conf = {"Labels": labels} if labels else None
+        return self.container.commit(repository=repository, tag=tag, conf=conf).id
 
     def _kill_in_background(self) -> None:
         threading.Thread(target=self._kill, daemon=True).start()

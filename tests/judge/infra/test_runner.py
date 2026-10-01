@@ -144,5 +144,6 @@ def test_no_containers_are_left_behind(
 ) -> None:
     run(docker_client, task_image(dart_task), cart_lib("fail_hidden"))
 
-    leftovers = docker_client.containers.list(all=True, filters={"ancestor": dart_task.image_tag})
+    ancestor = {"ancestor": dart_task.task.image_tag}
+    leftovers = docker_client.containers.list(all=True, filters=ancestor)
     assert leftovers == []

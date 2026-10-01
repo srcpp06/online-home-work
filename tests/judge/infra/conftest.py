@@ -58,4 +58,4 @@ def dart_task(docker_client: docker.DockerClient, dart_base_image: str) -> Itera
     """The cart task built once with the teacher's correct solution."""
     result = build(docker_client, dart_package("pass"), "dart", dart_base_image, "dartpass")
     yield result
-    remove_image(docker_client, result.image_tag)
+    remove_image(docker_client, result.task.image_tag)
