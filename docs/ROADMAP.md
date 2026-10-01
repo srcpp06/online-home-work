@@ -9,7 +9,7 @@ Qoidalar: vazifalar tartib bilan bajariladi. Tugagan vazifa `[x]` bilan belgilan
 Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ishlashini va qancha vaqt olishini isbotlash. Loyihaning eng katta xavfi shu yerda.
 
 - [x] Repo skeleti: `uv`, ruff, pytest, Makefile, `.env.example`, `.gitignore`, `docs/decisions.md` — `pyproject.toml`, `Makefile`, pre-commit, `judge/` qatlamlari va ularning bog'liqlik testi (`tests/test_architecture.py`)
-- [ ] `judge/core`: event, verdict, manifest entity'lari
+- [x] `judge/core`: event, verdict, manifest entity'lari — `events.py`, `manifest.py`, `progress.py` (oqimni manifest bilan solishtirish), `verdict.py` (`decide_verdict`, SPEC §3.4 tartibi)
 - [ ] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar
 - [ ] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l)
 - [ ] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan)
