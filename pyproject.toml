@@ -1,0 +1,49 @@
+[project]
+name = "online-home-work"
+version = "0.1.0"
+description = "Project-based homework checking platform for IT training centers"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6",
+    "pytest>=9.1",
+    "ruff>=0.16",
+]
+
+[tool.uv]
+# An application, not a library: run from the repo root, never built or installed.
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "S",   # bandit (security)
+    "RUF", # ruff-specific
+]
+# Official Uzbek Latin letters used in UI texts (docs/UI.md): oʻ, gʻ and the tutuq belgisi.
+allowed-confusables = ["ʻ", "ʼ"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["--import-mode=importlib", "--strict-markers", "--strict-config", "-ra"]
+xfail_strict = true
+markers = [
+    "docker: needs a running Docker daemon (run with `make test-docker`)",
+]

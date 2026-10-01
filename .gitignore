@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets: only .env.example is committed
+.env
+.env.*
+!.env.example
+
+# Django (Phase 1)
+/media/
+/staticfiles/
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

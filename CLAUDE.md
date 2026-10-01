@@ -83,6 +83,7 @@ judge/               tekshiruvchi yadrosi — Django'ni import qilmaydi
 profiles/            base image Dockerfile'lari: dart/, flutter/, pytest-http/, playwright/
 examples/            namuna topshiriqlar va turli yechimlar (testlar + o'qituvchilar uchun shablon)
 templates/  static/  docs/
+tests/               pytest testlari, kod papkalari tuzilishini takrorlaydi (tests/judge/parsers/...)
 ```
 
 `judge/core`, `judge/parsers` va `judge/packaging` Docker'siz unit-test qilinadi.

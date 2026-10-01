@@ -8,7 +8,7 @@ Qoidalar: vazifalar tartib bilan bajariladi. Tugagan vazifa `[x]` bilan belgilan
 
 Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ishlashini va qancha vaqt olishini isbotlash. Loyihaning eng katta xavfi shu yerda.
 
-- [ ] Repo skeleti: `uv`, ruff, pytest, Makefile, `.env.example`, `.gitignore`, `docs/decisions.md`
+- [x] Repo skeleti: `uv`, ruff, pytest, Makefile, `.env.example`, `.gitignore`, `docs/decisions.md` — `pyproject.toml`, `Makefile`, pre-commit, `judge/` qatlamlari va ularning bog'liqlik testi (`tests/test_architecture.py`)
 - [ ] `judge/core`: event, verdict, manifest entity'lari
 - [ ] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar
 - [ ] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l)
