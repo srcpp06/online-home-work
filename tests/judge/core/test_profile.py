@@ -13,6 +13,7 @@ def profile_data(**overrides: Any) -> dict[str, Any]:
     data: dict[str, Any] = {
         "slug": "dart",
         "lane": "fast",
+        "base_image": "ohw-base-dart:${DART_VERSION}",
         "student_paths": ["lib"],
         "install_command": ["dart", "pub", "get"],
         "test_command": ["dart", "test"],

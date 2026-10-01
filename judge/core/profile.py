@@ -19,6 +19,7 @@ class Lane(StrEnum):
 class RunnerProfile:
     slug: str
     lane: Lane
+    base_image: str  # e.g. "ohw-base-dart:${DART_VERSION}", filled in from the settings
     student_paths: tuple[str, ...]  # what is taken from a student's zip, e.g. ("lib",)
     install_command: tuple[str, ...]  # installs the teacher's libraries; the only networked step
     test_command: tuple[str, ...]
@@ -34,7 +35,8 @@ class RunnerProfile:
     build_timeout_s: int  # for installing libraries
 
     def __post_init__(self) -> None:
-        if not (self.slug and self.student_paths and self.install_command and self.test_command):
+        required = (self.slug, self.base_image, self.student_paths, self.install_command)
+        if not (all(required) and self.test_command):
             raise ValueError(f"profile {self.slug!r} is missing a required field")
         if min(self.memory_mb, self.tmp_mb, self.min_time_s, self.build_timeout_s) < 1:
             raise ValueError(f"profile {self.slug!r}: limits must be positive")
@@ -48,6 +50,7 @@ class RunnerProfile:
         return cls(
             slug=data["slug"],
             lane=Lane(data["lane"]),
+            base_image=data["base_image"],
             student_paths=tuple(data["student_paths"]),
             install_command=tuple(data["install_command"]),
             test_command=tuple(data["test_command"]),

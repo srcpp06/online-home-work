@@ -211,6 +211,7 @@ def profile(forbidden: list[str]) -> RunnerProfile:
         {
             "slug": "dart",
             "lane": "fast",
+            "base_image": "ohw-base-dart:${DART_VERSION}",
             "student_paths": ["lib"],
             "install_command": ["dart", "pub", "get"],
             "test_command": ["dart", "test"],

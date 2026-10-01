@@ -1,12 +1,12 @@
 """Shared helpers for the Docker tests: fixture packages, profiles, builds."""
 
 import contextlib
-import json
 from pathlib import Path
 
 import docker
 from docker.errors import ImageNotFound
 
+from judge import config
 from judge.core.profile import RunnerProfile
 from judge.infra.image_builder import BuildResult, build_task_image, task_image_tag
 from judge.infra.runner import TaskImage
@@ -22,8 +22,7 @@ NODE = NodeSettings(cpu_shares=512, max_output_bytes=512 * 1024)
 
 
 def load_profile(slug: str) -> RunnerProfile:
-    data = json.loads((REPO_ROOT / "profiles" / slug / "profile.json").read_text())
-    return RunnerProfile.from_json_data(data)
+    return config.load_profile(slug)
 
 
 def files_under(folder: Path, prefix: str = "") -> list[ArchiveFile]:

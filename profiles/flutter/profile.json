@@ -1,6 +1,7 @@
 {
   "slug": "flutter",
   "lane": "heavy",
+  "base_image": "ohw-base-flutter:${FLUTTER_VERSION}",
   "student_paths": ["lib"],
   "install_command": ["flutter", "pub", "get"],
   "test_command": ["flutter", "test", "--no-pub", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],

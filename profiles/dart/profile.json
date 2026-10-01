@@ -1,6 +1,7 @@
 {
   "slug": "dart",
   "lane": "fast",
+  "base_image": "ohw-base-dart:${DART_VERSION}",
   "student_paths": ["lib"],
   "install_command": ["dart", "pub", "get"],
   "test_command": ["dart", "test", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],
