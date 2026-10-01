@@ -1,0 +1,2 @@
+# Optional task settings. Leave out the file when the defaults are fine.
+allow_dart_io: false

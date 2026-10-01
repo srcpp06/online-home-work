@@ -106,7 +106,7 @@ make setup         # uv sync, pre-commit
 make dev           # Postgres (compose.dev.yml) + runserver + tailwind watch
 make worker        # python manage.py judge_worker
 make base-images   # profiles/* ni joriy arxitekturada yig'ish
-make poc           # examples/ ni judge CLI orqali ishlatish va o'lchash
+make poc           # examples/ ni judge orqali ishlatish va o'lchash (Markdown jadval)
 make test          # tez testlar (Docker'siz)
 make test-docker   # Docker talab qiladigan integration testlar (marker: docker)
 make lint          # ruff check, ruff format --check, djlint

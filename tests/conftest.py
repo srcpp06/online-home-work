@@ -11,7 +11,7 @@ from docker.errors import DockerException, ImageNotFound
 from judge.infra.image_builder import BuildResult
 from tests.judge.infra.support import build, dart_package, remove_image
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def pinned_version(name: str) -> str:

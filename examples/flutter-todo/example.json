@@ -1,0 +1,14 @@
+{
+  "profile": "flutter",
+  "starter": {"verdict": "wrong_answer", "failed_test": 1},
+  "submissions": {
+    "ok": {"verdict": "accepted"},
+    "fail_logic": {"verdict": "wrong_answer", "failed_test": 3},
+    "fail_widget": {"verdict": "wrong_answer", "failed_test": 4},
+    "compile_error": {"verdict": "compile_error"},
+    "timeout": {"verdict": "time_limit", "failed_test": 2},
+    "memory": {"verdict": "memory_limit", "failed_test": 2},
+    "forbidden_import": {"verdict": "rejected"},
+    "spoof_attempt": {"verdict": "wrong_answer", "failed_test": 2}
+  }
+}
