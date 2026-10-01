@@ -1,0 +1,15 @@
+{
+  "slug": "flutter",
+  "lane": "heavy",
+  "student_paths": ["lib"],
+  "install_command": ["flutter", "pub", "get"],
+  "test_command": ["flutter", "test", "--no-pub", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],
+  "test_import": "package:flutter_test/flutter_test.dart",
+  "parser": "dart_json",
+  "memory_mb": 3072,
+  "cpus": 1.5,
+  "tmp_mb": 512,
+  "min_time_s": 90,
+  "max_time_s": 300,
+  "build_timeout_s": 900
+}
