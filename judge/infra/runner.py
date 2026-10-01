@@ -72,6 +72,7 @@ class JudgeResult:
     wall_ms: int
     log: str  # for the teacher only: never shown to the student
     public_message: str = ""  # for the student: why the zip was rejected
+    peak_memory_mb: int | None = None  # when the node samples memory
 
 
 def judge_zip(
@@ -160,4 +161,5 @@ def judge_submission(
         compile_error=parser.compile_error,
         wall_ms=run.wall_ms,
         log="\n".join(log) + "\n",
+        peak_memory_mb=run.peak_memory_mb,
     )

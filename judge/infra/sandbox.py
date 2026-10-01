@@ -13,7 +13,7 @@ import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Self
+from typing import Any, Self
 
 import docker
 from docker.errors import APIError, NotFound
@@ -38,6 +38,7 @@ class NodeSettings:
     max_output_bytes: int  # JUDGE_MAX_OUTPUT_KB
     runtime: str = "runc"  # JUDGE_RUNTIME, later runsc (gVisor)
     pids_limit: int = 256
+    sample_memory: bool = False  # poll docker stats for the peak; for measurements
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,7 @@ class SandboxLimits:
     max_output_bytes: int
     runtime: str
     pids_limit: int
+    sample_memory: bool = False
 
     @classmethod
     def for_profile(cls, profile: RunnerProfile, node: NodeSettings) -> Self:
@@ -60,6 +62,7 @@ class SandboxLimits:
             max_output_bytes=node.max_output_bytes,
             runtime=node.runtime,
             pids_limit=node.pids_limit,
+            sample_memory=node.sample_memory,
         )
 
 
@@ -73,6 +76,7 @@ class ContainerRun:
     stopped_early: bool  # on_line asked to stop
     stdout: str
     stderr: str
+    peak_memory_mb: int | None = None  # only when the limits ask for memory sampling
 
     def describe(self) -> str:
         """Short status for logs, e.g. "exit 1, out of memory, 3.2 s"."""
@@ -83,6 +87,8 @@ class ContainerRun:
             parts.append("output limit exceeded")
         if self.stopped_early:
             parts.append("stopped at the first failure")
+        if self.peak_memory_mb is not None:
+            parts.append(f"peak {self.peak_memory_mb} MB")
         return ", ".join([*parts, f"{self.wall_ms / 1000:.1f} s"])
 
 
@@ -170,9 +176,12 @@ class Sandbox:
         timer.daemon = True
         stdout, stderr, pending = bytearray(), bytearray(), b""
         output_limit_exceeded = stopped_early = False
+        sampler = _MemorySampler(container) if self._limits.sample_memory else None
         started = time.monotonic()
         container.start()
         timer.start()
+        if sampler is not None:
+            sampler.start()
         try:
             for out, err in stream:
                 # After a kill the stream is still read to the end: if nobody reads it,
@@ -195,6 +204,8 @@ class Sandbox:
                 on_line(_text(pending))
         finally:
             timer.cancel()
+            if sampler is not None:
+                sampler.stop()
         wall_ms = int((time.monotonic() - started) * 1000)
 
         exit_code = container.wait(timeout=60).get("StatusCode")
@@ -208,6 +219,7 @@ class Sandbox:
             stopped_early=stopped_early,
             stdout=_text(stdout),
             stderr=_text(stderr),
+            peak_memory_mb=sampler.peak_mb if sampler is not None else None,
         )
 
     def commit(
@@ -227,6 +239,46 @@ class Sandbox:
         # Fails when the container already stopped or the daemon is busy finishing it.
         with contextlib.suppress(APIError, RequestException):
             self.container.kill()
+
+
+class _MemorySampler:
+    """Polls docker stats while the container runs and keeps the highest memory use.
+
+    Sampling can miss a spike shorter than the interval; good enough for measurements.
+    """
+
+    INTERVAL_S = 0.2
+
+    def __init__(self, container: Container) -> None:
+        self._container = container
+        self._stopped = threading.Event()
+        self._thread = threading.Thread(target=self._poll, daemon=True)
+        self._peak_bytes = 0
+
+    @property
+    def peak_mb(self) -> int | None:
+        return self._peak_bytes // (1024 * 1024) if self._peak_bytes else None
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def stop(self) -> None:
+        self._stopped.set()
+        self._thread.join(timeout=5)
+
+    def _poll(self) -> None:
+        while not self._stopped.is_set():
+            with contextlib.suppress(APIError, RequestException, KeyError, TypeError):
+                stats = self._container.stats(stream=False, one_shot=True)
+                self._peak_bytes = max(self._peak_bytes, _used_bytes(stats["memory_stats"]))
+            self._stopped.wait(self.INTERVAL_S)
+
+
+def _used_bytes(memory: dict[str, Any]) -> int:
+    """Like `docker stats`: usage minus the inactive page cache (cgroup v2 or v1 names)."""
+    cache = memory.get("stats", {})
+    inactive = cache.get("inactive_file", cache.get("total_inactive_file", 0))
+    return max(0, memory.get("usage", 0) - inactive)
 
 
 def _text(data: bytes | bytearray) -> str:

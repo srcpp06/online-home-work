@@ -37,6 +37,7 @@ class BuildResult:
     task: TaskImage
     solution_wall_ms: int
     log: str = ""  # not kept in the image label
+    warm_up_peak_mb: int | None = None  # when the node samples memory; not in the label
 
     def label(self) -> dict[str, str]:
         data = {"task": self.task.to_json_data(), "solution_wall_ms": self.solution_wall_ms}
@@ -144,7 +145,9 @@ def _warm_up(
             time_limit_s=time_limit_s(run.wall_ms, profile.min_time_s, profile.max_time_s),
             import_rules=_import_rules(package, profile),
         )
-        result = BuildResult(task, solution_wall_ms=run.wall_ms, log=log.text)
+        result = BuildResult(
+            task, solution_wall_ms=run.wall_ms, log=log.text, warm_up_peak_mb=run.peak_memory_mb
+        )
         repository, _, version = tag.partition(":")
         sandbox.commit(repository, version or None, labels=result.label())
     return result

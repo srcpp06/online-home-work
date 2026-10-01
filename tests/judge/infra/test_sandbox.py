@@ -1,5 +1,7 @@
 """Sandbox isolation against a real Docker daemon (marker: docker)."""
 
+import dataclasses
+
 import docker
 import pytest
 from docker.errors import NotFound
@@ -181,3 +183,21 @@ def test_commit_saves_the_files(docker_client, dart_base_image) -> None:
         assert lines == ["hi"]
     finally:
         docker_client.images.remove(image_id, force=True)
+
+
+def test_peak_memory_is_sampled_when_asked(docker_client, dart_base_image) -> None:
+    limits = dataclasses.replace(LIMITS, memory_mb=512, sample_memory=True)
+    hold_150_mb = "x=$(head -c 150M /dev/zero | tr '\\0' a); sleep 1.5; echo ${#x}"
+
+    run, lines = run_shell(docker_client, dart_base_image, hold_150_mb, limits=limits)
+
+    assert lines == [str(150 * 1024 * 1024)]
+    assert run.peak_memory_mb is not None
+    assert 140 <= run.peak_memory_mb <= 512
+    assert f"peak {run.peak_memory_mb} MB" in run.describe()
+
+
+def test_memory_is_not_sampled_by_default(docker_client, dart_base_image) -> None:
+    run, _ = run_shell(docker_client, dart_base_image, "true")
+
+    assert run.peak_memory_mb is None
