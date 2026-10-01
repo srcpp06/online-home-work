@@ -93,6 +93,7 @@ make poc
 
 | Xabar | Sabab va yechim |
 |---|---|
+| pacman: `failed retrieving file ... .sig ... 404` | Oyna (mirror) hali to'liq yangilanmagan: `sudo cachyos-rate-mirrors`, `sudo pacman -Syu`, keyin qayta o'rnating. `uv` uchun muqobil: `curl -LsSf https://astral.sh/uv/install.sh \| sh` va Fish'da `fish_add_path ~/.local/bin` |
 | `error: uv is not installed` | `sudo pacman -S uv` (serverda: `curl -LsSf https://astral.sh/uv/install.sh \| sh`, keyin qayta ulaning) |
 | `error: docker is not installed` | `sudo pacman -S docker docker-buildx` |
 | `error: can't reach the Docker daemon` | `sudo systemctl enable --now docker` va `sudo usermod -aG docker $USER`, keyin tizimdan chiqib qayta kiring |
