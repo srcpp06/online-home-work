@@ -153,7 +153,7 @@ Zip validator: hajm limiti (o'quvchi `SUBMISSION_MAX_ZIP_MB`, o'qituvchi `TASK_M
 
 ## 4. Flutter optimizatsiyasi
 
-- Base image: `debian:bookworm-slim` + `git clone --depth 1 --branch $FLUTTER_VERSION` (git clone multi-arch uchun; Dart SDK arxitekturaga mos o'zi yuklanadi). Yig'ishda dummy loyihada `flutter test` bir marta ishlatiladi — kerakli artefaktlar (`flutter_tester` va boshqalar) keshlanadi. Analytics va CLI animatsiyalari o'chiriladi.
+- Base image: `debian:trixie-slim` + `git clone --depth 1 --branch $FLUTTER_VERSION` (git clone multi-arch uchun; Dart SDK arxitekturaga mos o'zi yuklanadi). Yig'ishda dummy loyihada `flutter test` bir marta ishlatiladi — kerakli artefaktlar (`flutter_tester` va boshqalar) keshlanadi. Analytics va CLI animatsiyalari o'chiriladi.
 - Ko'p ishlatiladigan paketlar (`profiles/flutter/common_packages.txt`: provider, bloc, flutter_bloc, equatable, dio, http, go_router, get_it, mocktail …) base image pub keshiga oldindan yuklanadi — o'qituvchi topshiriq yig'ishi tezlashadi.
 - Test buyruqlari: `--no-pub`, `--concurrency=1`, bitta birlashtirilgan fayl, isitilgan kesh.
 - 2 bosqichli tekshiruv: mantiq `dart test` bilan (soniyalar), widget `flutter test` bilan faqat mantiq o'tsa. Agar PoC'da `dart test` Flutter loyiha ichida ishlamasa — profil konfiguratsiyasida `two_stage: false`.

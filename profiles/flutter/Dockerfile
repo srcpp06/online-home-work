@@ -1,7 +1,7 @@
 # Base image for the `flutter` runner profile (SPEC §4). Builds on linux/amd64 and
 # linux/arm64: the SDK comes from git (the release archives are x86_64 only), and the
 # flutter tool downloads the Dart SDK and engine artifacts for the machine it runs on.
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 ARG FLUTTER_VERSION
 RUN test -n "$FLUTTER_VERSION" || { echo "FLUTTER_VERSION build arg is required" >&2; exit 1; }
