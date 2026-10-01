@@ -1,11 +1,15 @@
 """Fixtures for tests that need a Docker daemon and the profile base images."""
 
 import os
+from collections.abc import Iterator
 from pathlib import Path
 
 import docker
 import pytest
 from docker.errors import DockerException, ImageNotFound
+
+from judge.infra.image_builder import BuildResult
+from tests.judge.infra.support import build, dart_package, remove_image
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -47,3 +51,11 @@ def dart_base_image(docker_client: docker.DockerClient) -> str:
 @pytest.fixture(scope="session")
 def flutter_base_image(docker_client: docker.DockerClient) -> str:
     return base_image(docker_client, "flutter", "FLUTTER_VERSION")
+
+
+@pytest.fixture(scope="session")
+def dart_task(docker_client: docker.DockerClient, dart_base_image: str) -> Iterator[BuildResult]:
+    """The cart task built once with the teacher's correct solution."""
+    result = build(docker_client, dart_package("pass"), "dart", dart_base_image, "dartpass")
+    yield result
+    remove_image(docker_client, result.image_tag)

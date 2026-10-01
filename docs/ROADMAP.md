@@ -14,7 +14,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l) — `judge/packaging/zip_validator.py`; zararli zip'lar testda yasaladi, fuzz testi ikki xato topdi va ular tuzatildi
 - [x] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan) — `make base-images`; ikkalasi internetsiz uid 1000 bilan smoke-test qilinadi. Flutter'ning `apt-get` qadami sessiya muhitida tekshirilmadi (`deb.debian.org` bloklangan), lokal `make base-images` da tasdiqlanadi
 - [x] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest — `judge/infra/image_builder.py`, `judge/infra/sandbox.py`; isitilgan image yangi kodni tekshirishi dart va flutter'da integration test bilan isbotlangan (`make test-docker`)
-- [ ] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash
+- [x] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash — `judge/infra/runner.py` + `judge/packaging/submission.py`; cheksiz sikl, xotira, chiqish oqimi, soxta JSON va butun loyiha zipi Docker testlarida tekshirilgan
 - [ ] Statik import tekshiruvi (dart/flutter)
 - [ ] `python -m judge.cli build` va `python -m judge.cli run`
 - [ ] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7)

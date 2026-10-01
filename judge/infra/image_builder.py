@@ -182,12 +182,7 @@ class _BuildLog:
         self._parts: list[str] = []
 
     def add(self, command: str, run: ContainerRun, output: str) -> None:
-        status = "timed out" if run.timed_out else f"exit {run.exit_code}"
-        if run.oom_killed:
-            status += ", out of memory"
-        if run.output_limit_exceeded:
-            status += ", output limit exceeded"
-        self._parts.append(f"$ {command}  ({status}, {run.wall_ms / 1000:.1f} s)")
+        self._parts.append(f"$ {command}  ({run.describe()})")
         self._parts += [text.rstrip() for text in (output, run.stderr) if text.strip()]
 
     @property

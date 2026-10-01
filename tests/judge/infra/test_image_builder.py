@@ -4,37 +4,30 @@ The key property: an image warmed up with the teacher's solution must judge the 
 code, never the cached solution.
 """
 
-import contextlib
-import json
 from collections.abc import Iterator
-from pathlib import Path
 
 import docker
 import pytest
-from docker.errors import ImageNotFound
 
-from judge.core.events import RunEvent
 from judge.core.limits import time_limit_s
 from judge.core.manifest import Manifest, ManifestTest, Visibility
-from judge.core.profile import RunnerProfile
-from judge.core.verdict import Judgement, RunOutcome, Verdict, decide_verdict
-from judge.infra.image_builder import (
-    BuildFailed,
-    BuildResult,
-    build_task_image,
-    task_image_tag,
+from judge.core.verdict import Verdict
+from judge.infra.image_builder import BuildFailed, BuildResult, task_image_tag
+from judge.infra.runner import judge_submission
+from judge.infra.sandbox import Sandbox, SandboxLimits
+from tests.judge.infra.support import (
+    NODE,
+    build,
+    cart_lib,
+    dart_package,
+    flutter_lib,
+    flutter_package,
+    load_profile,
+    remove_image,
+    task_image,
 )
-from judge.infra.sandbox import NodeSettings, Sandbox, SandboxLimits
-from judge.packaging.task_package import TaskPackage, read_task_package
-from judge.packaging.zip_validator import ArchiveFile
-from judge.parsers import make_parser
 
 pytestmark = pytest.mark.docker
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
-DART_FIXTURES = REPO_ROOT / "tests" / "judge" / "parsers" / "fixtures" / "dart_json"
-FLUTTER_FIXTURES = Path(__file__).parent / "fixtures" / "flutter_counter"
-NODE = NodeSettings(cpu_shares=512, max_output_bytes=512 * 1024)
 
 DART_MANIFEST = Manifest(
     (
@@ -46,95 +39,10 @@ DART_MANIFEST = Manifest(
 )
 
 
-def load_profile(slug: str) -> RunnerProfile:
-    data = json.loads((REPO_ROOT / "profiles" / slug / "profile.json").read_text())
-    return RunnerProfile.from_json_data(data)
-
-
-def files_under(folder: Path, prefix: str = "") -> list[ArchiveFile]:
-    return [
-        ArchiveFile(prefix + path.relative_to(folder).as_posix(), path.read_bytes())
-        for path in sorted(folder.rglob("*"))
-        if path.is_file()
-    ]
-
-
-def lib_of(solutions: Path, name: str) -> list[ArchiveFile]:
-    return files_under(solutions / name / "lib", prefix="lib/")
-
-
-def dart_package(solution: str, pubspec: bytes | None = None) -> TaskPackage:
-    project = [
-        file
-        for file in files_under(DART_FIXTURES / "project")
-        if file.path != "test/_ohw_all_test.dart"  # the builder generates its own
-    ]
-    if pubspec is not None:
-        project = [f for f in project if f.path != "pubspec.yaml"]
-        project.append(ArchiveFile("pubspec.yaml", pubspec))
-    solution_files = files_under(DART_FIXTURES / "solutions" / solution / "lib", "solution/lib/")
-    return read_task_package([*project, *solution_files])
-
-
-def flutter_package() -> TaskPackage:
-    return read_task_package(
-        [
-            *files_under(FLUTTER_FIXTURES / "package"),
-            *files_under(FLUTTER_FIXTURES / "solutions" / "pass" / "lib", "solution/lib/"),
-        ]
-    )
-
-
-def judge(
-    client: docker.DockerClient,
-    result: BuildResult,
-    profile: RunnerProfile,
-    lib: list[ArchiveFile],
-) -> Judgement:
-    """A minimal runner: the student's lib/ in the task image, tests, verdict."""
-    parser = make_parser(profile.parser)
-    events: list[RunEvent] = []
-
-    def on_line(line: str) -> bool:
-        event = parser.feed(line)
-        if event is not None:
-            events.append(event)
-        return False
-
-    limits = SandboxLimits.for_profile(profile, NODE)
-    with Sandbox(client, result.image_tag, profile.test_command, limits) as sandbox:
-        sandbox.put_files(lib)
-        run = sandbox.run(result.time_limit_s, on_line=on_line)
-    outcome = RunOutcome(tuple(events), run.timed_out, run.oom_killed, parser.compile_error)
-    return decide_verdict(result.manifest, outcome)
-
-
 @pytest.fixture
 def image_ids(docker_client: docker.DockerClient) -> Iterator[set[str]]:
-    """Image ids before and after a test: a failed build must leave nothing behind."""
-    before = {image.id for image in docker_client.images.list(all=True)}
-    yield before
-
-
-def build(
-    client: docker.DockerClient, package: TaskPackage, slug: str, base_image: str, name: str
-) -> BuildResult:
-    tag = task_image_tag(0, f"test{name}".ljust(12, "0"))
-    return build_task_image(
-        client, package, load_profile(slug), NODE, base_image=base_image, tag=tag
-    )
-
-
-def remove(client: docker.DockerClient, tag: str) -> None:
-    with contextlib.suppress(ImageNotFound):
-        client.images.remove(tag, force=True)
-
-
-@pytest.fixture(scope="module")
-def dart_task(docker_client: docker.DockerClient, dart_base_image: str) -> Iterator[BuildResult]:
-    result = build(docker_client, dart_package("pass"), "dart", dart_base_image, "dartpass")
-    yield result
-    remove(docker_client, result.image_tag)
+    """Image ids before a test: a failed build must leave nothing behind."""
+    yield {image.id for image in docker_client.images.list(all=True)}
 
 
 def test_task_image_tag_is_deterministic() -> None:
@@ -182,11 +90,11 @@ def test_warm_image_judges_the_new_code_not_the_cached_solution(
     verdict: Verdict,
     failed_test: int | None,
 ) -> None:
-    lib = lib_of(DART_FIXTURES / "solutions", solution)
+    result = judge_submission(
+        docker_client, task_image(dart_task), load_profile("dart"), NODE, cart_lib(solution)
+    )
 
-    judgement = judge(docker_client, dart_task, load_profile("dart"), lib)
-
-    assert (judgement.verdict, judgement.failed_test_index) == (verdict, failed_test)
+    assert (result.judgement.verdict, result.judgement.failed_test_index) == (verdict, failed_test)
 
 
 def test_failing_solution_fails_the_build(
@@ -241,11 +149,13 @@ def test_flutter_task_builds_and_judges_new_code(
             )
         )
         assert 90 <= result.time_limit_s <= 300
-        profile = load_profile("flutter")
-        solutions = FLUTTER_FIXTURES / "solutions"
-        failing = judge(docker_client, result, profile, lib_of(solutions, "fail"))
-        passing = judge(docker_client, result, profile, lib_of(solutions, "pass"))
-        assert (failing.verdict, failing.failed_test_index) == (Verdict.WRONG_ANSWER, 1)
-        assert passing.verdict == Verdict.ACCEPTED
+        task, profile = task_image(result), load_profile("flutter")
+        failing = judge_submission(docker_client, task, profile, NODE, flutter_lib("fail"))
+        passing = judge_submission(docker_client, task, profile, NODE, flutter_lib("pass"))
+        assert (failing.judgement.verdict, failing.judgement.failed_test_index) == (
+            Verdict.WRONG_ANSWER,
+            1,
+        )
+        assert passing.judgement.verdict == Verdict.ACCEPTED
     finally:
-        remove(docker_client, result.image_tag)
+        remove_image(docker_client, result.image_tag)

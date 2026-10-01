@@ -74,6 +74,17 @@ class ContainerRun:
     stdout: str
     stderr: str
 
+    def describe(self) -> str:
+        """Short status for logs, e.g. "exit 1, out of memory, 3.2 s"."""
+        parts = ["timed out" if self.timed_out else f"exit {self.exit_code}"]
+        if self.oom_killed:
+            parts.append("out of memory")
+        if self.output_limit_exceeded:
+            parts.append("output limit exceeded")
+        if self.stopped_early:
+            parts.append("stopped at the first failure")
+        return ", ".join([*parts, f"{self.wall_ms / 1000:.1f} s"])
+
 
 # Called with every stdout line while the container runs; returning True kills it.
 LineHandler = Callable[[str], bool]
