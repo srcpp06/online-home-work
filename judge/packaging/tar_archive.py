@@ -19,21 +19,34 @@ def make_tar(files: Sequence[ArchiveFile], prefix: str = "", mtime: float | None
     in the image must see the files as newer than the cache, never older.
     """
     stamp = time.time() if mtime is None else mtime
+    prefix = prefix.strip("/")
     buffer = io.BytesIO()
-    directories: set[str] = set()
+    written: set[str] = set()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.PAX_FORMAT) as tar:
+        for directory in _folders(prefix, files):
+            if directory not in written:
+                written.add(directory)
+                tar.addfile(_entry(directory, tarfile.DIRTYPE, 0o755, stamp))
         for file in files:
-            path = f"{prefix.strip('/')}/{file.path}" if prefix else file.path
-            parts = path.split("/")
-            for depth in range(1, len(parts)):
-                directory = "/".join(parts[:depth])
-                if directory not in directories:
-                    directories.add(directory)
-                    tar.addfile(_entry(directory, tarfile.DIRTYPE, 0o755, stamp))
-            info = _entry(path, tarfile.REGTYPE, 0o644, stamp)
+            info = _entry(_join(prefix, file.path), tarfile.REGTYPE, 0o644, stamp)
             info.size = len(file.data)
             tar.addfile(info, io.BytesIO(file.data))
     return buffer.getvalue()
+
+
+def _join(prefix: str, path: str) -> str:
+    return f"{prefix}/{path}" if prefix else path
+
+
+def _folders(prefix: str, files: Sequence[ArchiveFile]) -> list[str]:
+    """The prefix and every parent folder of the files, parents before children."""
+    paths = [prefix] if prefix else []
+    paths += [_join(prefix, file.path).rpartition("/")[0] for file in files]
+    folders: list[str] = []
+    for path in filter(None, paths):
+        parts = path.split("/")
+        folders += ["/".join(parts[:depth]) for depth in range(1, len(parts) + 1)]
+    return folders
 
 
 def _entry(name: str, kind: bytes, mode: int, mtime: float) -> tarfile.TarInfo:

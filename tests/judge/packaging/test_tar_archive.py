@@ -55,3 +55,9 @@ def test_unicode_names_survive() -> None:
     data = make_tar([ArchiveFile("lib/oʻquvchi.dart", b"// salom")])
 
     assert read_file(data, "lib/oʻquvchi.dart") == b"// salom"
+
+
+def test_prefix_folder_is_created_even_without_files() -> None:
+    entries = members(make_tar([], prefix="app"))
+
+    assert [(m.name, m.isdir(), m.uid) for m in entries] == [("app", True, 1000)]
