@@ -89,7 +89,7 @@ task.zip
 ### 3.4 Yechimni tekshirish (`judge` job)
 
 1. Zipni validatsiya qil (§3.6). Ildizni o'zing top: o'quvchi butun loyihani zip qilsa ham `lib/` (yoki profil belgisi — `index.html`, kirish fayli) 3 qavat chuqurlikkacha qidiriladi. Keraksizlarni tashla: `__MACOSX`, `.git`, `build/`, `.dart_tool/`, `node_modules/`, `venv/`, `__pycache__`. Faqat `profile.student_paths` olinadi.
-2. Statik tekshiruv (dart/flutter): `dart:io`, `dart:ffi`, `dart:isolate`, `dart:mirrors` va pubspec'da yo'q `package:` importlari (shu jumladan `export`, `part` va shartli importlar) → `rejected`, xabar: "Taqiqlangan import: dart:io — bu topshiriqda ruxsat etilmagan". `ohw.yaml` dagi `allow_dart_io: true` bilan ruxsat beriladi.
+2. Statik tekshiruv (dart/flutter): `dart:io`, `dart:ffi`, `dart:isolate`, `dart:mirrors` va pubspec `dependencies` da yo'q `package:` importlari — `dev_dependencies` (`test`, `flutter_test`, `mocktail` …) ham taqiqlanadi (shu jumladan `export`, `part` va shartli importlar) → `rejected`, xabar: "Taqiqlangan import: dart:io — bu topshiriqda ruxsat etilmagan". `ohw.yaml` dagi `allow_dart_io: true` bilan ruxsat beriladi.
 3. Image'dan konteyner yarat (limitlar §3.6), fayllarni `put_archive` bilan joyla (tar ichida uid/gid 1000), ishga tushir.
 4. Chiqishni qatorma-qator o'qi → parser → umumiy event → har bir test tugashi bilan `SubmissionTestResult` yoz, test boshlanganda joriy test nomini yangila.
 5. **Birinchi xatoda to'xtat:** konteynerni kill qil, qolgan testlar bajarilmaydi. Flutter'da 1-bosqich o'tmasa 2-bosqich boshlanmaydi.
