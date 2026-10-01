@@ -86,6 +86,9 @@ def test_forbidden_dart_library_is_found_however_it_is_written(source: str) -> N
             "import '../test/hidden/02_discount_test.dart';", "lib/ papkasidan", id="tests"
         ),
         pytest.param("import '/etc/passwd.dart';", "lib/ papkasidan", id="absolute-path"),
+        pytest.param(
+            "import '%2E%2E/test/hidden/x_test.dart';", "lib/ papkasidan", id="percent-dots"
+        ),
         pytest.param("import '//host/x.dart';", "lib/ papkasidan", id="network-path"),
         pytest.param("import 'file:///home/ohw/app/x.dart';", "faqat dart:", id="file-scheme"),
         pytest.param("import 'data:application/dart,main(){}';", "faqat dart:", id="data-uri"),

@@ -15,7 +15,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan) — `make base-images`; ikkalasi internetsiz uid 1000 bilan smoke-test qilinadi. Flutter'ning `apt-get` qadami sessiya muhitida tekshirilmadi (`deb.debian.org` bloklangan), lokal `make base-images` da tasdiqlanadi
 - [x] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest — `judge/infra/image_builder.py`, `judge/infra/sandbox.py`; isitilgan image yangi kodni tekshirishi dart va flutter'da integration test bilan isbotlangan (`make test-docker`)
 - [x] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash — `judge/infra/runner.py` + `judge/packaging/submission.py`; cheksiz sikl, xotira, chiqish oqimi, soxta JSON va butun loyiha zipi Docker testlarida tekshirilgan
-- [ ] Statik import tekshiruvi (dart/flutter)
+- [x] Statik import tekshiruvi (dart/flutter) — `judge/packaging/dart_imports.py`; 26 ta aylanib o'tish usuli haqiqiy Dart'da sinalgan va hammasi rad etiladi. Oqimga (`judge.cli run`) keyingi vazifada ulanadi
 - [ ] `python -m judge.cli build` va `python -m judge.cli run`
 - [ ] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7)
 - [ ] Lokal o'lchov (x86_64)
