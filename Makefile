@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help setup test test-docker lint format check
+.PHONY: help setup test test-docker lint format check fixtures-dart
 
 help: ## Show available commands
-	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-12s %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-14s %s\n", $$1, $$2}'
 
 setup: ## Install dependencies and git hooks
 	$(UV) sync
@@ -25,3 +25,6 @@ format: ## Fix lint issues and format code
 	$(UV) run ruff format .
 
 check: lint test ## lint + test, run before every commit
+
+fixtures-dart: ## Re-record dart_json parser fixtures (needs Docker and internet)
+	scripts/record-dart-json-fixtures.sh

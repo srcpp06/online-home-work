@@ -1,0 +1,25 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.32.0","pid":185,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"test/_ohw_all_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading test/_ohw_all_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":1,"time":8,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":444}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":447}
+{"group":{"id":3,"suiteID":0,"parentID":2,"name":"public/01_cart_test.dart","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":8,"column":3,"url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"group","time":448}
+{"test":{"id":4,"name":"public/01_cart_test.dart Savat boʻsh boʻlsa jami 0 ga teng","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":5,"column":3,"url":"file:///tmp/work/test/public/01_cart_test.dart","root_line":8,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":448}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":464}
+{"test":{"id":5,"name":"public/01_cart_test.dart Mahsulot qoʻshilganda jami ortadi","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///tmp/work/test/public/01_cart_test.dart","root_line":8,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":464}
+{"testID":5,"messageType":"print","message":"qoʻshildi: 1500","type":"print","time":467}
+{"testID":5,"messageType":"print","message":"qoʻshildi: 2500","type":"print","time":467}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":467}
+{"group":{"id":6,"suiteID":0,"parentID":2,"name":"hidden/02_discount_test.dart","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":9,"column":3,"url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"group","time":468}
+{"test":{"id":7,"name":"hidden/02_discount_test.dart (setUpAll)","suiteID":0,"groupIDs":[2,6],"metadata":{"skip":false,"skipReason":null},"line":7,"column":3,"url":"file:///tmp/work/test/hidden/02_discount_test.dart","root_line":9,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":468}
+{"testID":7,"messageType":"print","message":"qoʻshildi: 10000","type":"print","time":469}
+{"testID":7,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":469}
+{"group":{"id":8,"suiteID":0,"parentID":6,"name":"hidden/02_discount_test.dart Chegirma","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":15,"column":3,"url":"file:///tmp/work/test/hidden/02_discount_test.dart","root_line":9,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"group","time":470}
+{"test":{"id":9,"name":"hidden/02_discount_test.dart Chegirma 10% chegirma qoʻllanadi","suiteID":0,"groupIDs":[2,6,8],"metadata":{"skip":false,"skipReason":null},"line":16,"column":5,"url":"file:///tmp/work/test/hidden/02_discount_test.dart","root_line":9,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":470}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":472}
+{"test":{"id":10,"name":"hidden/02_discount_test.dart Chegirma 0% chegirmada narx oʻzgarmaydi","suiteID":0,"groupIDs":[2,6,8],"metadata":{"skip":false,"skipReason":null},"line":20,"column":5,"url":"file:///tmp/work/test/hidden/02_discount_test.dart","root_line":9,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":473}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":474}
+{"test":{"id":11,"name":"hidden/02_discount_test.dart (tearDownAll)","suiteID":0,"groupIDs":[2,6],"metadata":{"skip":false,"skipReason":null},"line":11,"column":3,"url":"file:///tmp/work/test/hidden/02_discount_test.dart","root_line":9,"root_column":3,"root_url":"file:///tmp/work/test/_ohw_all_test.dart"},"type":"testStart","time":475}
+{"testID":11,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":478}
+{"success":true,"type":"done","time":486}

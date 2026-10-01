@@ -111,6 +111,7 @@ make test          # tez testlar (Docker'siz)
 make test-docker   # Docker talab qiladigan integration testlar (marker: docker)
 make lint          # ruff check, ruff format --check, djlint
 make check         # lint + test — har commitdan oldin
+make fixtures-dart # dart_json parser fixture'larini qayta yozib olish (Docker + internet)
 ```
 
 ## Asosiy sozlamalar

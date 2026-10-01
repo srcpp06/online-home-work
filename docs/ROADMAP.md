@@ -10,7 +10,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 
 - [x] Repo skeleti: `uv`, ruff, pytest, Makefile, `.env.example`, `.gitignore`, `docs/decisions.md` — `pyproject.toml`, `Makefile`, pre-commit, `judge/` qatlamlari va ularning bog'liqlik testi (`tests/test_architecture.py`)
 - [x] `judge/core`: event, verdict, manifest entity'lari — `events.py`, `manifest.py`, `progress.py` (oqimni manifest bilan solishtirish), `verdict.py` (`decide_verdict`, SPEC §3.4 tartibi)
-- [ ] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar
+- [x] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar — `judge/parsers/dart_json.py`; Dart 3.13.5 dagi 8 ta haqiqiy chiqish (`make fixtures-dart`), fixture → verdict zanjiri testlangan
 - [ ] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l)
 - [ ] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan)
 - [ ] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest
