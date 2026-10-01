@@ -164,7 +164,7 @@ def _check_warm_up(
             for event in starts
         )
     )
-    judgement = decide_verdict(manifest, RunOutcome(events=tuple(events)))
+    judgement = decide_verdict(manifest, RunOutcome(events=tuple(events), exit_code=run.exit_code))
     if judgement.verdict == Verdict.WRONG_ANSWER:
         failure = next(e for e in events if e.type == EventType.FAIL)
         raise failed(

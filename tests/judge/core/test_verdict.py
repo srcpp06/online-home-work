@@ -163,6 +163,22 @@ def test_extra_test_after_the_end_is_never_accepted() -> None:
     assert decide_verdict(MANIFEST, RunOutcome(events=events)).verdict == Verdict.RUNTIME_ERROR
 
 
+@pytest.mark.parametrize("exit_code", [1, 137, None])
+def test_complete_stream_with_a_failed_process_is_never_accepted(exit_code: int | None) -> None:
+    outcome = RunOutcome(events=run_events(MANIFEST), exit_code=exit_code)
+
+    judgement = decide_verdict(MANIFEST, outcome)
+
+    assert judgement.verdict == Verdict.RUNTIME_ERROR
+    assert f"exited with {exit_code}" in judgement.detail
+
+
+def test_failed_test_stays_wrong_answer_despite_the_exit_code() -> None:
+    outcome = RunOutcome(events=run_events(MANIFEST, fail_at=1), exit_code=1)
+
+    assert decide_verdict(MANIFEST, outcome).verdict == Verdict.WRONG_ANSWER
+
+
 @pytest.mark.parametrize(
     ("outcome", "expected"),
     [

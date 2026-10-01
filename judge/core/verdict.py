@@ -32,6 +32,7 @@ class RunOutcome:
     timed_out: bool = False
     oom_killed: bool = False
     compile_error: str | None = None  # compiler output, None when everything compiled
+    exit_code: int | None = 0  # of the test process; anything but 0 is never accepted
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,8 @@ def decide_verdict(manifest: Manifest, outcome: RunOutcome) -> Judgement:
         verdict, detail = Verdict.WRONG_ANSWER, ""
     elif not progress.complete:
         verdict, detail = Verdict.RUNTIME_ERROR, "event stream ended before all tests finished"
+    elif outcome.exit_code != 0:
+        verdict, detail = Verdict.RUNTIME_ERROR, f"test process exited with {outcome.exit_code}"
     else:
         verdict, detail = Verdict.ACCEPTED, ""
 
