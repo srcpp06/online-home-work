@@ -12,13 +12,13 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `judge/core`: event, verdict, manifest entity'lari — `events.py`, `manifest.py`, `progress.py` (oqimni manifest bilan solishtirish), `verdict.py` (`decide_verdict`, SPEC §3.4 tartibi)
 - [x] `dart_json` parser + yozib olingan chiqishlar bilan fixture testlar — `judge/parsers/dart_json.py`; Dart 3.13.5 dagi 8 ta haqiqiy chiqish (`make fixtures-dart`), fixture → verdict zanjiri testlangan
 - [x] Zip validator + zararli zip testlari (zip-slip, symlink, zip-bomb, absolyut yo'l) — `judge/packaging/zip_validator.py`; zararli zip'lar testda yasaladi, fuzz testi ikki xato topdi va ular tuzatildi
-- [x] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan) — `make base-images`; ikkalasi internetsiz uid 1000 bilan smoke-test qilinadi. Flutter'ning `apt-get` qadami sessiya muhitida tekshirilmadi (`deb.debian.org` bloklangan), lokal `make base-images` da tasdiqlanadi
+- [x] Base image'lar: `profiles/dart`, `profiles/flutter` (multi-arch, `FLUTTER_VERSION` bilan) — `make base-images`; ikkalasi internetsiz uid 1000 bilan smoke-test qilinadi. Flutter'ning `apt-get` qadami lokal `make base-images` da tasdiqlandi (CachyOS, 2026-10-01)
 - [x] Image builder: birlashtirilgan test fayli, o'qituvchi yechimi bilan isitish, manifest — `judge/infra/image_builder.py`, `judge/infra/sandbox.py`; isitilgan image yangi kodni tekshirishi dart va flutter'da integration test bilan isbotlangan (`make test-docker`)
 - [x] Runner: limitlar, `put_archive`, chiqishni streaming o'qish, birinchi xatoda to'xtash, timeout va OOM aniqlash — `judge/infra/runner.py` + `judge/packaging/submission.py`; cheksiz sikl, xotira, chiqish oqimi, soxta JSON va butun loyiha zipi Docker testlarida tekshirilgan
 - [x] Statik import tekshiruvi (dart/flutter) — `judge/packaging/dart_imports.py`; 26 ta aylanib o'tish usuli haqiqiy Dart'da sinalgan va hammasi rad etiladi. Oqimga (`judge.cli run`) keyingi vazifada ulanadi
 - [x] `python -m judge.cli build` va `python -m judge.cli run` — `judge/cli.py`, `judge/config.py`, `judge_zip`; image o'z ma'lumotini label'da saqlaydi, `run --json` PoC o'lchovlari uchun
 - [x] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7) — `examples/dart-cart`, `examples/flutter-todo`; 17 ta yechim `tests/examples/` da, `make poc` jadval chiqaradi
-- [ ] Lokal o'lchov (x86_64) — vosita va yo'riqnoma tayyor: `make poc`, `docs/poc.md`; bulut sessiyasidagi mo'ljal: `docs/poc/x86_64-cloud-sandbox-20261001.md`
+- [x] Lokal o'lchov (x86_64) — CachyOS, 17/17 verdict kutilgandek; `docs/poc/x86_64-20261001-2059.md`, xulosa va takliflar `docs/poc-results.md` da
 - [ ] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga. Yo'riqnoma: `docs/poc.md`.
 - [ ] **Qaror nuqtasi:** natijalarni Erkin bilan ko'rib chiqish; profil limitlari va `two_stage` bo'yicha qaror
 
