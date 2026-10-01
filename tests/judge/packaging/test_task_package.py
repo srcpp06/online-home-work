@@ -179,3 +179,62 @@ def test_misplaced_or_unsafe_files_are_reported(extra: str, message: str) -> Non
 )
 def test_visibility_comes_from_the_folder(test_file: str, visibility: Visibility) -> None:
     assert visibility_of(test_file) == visibility
+
+
+PUBSPEC = b"""name: cart
+environment:
+  sdk: ^3.0.0
+dependencies:
+  collection: ^1.18.0
+  equatable: ^2.0.5
+dev_dependencies:
+  test: ^1.25.0
+  mocktail: ^1.0.0
+"""
+
+
+def test_pubspec_gives_the_package_name_and_only_runtime_dependencies() -> None:
+    package = read({**VALID, "pubspec.yaml": PUBSPEC})
+
+    assert package.package_name == "cart"
+    assert package.dependencies == {"collection", "equatable"}
+
+
+def test_flutter_sdk_dependency_counts_as_a_dependency() -> None:
+    pubspec = b"name: counter\ndependencies:\n  flutter:\n    sdk: flutter\n"
+
+    assert read({**VALID, "pubspec.yaml": pubspec}).dependencies == {"flutter"}
+
+
+def test_settings_default_without_ohw_yaml() -> None:
+    assert read(VALID).settings.allow_dart_io is False
+
+
+@pytest.mark.parametrize(
+    ("ohw_yaml", "allowed"),
+    [(b"allow_dart_io: true\n", True), (b"allow_dart_io: false\n", False), (b"", False)],
+)
+def test_ohw_yaml_can_allow_dart_io(ohw_yaml: bytes, allowed: bool) -> None:
+    assert read({**VALID, "ohw.yaml": ohw_yaml}).settings.allow_dart_io is allowed
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        pytest.param({"pubspec.yaml": b"name: [broken"}, "YAML formati buzilgan", id="bad-yaml"),
+        pytest.param({"pubspec.yaml": b"- just\n- a list\n"}, "kalit: qiymat", id="not-a-map"),
+        pytest.param({"pubspec.yaml": b"version: 1.0.0\n"}, "name yoʻq", id="no-name"),
+        pytest.param({"pubspec.yaml": b"name: My-Cart\n"}, "name yoʻq", id="bad-name"),
+        pytest.param(
+            {"pubspec.yaml": b"name: cart\ndependencies: [a, b]\n"}, "dependencies", id="bad-deps"
+        ),
+        pytest.param({"ohw.yaml": b"allow_dartio: true\n"}, "nomaʼlum sozlama", id="typo"),
+        pytest.param({"ohw.yaml": b"allow_dart_io: yes please\n"}, "true yoki false", id="type"),
+        pytest.param({"ohw.yaml": b"\xff\xfe"}, "YAML formati buzilgan", id="not-utf8"),
+    ],
+)
+def test_broken_pubspec_or_settings_are_reported(extra: dict[str, bytes], message: str) -> None:
+    errors = errors_of({**VALID, **extra})
+
+    assert len(errors) == 1
+    assert message in errors[0]

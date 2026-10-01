@@ -7,8 +7,12 @@ test/hidden/        hidden tests, only inside the image
 ohw.yaml, starter/  settings and starter code, not part of the image
 """
 
+import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+from typing import Any
+
+import yaml
 
 from judge.core.manifest import Visibility
 from judge.packaging.combined_tests import COMBINED_TEST_PATH, is_safe_test_path
@@ -19,6 +23,7 @@ JUNK_DIRS = frozenset(
     {"__MACOSX", ".git", "build", ".dart_tool", "node_modules", "venv", "__pycache__"}
 )
 JUNK_FILES = frozenset({".DS_Store", "Thumbs.db"})
+_PACKAGE_NAME = re.compile(r"[a-z_][a-z0-9_]*")
 
 
 class PackageInvalid(Exception):
@@ -30,10 +35,20 @@ class PackageInvalid(Exception):
 
 
 @dataclass(frozen=True)
+class TaskSettings:
+    """ohw.yaml: optional settings of a task."""
+
+    allow_dart_io: bool = False
+
+
+@dataclass(frozen=True)
 class TaskPackage:
     project_files: tuple[ArchiveFile, ...]  # go into the image: pubspec, tests, assets ...
     solution_files: tuple[ArchiveFile, ...]  # paths under lib/, used only to warm up
     test_files: tuple[str, ...]  # relative to test/, run order: public, then hidden
+    package_name: str  # pubspec name: students import package:<name>/...
+    dependencies: frozenset[str]  # pubspec dependencies: the only packages students may import
+    settings: TaskSettings
 
 
 def visibility_of(test_file: str) -> Visibility:
@@ -54,10 +69,14 @@ def read_task_package(files: Sequence[ArchiveFile]) -> TaskPackage:
     tests: dict[str, list[str]] = {"public": [], "hidden": []}
     combined_name = COMBINED_TEST_PATH.removeprefix("test/")
     lib_at_root = False
+    settings_data: bytes | None = None
 
     for file in files:
         path = file.path
-        if path == "ohw.yaml" or path.startswith("starter/"):
+        if path == "ohw.yaml":
+            settings_data = file.data
+            continue
+        if path.startswith("starter/"):
             continue
         if path.startswith("solution/"):
             if path.startswith("solution/lib/"):
@@ -87,9 +106,13 @@ def read_task_package(files: Sequence[ArchiveFile]) -> TaskPackage:
                 tests[folder].append(test_file)
         project.append(file)
 
-    paths = {file.path for file in project}
-    if "pubspec.yaml" not in paths:
+    pubspec = next((file.data for file in project if file.path == "pubspec.yaml"), None)
+    package_name, dependencies = "", frozenset[str]()
+    if pubspec is None:
         errors.append("pubspec.yaml topilmadi. Uni paketning ildiziga qoʻying.")
+    else:
+        package_name, dependencies = _read_pubspec(pubspec, errors)
+    settings = TaskSettings() if settings_data is None else _read_settings(settings_data, errors)
     if lib_at_root:
         errors.append("Ildizdagi lib/ papkasi ishlatilmaydi. Yechimni solution/lib ga koʻchiring.")
     if not any(file.path.endswith(".dart") for file in solution):
@@ -108,7 +131,55 @@ def read_task_package(files: Sequence[ArchiveFile]) -> TaskPackage:
         project_files=tuple(project),
         solution_files=tuple(solution),
         test_files=(*sorted(tests["public"]), *sorted(tests["hidden"])),
+        package_name=package_name,
+        dependencies=dependencies,
+        settings=settings,
     )
+
+
+def _read_yaml(data: bytes, name: str, errors: list[str]) -> dict[str, Any] | None:
+    try:
+        loaded = yaml.safe_load(data.decode("utf-8"))
+    except (yaml.YAMLError, UnicodeDecodeError):
+        errors.append(f"{name} ni oʻqib boʻlmadi: YAML formati buzilgan. Faylni tekshiring.")
+        return None
+    if loaded is None:
+        return {}
+    if not isinstance(loaded, dict):
+        errors.append(f"{name} kalit: qiymat koʻrinishida boʻlishi kerak.")
+        return None
+    return loaded
+
+
+def _read_pubspec(data: bytes, errors: list[str]) -> tuple[str, frozenset[str]]:
+    pubspec = _read_yaml(data, "pubspec.yaml", errors)
+    if pubspec is None:
+        return "", frozenset()
+    name = pubspec.get("name")
+    if not isinstance(name, str) or not _PACKAGE_NAME.fullmatch(name):
+        errors.append("pubspec.yaml da name yoʻq yoki notoʻgʻri. Masalan: name: cart")
+        name = ""
+    dependencies = pubspec.get("dependencies") or {}
+    if not isinstance(dependencies, dict):
+        errors.append("pubspec.yaml da dependencies kalit: qiymat koʻrinishida boʻlishi kerak.")
+        dependencies = {}
+    return name, frozenset(str(key) for key in dependencies)
+
+
+def _read_settings(data: bytes, errors: list[str]) -> TaskSettings:
+    settings = _read_yaml(data, "ohw.yaml", errors)
+    if settings is None:
+        return TaskSettings()
+    known = {field.name for field in fields(TaskSettings)}
+    for key in sorted(set(settings) - known, key=str):
+        errors.append(
+            f"ohw.yaml: nomaʼlum sozlama {key}. Mavjud sozlamalar: {', '.join(sorted(known))}."
+        )
+    allow_dart_io = settings.get("allow_dart_io", False)
+    if not isinstance(allow_dart_io, bool):
+        errors.append("ohw.yaml: allow_dart_io qiymati true yoki false boʻlishi kerak.")
+        allow_dart_io = False
+    return TaskSettings(allow_dart_io=allow_dart_io)
 
 
 def _strip_common_root(files: list[ArchiveFile]) -> list[ArchiveFile]:
