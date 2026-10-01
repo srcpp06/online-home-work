@@ -30,7 +30,7 @@ base-images: ## Build and smoke-test profile base images (PROFILES="dart flutter
 	scripts/build-base-images.sh $(PROFILES)
 
 poc: ## Run examples/ through the judge and print timings (Markdown)
-	$(UV) run python -m scripts.poc
+	$(UV) run python -m scripts.poc --output docs/poc/$$(uname -m)-$$(date +%Y%m%d-%H%M).md
 
 fixtures-dart: ## Re-record dart_json parser fixtures (needs Docker and internet)
 	scripts/record-dart-json-fixtures.sh

@@ -18,8 +18,8 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] Statik import tekshiruvi (dart/flutter) — `judge/packaging/dart_imports.py`; 26 ta aylanib o'tish usuli haqiqiy Dart'da sinalgan va hammasi rad etiladi. Oqimga (`judge.cli run`) keyingi vazifada ulanadi
 - [x] `python -m judge.cli build` va `python -m judge.cli run` — `judge/cli.py`, `judge/config.py`, `judge_zip`; image o'z ma'lumotini label'da saqlaydi, `run --json` PoC o'lchovlari uchun
 - [x] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7) — `examples/dart-cart`, `examples/flutter-todo`; 17 ta yechim `tests/examples/` da, `make poc` jadval chiqaradi
-- [ ] Lokal o'lchov (x86_64)
-- [ ] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga
+- [ ] Lokal o'lchov (x86_64) — vosita va yo'riqnoma tayyor: `make poc`, `docs/poc.md`; bulut sessiyasidagi mo'ljal: `docs/poc/x86_64-cloud-sandbox-20261001.md`
+- [ ] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga. Yo'riqnoma: `docs/poc.md`.
 - [ ] **Qaror nuqtasi:** natijalarni Erkin bilan ko'rib chiqish; profil limitlari va `two_stage` bo'yicha qaror
 
 ## Phase 1 — MVP veb
