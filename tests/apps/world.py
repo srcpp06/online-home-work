@@ -19,6 +19,7 @@ def make_user(username: str, role: Role, center: Center | None = None, **extra: 
 class CenterWorld:
     center: Center
     admin: User
+    manager: User
     teacher: User
     student: User  # in group, taught by teacher
     group: Group
@@ -40,6 +41,7 @@ def make_center(slug: str) -> CenterWorld:
     return CenterWorld(
         center=center,
         admin=make_user(f"{slug}-admin", Role.CENTER_ADMIN, center),
+        manager=make_user(f"{slug}-manager", Role.CENTER_MANAGER, center),
         teacher=teacher,
         student=student,
         group=group,

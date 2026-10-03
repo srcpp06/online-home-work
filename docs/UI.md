@@ -98,7 +98,9 @@ O'qituvchi:
 - Guruhga biriktirish (ochilish vaqti, muddat, kechikishga ruxsat, urinishlar limiti).
 - Yechim tafsiloti: kod, to'liq log, vaqtlar; "Qayta tekshirish".
 
-Markaz admini: o'qituvchilar, o'quvchilar, guruhlar; parolni tiklash; CSV import (Phase 2).
+Markaz admini: markaz menejerlari, o'qituvchilar, o'quvchilar, guruhlar; parolni tiklash; CSV import (Phase 2).
+
+Markaz menejeri (faqat ko'rish): markaz bo'yicha umumiy ko'rinish — guruhlar, o'qituvchilar va ularning topshiriqlari; istalgan guruh jurnali; yechim tafsiloti (kod va test natijalari, log'siz). Tahrirlash, yaratish va "Qayta tekshirish" tugmalari unga ko'rsatilmaydi.
 
 Superadmin: Django admin + `/system` (navbat, nodelar, o'rtacha kutish).
 
@@ -145,4 +147,4 @@ Kirish sahifasi: sokin, markazda daftar sahifasi ichidagi forma. Birinchi kirish
 | runtime_error | Bajarilishda xato |
 | rejected | Rad etildi |
 | system_error | Tizim xatosi — yechim qayta tekshiriladi |
-| teacher / student / center admin | Oʻqituvchi / Oʻquvchi / Markaz admini |
+| teacher / student / center admin / center manager | Oʻqituvchi / Oʻquvchi / Markaz admini / Markaz menejeri |

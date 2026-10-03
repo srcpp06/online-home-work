@@ -16,7 +16,7 @@ from tests.apps.world import World
 
 # URL name -> the address of centre b's object.
 IDOR_URLS: dict[str, Callable[[World], str]] = {}
-VIEWERS = ("admin", "teacher", "student")
+VIEWERS = ("admin", "manager", "teacher", "student")
 # Django admin is the superadmin's: no other role gets in (tests/apps/accounts/test_admin.py).
 SKIPPED_NAMESPACES = ("admin",)
 

@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 class Role(models.TextChoices):
     SUPERADMIN = "superadmin", "Superadmin"
     CENTER_ADMIN = "center_admin", "Markaz admini"
+    # Watches the whole centre, read-only (apps.accounts.permissions).
+    CENTER_MANAGER = "center_manager", "Markaz menejeri"
     TEACHER = "teacher", "Oʻqituvchi"
     STUDENT = "student", "Oʻquvchi"
 
@@ -77,8 +79,16 @@ class UserQuerySet(models.QuerySet["User"]):
             case Role.SUPERADMIN:
                 return self.all()
             case Role.CENTER_ADMIN:
-                # Their own centre's teachers and students, and themselves; other centre
-                # admins belong to the superadmin.
+                # The people they manage in their own centre, and themselves; centre
+                # admins are managed by the superadmin.
+                return self.filter(
+                    Q(pk=viewer.pk)
+                    | Q(
+                        center_id=viewer.center_id,
+                        role__in=(Role.CENTER_MANAGER, Role.TEACHER, Role.STUDENT),
+                    )
+                )
+            case Role.CENTER_MANAGER:
                 return self.filter(
                     Q(pk=viewer.pk)
                     | Q(center_id=viewer.center_id, role__in=(Role.TEACHER, Role.STUDENT))
@@ -194,7 +204,7 @@ class GroupQuerySet(models.QuerySet["Group"]):
         match viewer.role:
             case Role.SUPERADMIN:
                 return self.all()
-            case Role.CENTER_ADMIN:
+            case Role.CENTER_ADMIN | Role.CENTER_MANAGER:
                 return self.filter(center_id=viewer.center_id)
             case Role.TEACHER:
                 return self.filter(teacher=viewer)

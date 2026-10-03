@@ -29,8 +29,29 @@ def test_center_admin_sees_their_centre_only(world: World) -> None:
     a = world.a
 
     assert seen(Center, a.admin) == {a.center}
-    assert seen(User, a.admin) == {a.admin, a.teacher, a.other_teacher, a.student, a.other_student}
+    assert seen(User, a.admin) == {
+        a.admin,
+        a.manager,
+        a.teacher,
+        a.other_teacher,
+        a.student,
+        a.other_student,
+    }
     assert seen(Group, a.admin) == {a.group, a.other_group}
+
+
+def test_center_manager_watches_their_whole_centre(world: World) -> None:
+    a = world.a
+
+    assert seen(Center, a.manager) == {a.center}
+    assert seen(User, a.manager) == {
+        a.manager,
+        a.teacher,
+        a.other_teacher,
+        a.student,
+        a.other_student,
+    }
+    assert seen(Group, a.manager) == {a.group, a.other_group}
 
 
 def test_teacher_sees_their_groups_and_students(world: World) -> None:
@@ -73,12 +94,14 @@ def test_inactive_user_sees_nothing(world: World, model: type[models.Model]) -> 
 OTHER_CENTRE: dict[str, Pick] = {
     "center": lambda w: w.b.center,
     "admin": lambda w: w.b.admin,
+    "manager": lambda w: w.b.manager,
     "teacher": lambda w: w.b.teacher,
     "student": lambda w: w.b.student,
     "group": lambda w: w.b.group,
 }
 VIEWERS: dict[str, Callable[[World], User]] = {
     "center_admin": lambda w: w.a.admin,
+    "center_manager": lambda w: w.a.manager,
     "teacher": lambda w: w.a.teacher,
     "student": lambda w: w.a.student,
 }
@@ -103,6 +126,10 @@ def test_another_centres_object_is_404(world: World, viewer: str, target: str) -
         (lambda w: w.a.student, lambda w: w.a.other_student),
         (lambda w: w.a.student, lambda w: w.a.teacher),
         (lambda w: w.a.admin, lambda w: w.superadmin),
+        (lambda w: w.a.manager, lambda w: w.a.admin),
+        (lambda w: w.a.manager, lambda w: w.superadmin),
+        (lambda w: w.a.teacher, lambda w: w.a.manager),
+        (lambda w: w.a.student, lambda w: w.a.manager),
     ],
     ids=[
         "teacher-other-group",
@@ -112,6 +139,10 @@ def test_another_centres_object_is_404(world: World, viewer: str, target: str) -
         "student-other-student",
         "student-teacher",
         "centre-admin-superadmin",
+        "manager-centre-admin",
+        "manager-superadmin",
+        "teacher-manager",
+        "student-manager",
     ],
 )
 def test_same_centre_object_outside_the_role_is_404(

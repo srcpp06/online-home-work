@@ -25,7 +25,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 ## Phase 1 — MVP veb
 
 - [x] Django loyiha, env orqali settings, PostgreSQL (`compose.dev.yml`) — `config/` (sozlamalar `config/env.py` orqali, kodda standart qiymat yo'q), `apps/accounts` da birinchi migratsiyadan o'z `User` modeli, `make db`/`migrate`/`dev`; veb testlari haqiqiy PostgreSQL 17 da (`tests/config/`)
-- [x] `User` (rollar), `Center`, `Group`; ruxsatlar qatlami (`for_user`, `get_for_user_or_404`) + IDOR testlari — `apps/accounts/models.py` (rol qoidalari bazada `CheckConstraint`), `apps/accounts/access.py`; rol × boshqa markaz IDOR testlari, har model `for_user` ga va har parametrli URL IDOR testiga ega bo'lishini tekshiruvchi qo'riqchi testlar (`tests/apps/`)
+- [x] `User` (rollar), `Center`, `Group`; ruxsatlar qatlami (`for_user`, `get_for_user_or_404`) + IDOR testlari — `apps/accounts/models.py` (rol qoidalari bazada `CheckConstraint`), `apps/accounts/access.py`; rol × boshqa markaz IDOR testlari, har model `for_user` ga va har parametrli URL IDOR testiga ega bo'lishini tekshiruvchi qo'riqchi testlar (`tests/apps/`); Erkin so'rovi bilan markaz menejeri roli (faqat ko'rish) va rollar jadvali `apps/accounts/permissions.py`
 - [ ] Superadmin uchun Django admin; markaz admini sahifalari (CRUD, parolni tiklash), birinchi kirishda parol almashtirish
 - [ ] Dizayn tizimi asoslari: tokenlar, shriftlar, base layout, daftar sahifasi, holat belgisi
 - [ ] `RunnerProfile` seed (`dart`, `flutter`)

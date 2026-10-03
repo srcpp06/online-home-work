@@ -97,7 +97,48 @@ def test_group_with_another_centres_student_is_a_form_error(
     assert not Group.objects.filter(name="Backend 1").exists()
 
 
-@pytest.mark.parametrize("role", ["admin", "teacher", "student"])
+def test_superadmin_adds_a_center_manager(admin_client: Client, world: World) -> None:
+    response = admin_client.post(
+        "/admin/accounts/user/add/",
+        {
+            "username": "nodira",
+            "usable_password": "true",
+            "password1": PASSWORD,
+            "password2": PASSWORD,
+            "role": Role.CENTER_MANAGER,
+            "center": world.a.center.pk,
+        },
+    )
+
+    assert response.status_code == 302, response.context["adminform"].form.errors
+    manager = User.objects.get(username="nodira")
+    assert (manager.role, manager.center, manager.is_staff) == (
+        Role.CENTER_MANAGER,
+        world.a.center,
+        False,
+    )
+
+
+def test_center_manager_gets_no_directions(admin_client: Client, world: World) -> None:
+    response = admin_client.post(
+        "/admin/accounts/user/add/",
+        {
+            "username": "nodira",
+            "usable_password": "true",
+            "password1": PASSWORD,
+            "password2": PASSWORD,
+            "role": Role.CENTER_MANAGER,
+            "center": world.a.center.pk,
+            "directions": ["flutter"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Yoʻnalishlar faqat oʻqituvchiga biriktiriladi" in response.content.decode()
+    assert not User.objects.filter(username="nodira").exists()
+
+
+@pytest.mark.parametrize("role", ["admin", "manager", "teacher", "student"])
 def test_only_the_superadmin_gets_into_admin(client: Client, world: World, role: str) -> None:
     client.force_login(getattr(world.a, role))
 
