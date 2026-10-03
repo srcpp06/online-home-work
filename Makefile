@@ -2,7 +2,7 @@
 UV ?= uv
 
 .PHONY: help setup db db-down migrate css dev test test-docker lint format check
-.PHONY: base-images poc fixtures-dart needs-uv needs-docker needs-compose
+.PHONY: worker base-images poc fixtures-dart needs-uv needs-docker needs-compose
 COMPOSE_DEV = docker compose -f compose.dev.yml
 
 help: ## Show available commands
@@ -52,6 +52,9 @@ css: needs-uv ## Build static/css/app.css from assets/source.css (Tailwind; firs
 # css first: a failed Tailwind download stops here with its error, not as unstyled pages.
 dev: migrate css ## Run the site at http://127.0.0.1:8000 and rebuild the CSS on every change
 	$(UV) run python manage.py tailwind runserver
+
+worker: needs-uv needs-docker migrate ## Run the judge worker: builds task images and checks submissions
+	$(UV) run python manage.py judge_worker
 
 test: needs-uv db ## Fast tests: the judge without Docker, the site with the development PostgreSQL
 	$(UV) run pytest -m "not docker"

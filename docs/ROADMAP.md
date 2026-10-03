@@ -29,10 +29,10 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] Dizayn tizimi asoslari: tokenlar, shriftlar, base layout, daftar sahifasi, holat belgisi — Erkin roziligi bilan keyingi vazifadan oldinga olindi (sahifalar bir marta yozilsin). `assets/source.css` (Tailwind v4, faqat UI.md ranglari), self-hosted shriftlar (Literata, Golos Text, JetBrains Mono + `ʻ` uchun OHW Marks), `apps/ui` (`{% icon %}`, `{% status_badge %}`, `/ui/` styleguide), `templates/base.html` va `layouts/app.html`, WhiteNoise; desktop va telefon skrinshotlari bilan tekshirildi
 - [x] Superadmin uchun Django admin; markaz admini sahifalari (CRUD, parolni tiklash), birinchi kirishda parol almashtirish — kirish/chiqish, birinchi kirishda majburiy parol almashtirish, django-axes (login + IP bo'yicha), rolga qarab bosh sahifa va menyu; o'qituvchi, o'quvchi, menejer va guruhlar sahifalari (`apps/accounts/views/`), menejer va o'qituvchi uchun faqat ko'rish; vaqtinchalik parol bir marta ko'rsatiladi; har bir id URL uchun GET+POST IDOR testi
 - [x] `RunnerProfile` seed (`dart`, `flutter`) — `manage.py load_profiles` (`make migrate` ishga tushiradi) `profiles/*/profile.json` dan; fayli yo'q profil o'chiriladi, o'chirilmaydi
-- [ ] `Task` / `TaskVersion`: yaratish ustasi, paket yuklash va struktura tekshiruvi, build job, jonli build logi, e'lon qilish
+- [x] `Task` / `TaskVersion`: yaratish ustasi, paket yuklash va struktura tekshiruvi, build job, jonli build logi, e'lon qilish — `apps/tasks/views.py` (3 qadam: topshiriq va paket → image yig'ish → e'lon), paket saytda tekshiriladi, image `judge.adapters.jobs.run_build` da; log har qadamda yangilanadi
 - [x] `Assignment`: guruhga biriktirish, muddat — `/tasks/<id>/assign/`: ochilish vaqti, muddat, kechikishga ruxsat, urinishlar limiti; bir guruhga bir marta, muddat ochilishdan keyin (baza cheklovi)
 - [ ] `Submission`: yuklash, validatsiya, cooldown va faol yechimlar limiti, `Job` yaratish
-- [ ] `judge_worker`: slotlar va lane'lar, SKIP LOCKED, lease/heartbeat, reaper, xotira sig'ishi tekshiruvi
+- [x] `judge_worker`: slotlar va lane'lar, SKIP LOCKED, lease/heartbeat, reaper, xotira sig'ishi tekshiruvi — `make worker`; `judge/adapters/worker.py` (slot thread'lari), `apps/system/queue.py` (claim/lease/reap, 3 urinishdan keyin `system_error`); image'i yo'q node uni paketdan qayta yig'adi; heavy slot bo'sh qolsa fast ishni oladi
 - [ ] Jonli natija sahifasi: HTMX polling, navbatdagi o'rin, verdict muhri
 - [ ] Jurnal
 - [ ] `compose.prod.yml`, Caddy, `docs/deploy.md`; serverga birinchi deploy

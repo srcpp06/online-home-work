@@ -14,6 +14,7 @@ import contextlib
 import dataclasses
 import json
 import shlex
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import docker
@@ -90,14 +91,17 @@ def build_task_image(
     *,
     base_image: str,
     tag: str,
+    on_log: Callable[[str], None] | None = None,
 ) -> BuildResult:
+    """``on_log`` gets the whole log so far whenever a step starts or ends (the live page)."""
     limits = SandboxLimits.for_profile(profile, node)
-    log = _BuildLog()
+    log = _BuildLog(on_log)
 
     with Sandbox(client, base_image, profile.install_command, limits, network=True) as sandbox:
         sandbox.put_files(
             [*package.project_files, combined_test_file(package.test_files, profile.test_import)]
         )
+        log.running(shlex.join(profile.install_command))
         run = sandbox.run(timeout_s=profile.build_timeout_s)
         log.add(shlex.join(profile.install_command), run, run.stdout)
         if run.timed_out:
@@ -146,6 +150,7 @@ def _warm_up(
 
     with Sandbox(client, installed_image, command, limits) as sandbox:
         sandbox.put_files(package.solution_files)
+        log.running(test_command)
         run = sandbox.run(timeout_s=profile.max_time_s, on_line=on_line)
         log.add(test_command, run, "\n".join(parser.log))
         try:
@@ -187,6 +192,7 @@ def _judge_solution(
     """The task of the warmed image, timed by judging the teacher's solution in it."""
     rules = _import_rules(package, profile)
     trial = TaskImage(warmed_image, manifest, profile.max_time_s, import_rules=rules)
+    log.running(f"{shlex.join(profile.test_command)}  # the solution, judged in the finished image")
     result = judge_submission(client, trial, profile, node, package.solution_files)
     log.add_text(result.log)
     if result.judgement.verdict != Verdict.ACCEPTED:
@@ -258,15 +264,27 @@ def _check_warm_up(
 class _BuildLog:
     """What the teacher sees: each step's command, result and output."""
 
-    def __init__(self) -> None:
+    def __init__(self, on_change: Callable[[str], None] | None = None) -> None:
         self._parts: list[str] = []
+        self._on_change = on_change
+
+    def running(self, command: str) -> None:
+        """Tell the watcher a step started; the line is replaced by the step's result."""
+        if self._on_change is not None:
+            self._on_change(f"{self.text}$ {command}  (running)\n")
 
     def add(self, command: str, run: ContainerRun, output: str) -> None:
         self._parts.append(f"$ {command}  ({run.describe()})")
         self._parts += [text.rstrip() for text in (output, run.stderr) if text.strip()]
+        self._changed()
 
     def add_text(self, text: str) -> None:
         self._parts.append(text.rstrip())
+        self._changed()
+
+    def _changed(self) -> None:
+        if self._on_change is not None:
+            self._on_change(self.text)
 
     @property
     def text(self) -> str:

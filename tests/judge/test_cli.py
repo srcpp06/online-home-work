@@ -7,12 +7,12 @@ import zipfile
 from collections.abc import Iterator
 from pathlib import Path
 
-import docker
 import pytest
 from docker.errors import ImageNotFound
 
 from judge import cli
 from judge.config import REPO_ROOT, read_env
+from judge.infra.docker_client import connect as connect_docker
 from judge.packaging.zip_validator import ArchiveFile
 from tests.judge.infra.support import cart_lib, cart_project
 
@@ -78,7 +78,7 @@ def zips(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Path]:
 def built_tags() -> Iterator[list[str]]:
     tags: list[str] = []
     yield tags
-    client = docker.from_env()
+    client = connect_docker()
     for tag in tags:
         with contextlib.suppress(ImageNotFound):
             client.images.remove(tag, force=True)

@@ -24,6 +24,7 @@ from judge.config import ConfigError, JudgeConfig, load_profile, read_env
 from judge.core.events import EventType, RunEvent
 from judge.core.manifest import Visibility
 from judge.core.profile import RunnerProfile
+from judge.infra import docker_client
 from judge.infra.image_builder import (
     BuildFailed,
     BuildResult,
@@ -76,8 +77,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def _docker() -> docker.DockerClient:
     try:
-        client = docker.from_env()
-        client.ping()
+        client = docker_client.connect()
     except DockerException as error:
         raise CliError(f"Docker is not available: {error}") from None
     return client

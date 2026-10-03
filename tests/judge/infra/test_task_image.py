@@ -40,3 +40,28 @@ def test_build_label_keeps_uzbek_text_readable() -> None:
     assert json.loads(label[BUILD_LABEL])["warm_wall_ms"] == 1_500
     assert "Savat boʻsh" in label[BUILD_LABEL]
     assert "not in the label" not in label[BUILD_LABEL]
+
+
+def test_build_log_tells_the_watcher_each_step() -> None:
+    from judge.infra.image_builder import _BuildLog
+    from judge.infra.sandbox import ContainerRun
+
+    seen: list[str] = []
+    log = _BuildLog(seen.append)
+    run = ContainerRun(
+        exit_code=0,
+        timed_out=False,
+        oom_killed=False,
+        output_limit_exceeded=False,
+        stopped_early=False,
+        wall_ms=1200,
+        stdout="",
+        stderr="",
+    )
+
+    log.running("dart pub get")
+    log.add("dart pub get", run, "Got dependencies!")
+
+    assert seen[0].endswith("$ dart pub get  (running)\n")
+    assert "Got dependencies!" in seen[1]
+    assert "(running)" not in seen[1]

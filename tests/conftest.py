@@ -8,6 +8,7 @@ import docker
 import pytest
 from docker.errors import DockerException, ImageNotFound
 
+from judge.infra.docker_client import connect as connect_docker
 from judge.infra.image_builder import BuildResult
 from tests.judge.infra.support import build, dart_package, remove_image
 
@@ -27,8 +28,7 @@ def pinned_version(name: str) -> str:
 @pytest.fixture(scope="session")
 def docker_client() -> docker.DockerClient:
     try:
-        client = docker.from_env()
-        client.ping()
+        client = connect_docker()
     except DockerException as error:
         pytest.skip(f"Docker is not available: {error}")
     return client
