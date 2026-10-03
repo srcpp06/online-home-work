@@ -32,8 +32,11 @@ def test_task_image_without_import_rules_survives_json() -> None:
 
 
 def test_build_label_keeps_uzbek_text_readable() -> None:
-    label = BuildResult(TASK, solution_wall_ms=11_500, log="not in the label").label()
+    label = BuildResult(
+        TASK, solution_wall_ms=11_500, warm_wall_ms=1_500, log="not in the label"
+    ).label()
 
     assert set(label) == {BUILD_LABEL}
+    assert json.loads(label[BUILD_LABEL])["warm_wall_ms"] == 1_500
     assert "Savat boʻsh" in label[BUILD_LABEL]
     assert "not in the label" not in label[BUILD_LABEL]

@@ -31,7 +31,7 @@ Qoidalar:
 - `Group`: center, name, teacher, students (M2M), show_journal_to_students.
 - `RunnerProfile`: slug, title, direction, lane (`fast` yoki `heavy`), base_image, config (JSON: student_paths, build va test buyruqlari, parser, limitlar, forbidden_imports, two_stage). Faqat superadmin tahrirlaydi.
 - `Task`: center, author, title, statement_md, profile, is_archived.
-- `TaskVersion`: task, number, package (fayl), sha256, status (`building`, `build_failed`, `ready`), image_tag, build_log, manifest (JSON: tartiblangan testlar — name, stage, visibility), starter (fayl), solution_wall_ms, time_limit_s, memory_limit_mb, runtime_info (masalan, Flutter versiyasi).
+- `TaskVersion`: task, number, package (fayl), sha256, status (`building`, `build_failed`, `ready`), image_tag, build_log, manifest (JSON: tartiblangan testlar — name, stage, visibility), starter (fayl), solution_wall_ms, warm_wall_ms, time_limit_s, memory_limit_mb, runtime_info (masalan, Flutter versiyasi).
 - `Assignment`: task, group, opens_at, deadline, allow_late, max_attempts (null — cheksiz).
 - `Submission`: assignment, student, task_version, archive, sha256, status (`queued`, `running`, `finished`), verdict, tests_total, tests_passed, failed_test_index, failed_test_name, public_message, internal_log, wall_ms, is_late, created_at, started_at, finished_at.
 - `SubmissionTestResult`: submission, index, name, stage, visibility, status, duration_ms, message.
@@ -82,7 +82,8 @@ task.zip
 2. Profil base image'i ustiga build context yarat: kutubxonalar manifesti → o'rnatish (**internet faqat shu bosqichda**) → testlar → birlashtirilgan test fayllari.
 3. Birlashtirish: `test/_ohw_all_test.dart` har bir test faylini prefiks bilan import qiladi va `group('<fayl_nomi>', f.main)` ichida chaqiradi (setUp/tearDown boshqa faylga o'tib ketmasligi uchun). Natijada kompilyatsiya bir marta bo'ladi — asosiy tezlashtirish. Parser ko'rsatishda shu guruh prefiksini olib tashlaydi. Flutter'da har bir bosqich uchun alohida birlashtirilgan fayl.
 4. **Isitish va o'qituvchi yechimini tekshirish:** testlar o'qituvchi yechimi bilan ishga tushiriladi. Birorta test o'tmasa → `build_failed`, log o'qituvchiga ko'rsatiladi. Hammasi o'tsa: manifest (tartiblangan test nomlari), `solution_wall_ms`, runtime versiyasi yoziladi; kompilyatsiya keshi image ichida qoladi.
-5. Vaqt limiti: `clamp(ceil(solution_wall_s × 2.5), profil.min_time_s, profil.max_time_s)`; o'qituvchi o'zgartira oladi.
+5. **Tayyor image'da qayta tekshirish:** o'qituvchi yechimi isitilgan image'da xuddi o'quvchi yechimidek tekshiriladi va `accepted` bo'lishi shart (aks holda `build_failed`). Vaqti — `warm_wall_ms`.
+   Vaqt limiti: `clamp(ceil(warm_wall_s × 2.5), profil.min_time_s, profil.max_time_s)`; o'qituvchi o'zgartira oladi. Sabab (PoC): o'quvchi ham iliq image'da tekshiriladi; sovuq isitish vaqtidan olingan limit 6–18 marta katta chiqardi.
 6. Starter zip: paket − `solution/` − `test/hidden/`, ustiga `starter/` qo'yiladi.
 7. Image tegi deterministik: `ohw-task:<task_version_id>-<sha12>`. Nodeda image bo'lmasa, worker uni saqlangan paketdan o'zi qayta yig'adi — shuning uchun nodelar stateless.
 
@@ -113,12 +114,12 @@ Umumiy event: `{type: start | pass | fail | done, index, name, stage, duration_m
 O'quvchi kodi — ishonchsiz kod. Har bir tekshiruv konteyneri:
 `network_mode=none`, `mem_limit` = `memswap_limit` (swap'siz), `nano_cpus`, `cpu_shares=JUDGE_CPU_SHARES` (sayt va baza CPU'da ustunlik oladi), `pids_limit=256`, `user=1000:1000`, `cap_drop=["ALL"]`, `security_opt=["no-new-privileges"]`, hajmi cheklangan `/tmp` tmpfs, chiqish hajmi limiti (`JUDGE_MAX_OUTPUT_KB`), wall-clock timeout. Build bosqichi ham vaqt va RAM limiti bilan ishlaydi — o'qituvchi paketi ham to'liq ishonchli emas.
 
-Profil standartlari (PoC'dan keyin aniqlashtiriladi):
+Profil standartlari (`dart` va `flutter` — Phase 0 o'lchovlaridan keyin, `docs/poc-results.md`):
 
 | Profil | RAM | CPU | Vaqt min–max |
 |---|---|---|---|
-| `dart` | 1024 MB | 1.0 | 20–120 s |
-| `flutter` | 3072 MB | 1.5 | 90–300 s |
+| `dart` | 1024 MB | 1.0 | 15–120 s |
+| `flutter` | 1536 MB | 1.5 | 30–300 s |
 | `backend-python` | app 512 + tester 512 MB | 1.0 | 30–120 s |
 | `web-static` | 1536 MB | 1.0 | 45–180 s |
 
@@ -156,7 +157,7 @@ Zip validator: hajm limiti (o'quvchi `SUBMISSION_MAX_ZIP_MB`, o'qituvchi `TASK_M
 - Base image: `debian:trixie-slim` + `git clone --depth 1 --branch $FLUTTER_VERSION` (git clone multi-arch uchun; Dart SDK arxitekturaga mos o'zi yuklanadi). Yig'ishda dummy loyihada `flutter test` bir marta ishlatiladi — kerakli artefaktlar (`flutter_tester` va boshqalar) keshlanadi. Analytics va CLI animatsiyalari o'chiriladi.
 - Ko'p ishlatiladigan paketlar (`profiles/flutter/common_packages.txt`: provider, bloc, flutter_bloc, equatable, dio, http, go_router, get_it, mocktail …) base image pub keshiga oldindan yuklanadi — o'qituvchi topshiriq yig'ishi tezlashadi.
 - Test buyruqlari: `--no-pub`, `--concurrency=1`, bitta birlashtirilgan fayl, isitilgan kesh.
-- 2 bosqichli tekshiruv: mantiq `dart test` bilan (soniyalar), widget `flutter test` bilan faqat mantiq o'tsa. Agar PoC'da `dart test` Flutter loyiha ichida ishlamasa — profil konfiguratsiyasida `two_stage: false`.
+- 2 bosqichli tekshiruv: mantiq `dart test` bilan (soniyalar), widget `flutter test` bilan faqat mantiq o'tsa. Agar PoC'da `dart test` Flutter loyiha ichida ishlamasa — profil konfiguratsiyasida `two_stage: false`. **PoC qarori: MVP'da `two_stage` yo'q** — iliq image'da butun Flutter tekshiruvi ~5 s, mantiq fayli esa `package:flutter` ni import qilmasligi kerak bo'lardi; Phase 2'da qayta ko'riladi.
 - Faqat unit va widget testlar; integration_test va emulyator yo'q. Platform channel'lar (kamera, GPS va h.k.) testlarda mock qilinadi — buni o'qituvchilar yo'riqnomasida yoz.
 - Topshiriq sahifasida serverdagi Flutter versiyasi ko'rsatiladi, o'quvchi o'z kompyuterida shu versiyadan foydalanishi uchun.
 

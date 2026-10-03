@@ -4,6 +4,7 @@ The key property: an image warmed up with the teacher's solution must judge the 
 code, never the cached solution.
 """
 
+import json
 from collections.abc import Iterator
 
 import docker
@@ -13,6 +14,7 @@ from judge.core.limits import time_limit_s
 from judge.core.manifest import Manifest, ManifestTest, Visibility
 from judge.core.verdict import Verdict
 from judge.infra.image_builder import (
+    BUILD_LABEL,
     BuildFailed,
     BuildResult,
     load_build_result,
@@ -21,10 +23,13 @@ from judge.infra.image_builder import (
 from judge.infra.runner import judge_submission
 from judge.infra.sandbox import Sandbox, SandboxLimits
 from judge.packaging.dart_imports import ImportRules
+from judge.packaging.task_package import read_task_package
+from judge.packaging.zip_validator import ArchiveFile
 from tests.judge.infra.support import (
     NODE,
     build,
     cart_lib,
+    cart_project,
     dart_package,
     flutter_lib,
     flutter_package,
@@ -58,11 +63,17 @@ def test_task_image_tag_is_deterministic() -> None:
 def test_dart_task_builds_with_manifest_and_time_limit(
     docker_client: docker.DockerClient, dart_task: BuildResult
 ) -> None:
+    profile = load_profile("dart")
+
     assert dart_task.task.manifest == DART_MANIFEST
-    assert dart_task.solution_wall_ms > 0
-    assert dart_task.task.time_limit_s == time_limit_s(dart_task.solution_wall_ms, 20, 120)
+    # The warm-up compiles from scratch; the warm run only compiles the solution's lib.
+    assert 0 < dart_task.warm_wall_ms < dart_task.solution_wall_ms
+    assert dart_task.task.time_limit_s == time_limit_s(
+        dart_task.warm_wall_ms, profile.min_time_s, profile.max_time_s
+    )
     assert docker_client.images.get(dart_task.task.image_tag)
     assert "$ dart pub get" in dart_task.log
+    assert "verdict: accepted" in dart_task.log
 
 
 def test_image_carries_its_build_in_a_label(
@@ -70,7 +81,7 @@ def test_image_carries_its_build_in_a_label(
 ) -> None:
     loaded = load_build_result(docker_client, dart_task.task.image_tag)
 
-    assert loaded == BuildResult(dart_task.task, dart_task.solution_wall_ms)
+    assert loaded == BuildResult(dart_task.task, dart_task.solution_wall_ms, dart_task.warm_wall_ms)
     assert loaded.task.import_rules == ImportRules(
         package_name="cart",
         allowed_packages=frozenset({"cart"}),
@@ -83,6 +94,19 @@ def test_image_carries_its_build_in_a_label(
 
 def test_missing_image_has_no_build(docker_client: docker.DockerClient) -> None:
     assert load_build_result(docker_client, "ohw-task:no-such-image") is None
+
+
+def test_image_built_before_the_warm_run_is_built_again(
+    docker_client: docker.DockerClient, dart_task: BuildResult
+) -> None:
+    old_label = json.dumps({"task": dart_task.task.to_json_data(), "solution_wall_ms": 11_500})
+    limits = SandboxLimits.for_profile(load_profile("dart"), NODE)
+    with Sandbox(docker_client, dart_task.task.image_tag, ["true"], limits) as sandbox:
+        sandbox.commit("ohw-task", "old-label", labels={BUILD_LABEL: old_label})
+    try:
+        assert load_build_result(docker_client, "ohw-task:old-label") is None
+    finally:
+        remove_image(docker_client, "ohw-task:old-label")
 
 
 def test_image_keeps_tests_and_cache_but_not_the_solution(
@@ -146,6 +170,40 @@ def test_solution_that_does_not_compile_fails_the_build(
     assert "The getter 'total' isn't defined" in error.value.errors[0]
 
 
+def test_solution_must_also_pass_in_the_finished_image(
+    docker_client: docker.DockerClient, dart_base_image: str, image_ids: set[str]
+) -> None:
+    # Passes in the warm-up, then fails: the warm-up leaves its marker in the image.
+    once = b"""import 'dart:io';
+import 'package:test/test.dart';
+
+void main() {
+  test('Faqat bir marta', () {
+    final marker = File('.warm_up_ran');
+    expect(marker.existsSync(), isFalse);
+    marker.writeAsStringSync('yes');
+  });
+}
+"""
+    package = dart_package("pass")
+    package = read_task_package(
+        [
+            *cart_project(),
+            ArchiveFile("test/hidden/03_once_test.dart", once),
+            *(ArchiveFile(f"solution/{f.path}", f.data) for f in package.solution_files),
+        ]
+    )
+
+    with pytest.raises(BuildFailed) as error:
+        build(docker_client, package, "dart", dart_base_image, "dartonce")
+
+    assert error.value.errors[0].startswith(
+        "Tayyor image oʻqituvchi yechimini qabul qilmadi (wrong_answer)"
+    )
+    assert "verdict: wrong_answer" in error.value.log
+    assert {image.id for image in docker_client.images.list(all=True)} == image_ids
+
+
 def test_unknown_library_fails_the_install(
     docker_client: docker.DockerClient, dart_base_image: str, image_ids: set[str]
 ) -> None:
@@ -174,8 +232,12 @@ def test_flutter_task_builds_and_judges_new_code(
                 ManifestTest("Ikki marta oshirilganda 2 boʻladi", 1, Visibility.HIDDEN),
             )
         )
-        assert 90 <= result.task.time_limit_s <= 300
-        task, profile = task_image(result), load_profile("flutter")
+        profile = load_profile("flutter")
+        assert 0 < result.warm_wall_ms < result.solution_wall_ms
+        assert result.task.time_limit_s == time_limit_s(
+            result.warm_wall_ms, profile.min_time_s, profile.max_time_s
+        )
+        task = task_image(result)
         failing = judge_submission(docker_client, task, profile, NODE, flutter_lib("fail"))
         passing = judge_submission(docker_client, task, profile, NODE, flutter_lib("pass"))
         assert (failing.judgement.verdict, failing.judgement.failed_test_index) == (

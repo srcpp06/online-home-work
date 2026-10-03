@@ -202,8 +202,9 @@ def _verdicts(
     report(f"## {example.name} ({example.profile})")
     report()
     report(
-        f"Cold build {build_s:.1f} s; teacher's solution {build.solution_wall_ms / 1000:.1f} s, "
-        f"peak {build.warm_up_peak_mb or '?'} MB. Time limit {task.time_limit_s} s, "
+        f"Cold build {build_s:.1f} s; teacher's solution {build.solution_wall_ms / 1000:.1f} s "
+        f"cold (peak {build.warm_up_peak_mb or '?'} MB), {build.warm_wall_ms / 1000:.1f} s warm. "
+        f"Time limit {task.time_limit_s} s, "
         f"memory limit {profile.memory_mb} MB, {len(task.manifest.tests)} tests."
     )
     report()

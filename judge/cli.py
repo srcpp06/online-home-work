@@ -128,7 +128,8 @@ def _ensure_build(
     task = result.task
     print(f"Built {tag} in {time.monotonic() - started:.1f} s", file=report)
     print(
-        f"Solution: {result.solution_wall_ms / 1000:.1f} s, time limit: {task.time_limit_s} s",
+        f"Solution: {result.solution_wall_ms / 1000:.1f} s cold, "
+        f"{result.warm_wall_ms / 1000:.1f} s warm; time limit: {task.time_limit_s} s",
         file=report,
     )
     print(f"Tests ({len(task.manifest.tests)}):", file=report)
@@ -218,6 +219,7 @@ def _as_json(result: JudgeResult, build: BuildResult) -> dict[str, Any]:
             "image_tag": build.task.image_tag,
             "time_limit_s": build.task.time_limit_s,
             "solution_wall_ms": build.solution_wall_ms,
+            "warm_wall_ms": build.warm_wall_ms,
         },
     }
 

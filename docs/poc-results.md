@@ -76,9 +76,11 @@ Bulut sessiyasi natijalari shu tartibda (kesh 8.8x / 3.0x, RAM bir xil darajada)
 6. **Ikki bosqich texnik jihatdan ishlaydi, lekin cheklov bilan:** mantiq fayli `package:flutter` ni import qilmasligi shart. Iliq image'da butun Flutter tekshiruvi ~5 s, ya'ni ikki bosqich sezilarli yutuq bermaydi.
 7. **Prod'dagi 2 yadroda ikki slot deyarli halaqit bermaydi (1.09–1.14x).** `JUDGE_SLOTS=heavy:1,fast:1` xavfsiz.
 
-## Qaror nuqtasi uchun takliflar (Erkin tasdig'ini kutmoqda)
+## Qaror nuqtasi (2026-10-03, Erkin tasdiqladi)
 
-| Sozlama | Hozir | Taklif | Sabab |
+Quyidagi takliflar o'zgarishsiz qabul qilindi va kodga kiritildi; yozuv — `docs/decisions.md`.
+
+| Sozlama | Oldin | Qaror | Sabab |
 |---|---|---|---|
 | `flutter.memory_mb` | 3072 | 1536 | cho'qqi 0.94 GB (ikki mashinada ham), ~1.6x zaxira; xotira limiti tezroq ishlaydi; 12 GB serverga ko'proq heavy slot sig'adi |
 | `dart.memory_mb` | 1024 | 1024 | cho'qqi 0.47 GB, zaxira yetarli |

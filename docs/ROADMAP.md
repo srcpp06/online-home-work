@@ -20,7 +20,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7) — `examples/dart-cart`, `examples/flutter-todo`; 17 ta yechim `tests/examples/` da, `make poc` jadval chiqaradi
 - [x] Lokal o'lchov (x86_64) — CachyOS, 17/17 verdict kutilgandek; `docs/poc/x86_64-20261001-2059.md`, xulosa va takliflar `docs/poc-results.md` da
 - [x] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga. Yo'riqnoma: `docs/poc.md`. — Oracle A1 (2 OCPU, Ubuntu 24.04), 2026-10-03: `make test-docker` 117/117, `make poc` ikki marta 17/17; `docs/poc/aarch64-20261003-*.md`
-- [ ] **Qaror nuqtasi:** natijalarni Erkin bilan ko'rib chiqish; profil limitlari va `two_stage` bo'yicha qaror
+- [x] **Qaror nuqtasi:** natijalarni Erkin bilan ko'rib chiqish; profil limitlari va `two_stage` bo'yicha qaror — 2026-10-03: flutter RAM 1536 MB, vaqt limiti tayyor image'dagi iliq tekshiruvdan (min dart 15 s / flutter 30 s), `two_stage` MVP'da yo'q, `JUDGE_SLOTS=heavy:1,fast:1`; `docs/decisions.md`, `docs/poc-results.md`. ARM'da yangi limitlar bilan `make poc` ni bir marta tasdiqlash qoldi
 
 ## Phase 1 — MVP veb
 

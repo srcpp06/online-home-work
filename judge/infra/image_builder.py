@@ -4,11 +4,14 @@
 2. Warm up: run the tests with the teacher's solution exactly like a judge run (no
    internet, the same limits). Every test must pass. The compile cache stays in the image;
    the solution is deleted before the image is saved, so students can't import it.
+3. Judge the teacher's solution in the warmed image, the way a student's is judged. It
+   must be accepted, and its time sets the time limit: students are judged warm too.
 
 No Dockerfile: each step is a sandbox container saved with commit.
 """
 
 import contextlib
+import dataclasses
 import json
 import shlex
 from dataclasses import dataclass
@@ -21,7 +24,7 @@ from judge.core.limits import time_limit_s
 from judge.core.manifest import Manifest, ManifestTest
 from judge.core.profile import RunnerProfile
 from judge.core.verdict import RunOutcome, Verdict, decide_verdict
-from judge.infra.runner import TaskImage
+from judge.infra.runner import TaskImage, judge_submission
 from judge.infra.sandbox import ContainerRun, NodeSettings, Sandbox, SandboxLimits
 from judge.packaging.combined_tests import combined_test_file
 from judge.packaging.dart_imports import ImportRules
@@ -35,12 +38,17 @@ BUILD_LABEL = "ohw.build"
 @dataclass(frozen=True)
 class BuildResult:
     task: TaskImage
-    solution_wall_ms: int
+    solution_wall_ms: int  # the warm-up: cold compile and the tests
+    warm_wall_ms: int  # judged in the finished image; the time limit comes from this
     log: str = ""  # not kept in the image label
     warm_up_peak_mb: int | None = None  # when the node samples memory; not in the label
 
     def label(self) -> dict[str, str]:
-        data = {"task": self.task.to_json_data(), "solution_wall_ms": self.solution_wall_ms}
+        data = {
+            "task": self.task.to_json_data(),
+            "solution_wall_ms": self.solution_wall_ms,
+            "warm_wall_ms": self.warm_wall_ms,
+        }
         return {BUILD_LABEL: json.dumps(data, ensure_ascii=False)}
 
 
@@ -67,7 +75,11 @@ def load_build_result(client: docker.DockerClient, tag: str) -> BuildResult | No
     if BUILD_LABEL not in labels:
         return None
     data = json.loads(labels[BUILD_LABEL])
-    return BuildResult(TaskImage.from_json_data(data["task"]), data["solution_wall_ms"])
+    if "warm_wall_ms" not in data:
+        return None  # built before the time limit came from a warm run: build it again
+    return BuildResult(
+        TaskImage.from_json_data(data["task"]), data["solution_wall_ms"], data["warm_wall_ms"]
+    )
 
 
 def build_task_image(
@@ -104,7 +116,7 @@ def build_task_image(
         installed_image = sandbox.commit()
 
     try:
-        return _warm_up(client, package, profile, limits, installed_image, tag, log)
+        return _warm_up(client, package, profile, node, installed_image, tag, log)
     except BuildFailed:
         _remove_image(client, installed_image)
         raise
@@ -114,11 +126,12 @@ def _warm_up(
     client: docker.DockerClient,
     package: TaskPackage,
     profile: RunnerProfile,
-    limits: SandboxLimits,
+    node: NodeSettings,
     installed_image: str,
     tag: str,
     log: "_BuildLog",
 ) -> BuildResult:
+    limits = SandboxLimits.for_profile(profile, node)
     test_command = shlex.join(profile.test_command)
     # The solution is removed in the same container, so it never reaches an image layer.
     command = ["sh", "-c", f"{test_command}; status=$?; rm -rf lib; exit $status"]
@@ -139,18 +152,54 @@ def _warm_up(
             manifest = _check_warm_up(run, parser.compile_error, events, parser.test_files, profile)
         except BuildFailed as error:
             raise BuildFailed(error.errors, log.text) from None
-        task = TaskImage(
-            image_tag=tag,
-            manifest=manifest,
-            time_limit_s=time_limit_s(run.wall_ms, profile.min_time_s, profile.max_time_s),
-            import_rules=_import_rules(package, profile),
+        warmed_image = sandbox.commit()
+
+    try:
+        task, warm_wall_ms = _judge_solution(
+            client, package, profile, node, warmed_image, manifest, log
         )
         result = BuildResult(
-            task, solution_wall_ms=run.wall_ms, log=log.text, warm_up_peak_mb=run.peak_memory_mb
+            dataclasses.replace(task, image_tag=tag),
+            solution_wall_ms=run.wall_ms,
+            warm_wall_ms=warm_wall_ms,
+            log=log.text,
+            warm_up_peak_mb=run.peak_memory_mb,
         )
+        # Labels are fixed at commit: the tagged image is a commit of an unused container.
         repository, _, version = tag.partition(":")
-        sandbox.commit(repository, version or None, labels=result.label())
+        with Sandbox(client, warmed_image, ["true"], limits) as sandbox:
+            sandbox.commit(repository, version or None, labels=result.label())
+    except BuildFailed:
+        _remove_image(client, warmed_image)
+        raise
     return result
+
+
+def _judge_solution(
+    client: docker.DockerClient,
+    package: TaskPackage,
+    profile: RunnerProfile,
+    node: NodeSettings,
+    warmed_image: str,
+    manifest: Manifest,
+    log: "_BuildLog",
+) -> tuple[TaskImage, int]:
+    """The task of the warmed image, timed by judging the teacher's solution in it."""
+    rules = _import_rules(package, profile)
+    trial = TaskImage(warmed_image, manifest, profile.max_time_s, import_rules=rules)
+    result = judge_submission(client, trial, profile, node, package.solution_files)
+    log.add_text(result.log)
+    if result.judgement.verdict != Verdict.ACCEPTED:
+        raise BuildFailed(
+            [
+                "Tayyor image oʻqituvchi yechimini qabul qilmadi "
+                f"({result.judgement.verdict}). Testlar bir-biriga yoki oldingi "
+                "ishga tushirishdan qolgan fayllarga bogʻliq boʻlmasin; logni tekshiring."
+            ],
+            log.text,
+        )
+    limit = time_limit_s(result.wall_ms, profile.min_time_s, profile.max_time_s)
+    return dataclasses.replace(trial, time_limit_s=limit), result.wall_ms
 
 
 def _import_rules(package: TaskPackage, profile: RunnerProfile) -> ImportRules | None:
@@ -215,6 +264,9 @@ class _BuildLog:
     def add(self, command: str, run: ContainerRun, output: str) -> None:
         self._parts.append(f"$ {command}  ({run.describe()})")
         self._parts += [text.rstrip() for text in (output, run.stderr) if text.strip()]
+
+    def add_text(self, text: str) -> None:
+        self._parts.append(text.rstrip())
 
     @property
     def text(self) -> str:
