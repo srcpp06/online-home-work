@@ -39,6 +39,12 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [ ] Serverga birinchi deploy — Erkin, `docs/deploy.md` bo'yicha
 - [ ] **Qaror nuqtasi:** bitta haqiqiy guruh bilan sinov
 
+### Sinovda topilgan kamchiliklar (to'planadi, keyin birga tuzatiladi)
+
+- [ ] Topshiriq yaratish sahifasi paket formatini tushuntirmaydi: tuzilish sxemasi va "Namuna paketni yuklab olish" (Dart, Flutter) kerak — Erkin oddiy Flutter loyihasini yuklab, xatolar ro'yxatini oldi
+- [ ] Jurnalni o'quvchilarga ochishni faqat markaz admini qila oladi (guruh tahriri); o'qituvchi ham o'z guruhida qila olsin
+- [ ] Yashirin test xabarini o'quvchiga ochish sozlamasi (`show_hidden_messages`, SPEC §3.8) yo'q
+
 ## Phase 2 — Sifat
 
 - [x] Starter zip generatsiyasi va yuklab olish — Phase 1 da qilindi (`judge/packaging/starter.py`, o'quvchi topshiriq sahifasidan yuklab oladi)
