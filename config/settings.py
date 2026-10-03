@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "django_tailwind_cli",
     "axes",
     "apps.accounts",
+    "apps.tasks",
+    "apps.submissions",
+    "apps.system",
     "apps.ui",
 ]
 

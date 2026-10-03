@@ -113,3 +113,31 @@ def test_env_module_imports_nothing_from_the_project() -> None:
         name for name, _ in imports if name.split(".")[0] in ("judge", "config", "apps")
     )
     assert not project, f"judge.env must stay dependency-free: {project}"
+
+
+# The site never talks to Docker (CLAUDE.md, "Arxitektura"): only the worker command does.
+WEB_DIRS = (REPO_ROOT / "apps", REPO_ROOT / "config")
+WORKER_DIR = REPO_ROOT / "apps" / "system" / "management" / "commands"
+DOCKER_SIDE = ("docker", "judge.infra", "judge.adapters", "judge.config", "judge.cli")
+
+
+def web_files() -> list[Path]:
+    return sorted(
+        path
+        for folder in WEB_DIRS
+        for path in folder.rglob("*.py")
+        if "migrations" not in path.parts and WORKER_DIR not in path.parents
+    )
+
+
+@pytest.mark.parametrize("path", web_files(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+def test_web_code_never_reaches_docker(path: Path) -> None:
+    module = module_name(path)
+    imports = imported_modules(path.read_text(), module, path.name == "__init__.py")
+    violations = sorted(
+        f"line {line}: imports {name}"
+        for name, line in imports
+        for prefix in DOCKER_SIDE
+        if matches(name, prefix)
+    )
+    assert not violations, f"{module} must not reach Docker:\n" + "\n".join(violations)

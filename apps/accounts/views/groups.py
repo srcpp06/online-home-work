@@ -1,7 +1,7 @@
 """A centre's study groups (SPEC §1): the centre admin manages them, others look."""
 
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, ProtectedError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -100,7 +100,15 @@ def group_delete(request: HttpRequest, pk: int) -> HttpResponse:
     require(request, Action.MANAGE_GROUPS)
     group = get_for_user_or_404(Group, request.user, pk=pk)
     if request.method == "POST":
-        group.delete()
+        try:
+            group.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                f"“{group.name}” guruhiga topshiriq biriktirilgan; oʻquvchilarning yechimlari "
+                "va jurnal saqlanib qolishi uchun guruhni oʻchirib boʻlmaydi.",
+            )
+            return redirect("accounts:group", group.pk)
         messages.success(request, f"“{group.name}” guruhi oʻchirildi.")
         return redirect("accounts:groups")
     return render(

@@ -37,7 +37,7 @@ class Direction(models.TextChoices):
     FRONTEND = "frontend", "Frontend"
 
 
-def _viewer(user: "User | AnonymousUser") -> Any:
+def active_viewer(user: "User | AnonymousUser") -> Any:
     """The user if they may see anything at all, else None."""
     if not user.is_authenticated or not user.is_active:
         return None
@@ -46,7 +46,7 @@ def _viewer(user: "User | AnonymousUser") -> Any:
 
 class CenterQuerySet(models.QuerySet["Center"]):
     def for_user(self, user: "User | AnonymousUser") -> Self:
-        viewer = _viewer(user)
+        viewer = active_viewer(user)
         if viewer is None:
             return self.none()
         if viewer.role == Role.SUPERADMIN:
@@ -72,7 +72,7 @@ class Center(models.Model):
 
 class UserQuerySet(models.QuerySet["User"]):
     def for_user(self, user: "User | AnonymousUser") -> Self:
-        viewer = _viewer(user)
+        viewer = active_viewer(user)
         if viewer is None:
             return self.none()
         match viewer.role:
@@ -207,7 +207,7 @@ class User(AbstractUser):
 
 class GroupQuerySet(models.QuerySet["Group"]):
     def for_user(self, user: "User | AnonymousUser") -> Self:
-        viewer = _viewer(user)
+        viewer = active_viewer(user)
         if viewer is None:
             return self.none()
         match viewer.role:

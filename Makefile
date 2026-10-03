@@ -42,8 +42,9 @@ db: needs-compose .env ## Start the development PostgreSQL (compose.dev.yml)
 db-down: needs-compose ## Stop the development PostgreSQL; its data stays
 	$(COMPOSE_DEV) down
 
-migrate: needs-uv db ## Apply database migrations
+migrate: needs-uv db ## Apply database migrations and load runner profiles
 	$(UV) run python manage.py migrate
+	$(UV) run python manage.py load_profiles
 
 css: needs-uv ## Build static/css/app.css from assets/source.css (Tailwind; first run downloads it)
 	$(UV) run python manage.py tailwind build

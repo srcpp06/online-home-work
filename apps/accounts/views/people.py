@@ -204,8 +204,8 @@ def person_delete(request: HttpRequest, pk: int) -> HttpResponse:
         except ProtectedError:
             messages.error(
                 request,
-                f"{name} guruhga oʻqituvchi qilib biriktirilgan. Avval guruhga boshqa oʻqituvchini "
-                "tanlang yoki oʻchirish oʻrniga hisobni nofaol qiling.",
+                f"{name} bilan bogʻliq maʼlumotlar bor (guruh, topshiriq yoki yechimlar). "
+                "Ularni saqlab qolish uchun oʻchirish oʻrniga hisobni nofaol qiling.",
             )
             return redirect("accounts:person", person.pk)
         messages.success(request, f"{name} oʻchirildi.")

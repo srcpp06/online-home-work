@@ -170,11 +170,19 @@ class TestChanging:
     def test_admin_deletes_a_student(self, client: Client, world: World) -> None:
         as_(client, world.a.admin)
 
-        response = client.post(f"/people/{world.a.student.pk}/delete/")
+        response = client.post(f"/people/{world.a.other_student.pk}/delete/")
 
         assert response["Location"] == "/students/"
-        assert not User.objects.filter(pk=world.a.student.pk).exists()
-        assert Group.objects.filter(pk=world.a.group.pk).exists()
+        assert not User.objects.filter(pk=world.a.other_student.pk).exists()
+        assert Group.objects.filter(pk=world.a.other_group.pk).exists()
+
+    def test_a_student_with_submissions_is_kept(self, client: Client, world: World) -> None:
+        as_(client, world.a.admin)
+
+        response = client.post(f"/people/{world.a.student.pk}/delete/", follow=True)
+
+        assert User.objects.filter(pk=world.a.student.pk).exists()
+        assert "nofaol qiling" in response.content.decode()
 
     def test_a_groups_teacher_is_not_deleted(self, client: Client, world: World) -> None:
         as_(client, world.a.admin)
@@ -182,7 +190,7 @@ class TestChanging:
         response = client.post(f"/people/{world.a.teacher.pk}/delete/", follow=True)
 
         assert User.objects.filter(pk=world.a.teacher.pk).exists()
-        assert "guruhga oʻqituvchi qilib biriktirilgan" in response.content.decode()
+        assert "bilan bogʻliq maʼlumotlar bor" in response.content.decode()
 
     @pytest.mark.parametrize("action", ["edit", "password", "delete"])
     def test_admin_does_not_manage_themselves_here(

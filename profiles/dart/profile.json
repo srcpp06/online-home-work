@@ -1,14 +1,35 @@
 {
   "slug": "dart",
+  "title": "Dart",
+  "direction": "flutter",
   "lane": "fast",
   "base_image": "ohw-base-dart:${DART_VERSION}",
-  "student_paths": ["lib"],
-  "install_command": ["dart", "pub", "get"],
-  "test_command": ["dart", "test", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],
+  "student_paths": [
+    "lib"
+  ],
+  "install_command": [
+    "dart",
+    "pub",
+    "get"
+  ],
+  "test_command": [
+    "dart",
+    "test",
+    "--reporter",
+    "json",
+    "--concurrency=1",
+    "test/_ohw_all_test.dart"
+  ],
   "test_import": "package:test/test.dart",
   "parser": "dart_json",
   "static_check": "dart_imports",
-  "forbidden_imports": ["dart:io", "dart:ffi", "dart:isolate", "dart:mirrors", "dart:cli"],
+  "forbidden_imports": [
+    "dart:io",
+    "dart:ffi",
+    "dart:isolate",
+    "dart:mirrors",
+    "dart:cli"
+  ],
   "memory_mb": 1024,
   "cpus": 1.0,
   "tmp_mb": 256,

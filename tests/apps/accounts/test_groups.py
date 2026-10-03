@@ -107,6 +107,15 @@ def test_admin_edits_and_deletes_a_group(client: Client, world: World) -> None:
     assert (a.group.name, a.group.teacher) == ("Flutter 1A", a.other_teacher)
     assert list(a.group.students.all()) == [a.other_student]
 
-    assert client.post(f"/groups/{a.group.pk}/delete/")["Location"] == "/groups/"
-    assert not Group.objects.filter(pk=a.group.pk).exists()
-    assert User.objects.filter(pk=a.student.pk).exists()
+    assert client.post(f"/groups/{a.other_group.pk}/delete/")["Location"] == "/groups/"
+    assert not Group.objects.filter(pk=a.other_group.pk).exists()
+    assert User.objects.filter(pk=a.other_student.pk).exists()
+
+
+def test_a_group_with_assignments_is_not_deleted(client: Client, world: World) -> None:
+    as_(client, world.a.admin)
+
+    response = client.post(f"/groups/{world.a.group.pk}/delete/", follow=True)
+
+    assert Group.objects.filter(pk=world.a.group.pk).exists()
+    assert "guruhni oʻchirib boʻlmaydi" in response.content.decode()

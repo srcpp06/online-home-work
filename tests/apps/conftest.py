@@ -11,6 +11,12 @@ def fast_password_hashing(settings: Any) -> None:
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 
+@pytest.fixture(autouse=True)
+def media_in_tmp(settings: Any, tmp_path: Any) -> None:
+    """Uploaded files of a test go to its own folder, never the developer's media/."""
+    settings.MEDIA_ROOT = tmp_path / "media"
+
+
 @pytest.fixture
 def world(db: None) -> World:
     return make_world()

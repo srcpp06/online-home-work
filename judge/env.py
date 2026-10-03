@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+PROFILES_DIR = REPO_ROOT / "profiles"  # one folder per runner profile: Dockerfile, profile.json
 
 
 class ConfigError(Exception):

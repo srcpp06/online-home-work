@@ -13,12 +13,12 @@ from pathlib import Path
 from typing import Self
 
 from judge.core.profile import RunnerProfile
-from judge.env import REPO_ROOT, ConfigError
+from judge.env import PROFILES_DIR, ConfigError
+from judge.env import REPO_ROOT as REPO_ROOT  # re-exported: tools and tests import it here
 from judge.env import read_env as read_env  # re-exported: the CLI and tools import it here
 from judge.infra.sandbox import NodeSettings
 from judge.packaging.zip_validator import ZipLimits
 
-PROFILES_DIR = REPO_ROOT / "profiles"
 REQUIRED = (
     "JUDGE_CPU_SHARES",
     "JUDGE_MAX_OUTPUT_KB",

@@ -1,14 +1,36 @@
 {
   "slug": "flutter",
+  "title": "Flutter",
+  "direction": "flutter",
   "lane": "heavy",
   "base_image": "ohw-base-flutter:${FLUTTER_VERSION}",
-  "student_paths": ["lib"],
-  "install_command": ["flutter", "pub", "get"],
-  "test_command": ["flutter", "test", "--no-pub", "--reporter", "json", "--concurrency=1", "test/_ohw_all_test.dart"],
+  "student_paths": [
+    "lib"
+  ],
+  "install_command": [
+    "flutter",
+    "pub",
+    "get"
+  ],
+  "test_command": [
+    "flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "json",
+    "--concurrency=1",
+    "test/_ohw_all_test.dart"
+  ],
   "test_import": "package:flutter_test/flutter_test.dart",
   "parser": "dart_json",
   "static_check": "dart_imports",
-  "forbidden_imports": ["dart:io", "dart:ffi", "dart:isolate", "dart:mirrors", "dart:cli"],
+  "forbidden_imports": [
+    "dart:io",
+    "dart:ffi",
+    "dart:isolate",
+    "dart:mirrors",
+    "dart:cli"
+  ],
   "memory_mb": 1536,
   "cpus": 1.5,
   "tmp_mb": 512,
