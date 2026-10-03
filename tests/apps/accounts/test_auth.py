@@ -193,3 +193,40 @@ def test_menu_follows_the_role(client: Client, world: World, who: str, labels: l
     response = client.get("/password/")
 
     assert [item.label for item in response.context["nav_items"]] == labels
+
+
+class TestAlreadySignedIn:
+    """Erkin, signed in to /admin/ as the superadmin, opened /login/ and was sent straight
+    back to the admin: the sign-in form never showed."""
+
+    def test_the_login_page_still_shows_and_says_who_is_signed_in(
+        self, client: Client, world: World
+    ) -> None:
+        client.force_login(world.superadmin)
+
+        response = client.get("/login/")
+
+        assert response.status_code == 200
+        assert f"Hozir {world.superadmin.display_name} sifatida kirgansiz" in (
+            response.content.decode()
+        )
+
+    def test_signing_in_as_someone_else_switches_the_account(
+        self, client: Client, world: World
+    ) -> None:
+        client.force_login(world.superadmin)
+
+        sign_in(client, world.a.teacher.username)
+
+        assert client.get("/")["Location"] == "/groups/"
+
+
+def test_admin_login_sends_other_roles_to_the_site_login(client: Client, world: World) -> None:
+    response = client.post(
+        "/admin/login/", {"username": world.a.teacher.username, "password": PASSWORD}
+    )
+
+    html = response.content.decode()
+    assert response.status_code == 200
+    assert "Admin panelga faqat superadmin kiradi" in html
+    assert 'href="/login/"' in html

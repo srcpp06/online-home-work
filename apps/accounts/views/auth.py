@@ -11,9 +11,11 @@ from apps.accounts.models import Role
 
 
 class LoginView(auth_views.LoginView):
+    """The form shows even when someone is signed in: the page says who, and signing in
+    with another login switches the account (a superadmin in /admin/ trying a teacher)."""
+
     template_name = "accounts/login.html"
     form_class = LoginForm
-    redirect_authenticated_user = True
 
 
 class PasswordChangeView(auth_views.PasswordChangeView):

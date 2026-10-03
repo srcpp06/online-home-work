@@ -3,7 +3,10 @@
 from typing import Any
 
 from django import forms
+from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.accounts.models import Group, Role, User, check_students
 
@@ -27,6 +30,22 @@ class LoginForm(AuthenticationForm):
             raise forms.ValidationError(
                 self.error_messages["center_inactive"], code="center_inactive"
             )
+
+
+class AdminLoginForm(AdminAuthenticationForm):
+    """/admin/ is the superadmin's; everyone else is pointed to the site's sign-in."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.error_messages = {
+            **self.error_messages,
+            "invalid_login": format_html(
+                "Login yoki parol notoʻgʻri. Admin panelga faqat superadmin kiradi; markaz "
+                'xodimlari, oʻqituvchi va oʻquvchilar <a href="{}">saytning kirish '
+                "sahifasidan</a> kiradi.",
+                reverse("accounts:login"),
+            ),
+        }
 
 
 class NewPasswordForm(PasswordChangeForm):
