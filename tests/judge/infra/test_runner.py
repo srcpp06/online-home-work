@@ -71,6 +71,9 @@ def test_compile_error_reports_the_compiler(
     assert result.judgement.verdict == Verdict.COMPILE_ERROR
     assert result.results == ()
     assert "The getter 'total' isn't defined" in (result.compile_error or "")
+    # The student reads the cleaned message: no test path, no test code (SPEC §3.8).
+    assert "The getter 'total' isn't defined" in result.public_message
+    assert "test/" not in result.public_message
 
 
 def test_infinite_loop_hits_the_time_limit(

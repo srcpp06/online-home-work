@@ -7,6 +7,7 @@ from collections.abc import Sequence
 import pytest
 
 from judge.core.manifest import Manifest, ManifestTest, Visibility
+from judge.core.messages import MAX_PUBLIC_MESSAGE
 from judge.core.verdict import Verdict
 from judge.infra import runner
 from judge.infra.runner import JudgeResult, TaskImage, judge_zip
@@ -85,13 +86,13 @@ def test_public_message_is_capped() -> None:
 
     result = judged(zip_of(**{"lib__cart.dart": many}))
 
-    assert len(result.public_message) == runner.MAX_PUBLIC_MESSAGE
+    assert len(result.public_message) == MAX_PUBLIC_MESSAGE
 
 
 def test_task_without_rules_for_a_checked_profile_is_a_bug() -> None:
     task = TaskImage(TASK.image_tag, TASK.manifest, TASK.time_limit_s)
 
-    with pytest.raises(ValueError, match="no import rules"):
+    with pytest.raises(ValueError, match="needs import rules"):
         judged(zip_of(**{"lib__cart.dart": b"class Cart {}"}), task)
 
 

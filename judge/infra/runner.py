@@ -21,12 +21,11 @@ from judge.core.profile import RunnerProfile
 from judge.core.progress import RunProgress
 from judge.core.verdict import Judgement, RunOutcome, Verdict, decide_verdict
 from judge.infra.sandbox import NodeSettings, Sandbox, SandboxLimits
-from judge.packaging.dart_imports import ImportRules, find_forbidden_imports
-from judge.packaging.submission import SubmissionInvalid, read_submission
-from judge.packaging.zip_validator import ArchiveFile, ZipLimits, ZipRejected, validate_zip
+from judge.packaging.dart_imports import ImportRules
+from judge.packaging.submission import SubmissionRejected, check_submission
+from judge.packaging.zip_validator import ArchiveFile, ZipLimits
 from judge.parsers import make_parser
-
-MAX_PUBLIC_MESSAGE = 2000  # SPEC §3.8
+from judge.parsers.compile_message import student_compile_message
 
 # Called with every event that matched the manifest: start (show the running test),
 # pass and fail (save the test's row), done.
@@ -71,7 +70,7 @@ class JudgeResult:
     compile_error: str | None
     wall_ms: int
     log: str  # for the teacher only: never shown to the student
-    public_message: str = ""  # for the student: why the zip was rejected
+    public_message: str = ""  # for the student: why it was rejected or didn't compile
     peak_memory_mb: int | None = None  # when the node samples memory
 
 
@@ -86,22 +85,14 @@ def judge_zip(
 ) -> JudgeResult:
     """Judge a student's zip. A broken zip, missing lib/ or forbidden import is rejected."""
     try:
-        files = read_submission(validate_zip(archive, limits), profile.student_paths)
-    except (ZipRejected, SubmissionInvalid) as error:
+        files = check_submission(archive, limits, profile, task.import_rules)
+    except SubmissionRejected as error:
         return _rejected(task, str(error))
-    if task.import_rules is not None:
-        problems = find_forbidden_imports(files, task.import_rules)
-        if problems:
-            return _rejected(task, "\n".join(problems))
-    elif profile.static_check is not None:
-        raise ValueError(f"{task.image_tag} has no import rules for {profile.static_check}")
     return judge_submission(client, task, profile, node, files, on_event)
 
 
 def _rejected(task: TaskImage, message: str) -> JudgeResult:
     judgement = Judgement(Verdict.REJECTED, tests_total=len(task.manifest.tests), tests_passed=0)
-    if len(message) > MAX_PUBLIC_MESSAGE:
-        message = message[: MAX_PUBLIC_MESSAGE - 3] + "..."
     return JudgeResult(
         judgement=judgement,
         results=(),
@@ -155,11 +146,15 @@ def judge_submission(
     log += [text.rstrip() for text in ("\n".join(parser.log), run.stderr) if text.strip()]
     detail = f" ({judgement.detail})" if judgement.detail else ""
     log.append(f"verdict: {judgement.verdict}{detail}")
+    public_message = ""
+    if judgement.verdict == Verdict.COMPILE_ERROR and parser.compile_error is not None:
+        public_message = student_compile_message(parser.compile_error, profile.student_paths)
     return JudgeResult(
         judgement=judgement,
         results=tuple(e for e in events if e.type in (EventType.PASS, EventType.FAIL)),
         compile_error=parser.compile_error,
         wall_ms=run.wall_ms,
         log="\n".join(log) + "\n",
+        public_message=public_message,
         peak_memory_mb=run.peak_memory_mb,
     )

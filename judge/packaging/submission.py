@@ -8,15 +8,52 @@ chooses libraries and tests.
 """
 
 from collections.abc import Sequence
+from typing import BinaryIO
 
+from judge.core.messages import cut
+from judge.core.profile import RunnerProfile
+from judge.packaging.dart_imports import ImportRules, find_forbidden_imports
 from judge.packaging.task_package import is_junk
-from judge.packaging.zip_validator import ArchiveFile, ValidatedZip
+from judge.packaging.zip_validator import (
+    ArchiveFile,
+    ValidatedZip,
+    ZipLimits,
+    ZipRejected,
+    validate_zip,
+)
 
 MAX_ROOT_DEPTH = 3
 
 
 class SubmissionInvalid(Exception):
     """The zip has nothing to judge. ``str(error)`` is the message for the student."""
+
+
+class SubmissionRejected(Exception):
+    """Decided before anything runs: a bad zip, nothing to judge or a forbidden import.
+    ``str(error)`` is the message for the student."""
+
+
+def check_submission(
+    archive: BinaryIO,
+    limits: ZipLimits,
+    profile: RunnerProfile,
+    import_rules: ImportRules | None,
+) -> list[ArchiveFile]:
+    """The student's files once the zip, its layout and the imports pass (SPEC §3.4 steps
+    1-2). The site runs it on upload, so a rejection is immediate and never queued; the
+    worker runs it again before judging."""
+    try:
+        files = read_submission(validate_zip(archive, limits), profile.student_paths)
+    except (ZipRejected, SubmissionInvalid) as error:
+        raise SubmissionRejected(cut(str(error))) from None
+    if import_rules is not None:
+        problems = find_forbidden_imports(files, import_rules)
+        if problems:
+            raise SubmissionRejected(cut("\n".join(problems)))
+    elif profile.static_check is not None:
+        raise ValueError(f"profile {profile.slug!r} needs import rules for {profile.static_check}")
+    return files
 
 
 def select_student_files(paths: Sequence[str], student_paths: Sequence[str]) -> dict[str, str]:

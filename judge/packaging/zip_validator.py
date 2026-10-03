@@ -124,16 +124,22 @@ class ValidatedZip:
         return files
 
 
-def validate_zip(source: BinaryIO, limits: ZipLimits) -> ValidatedZip:
-    """Check the zip's size and every entry's metadata without decompressing anything."""
-    size = source.seek(0, os.SEEK_END)
-    source.seek(0)
+def check_size(size: int, limits: ZipLimits) -> None:
+    """The first check, on its own so an upload over the limit is refused before it is
+    stored anywhere."""
     if size > limits.max_zip_bytes:
         raise ZipRejected(
             ZipProblem.TOO_LARGE,
             f"Zip hajmi juda katta: {size / _MB:.1f} MB, ruxsat etilgani "
             f"{limits.max_zip_bytes / _MB:g} MB. Faqat kerakli fayllarni zip qilib qayta yuklang.",
         )
+
+
+def validate_zip(source: BinaryIO, limits: ZipLimits) -> ValidatedZip:
+    """Check the zip's size and every entry's metadata without decompressing anything."""
+    size = source.seek(0, os.SEEK_END)
+    source.seek(0)
+    check_size(size, limits)
     try:
         archive = zipfile.ZipFile(source)
         infos = archive.infolist()
