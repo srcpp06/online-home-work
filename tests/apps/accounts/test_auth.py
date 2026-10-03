@@ -38,6 +38,7 @@ def test_every_other_page_needs_a_login(client: Client, world: World) -> None:
         ("a.admin", "/teachers/"),
         ("a.manager", "/teachers/"),
         ("a.teacher", "/groups/"),
+        ("a.student", "/assignments/"),
     ],
 )
 def test_each_role_lands_on_its_page(client: Client, world: World, who: str, home: str) -> None:
@@ -50,10 +51,10 @@ def test_each_role_lands_on_its_page(client: Client, world: World, who: str, hom
 def test_student_home_is_their_assignments(client: Client, world: World) -> None:
     sign_in(client, world.a.student.username)
 
-    html = client.get("/").content.decode()
+    html = client.get("/", follow=True).content.decode()
 
     assert "<h1>Topshiriqlarim</h1>" in html
-    assert "Hali topshiriq yoʻq." in html
+    assert world.a.task.title in html
 
 
 def test_wrong_password_is_one_plain_message(client: Client, world: World) -> None:

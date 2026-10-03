@@ -1,0 +1,10 @@
+{% load ui %}
+{% if row.state == "accepted" %}
+  {% status_badge "accepted" %}
+{% elif row.state == "active" %}
+  {% status_badge "running" %}
+{% elif row.state == "tried" %}
+  <span class="status tone-fail">{% icon "x" %}<span>Urinilgan: {{ row.attempts }} ta</span></span>
+{% else %}
+  <span class="status tone-neutral">{% icon "circle-dashed" %}<span>Yangi</span></span>
+{% endif %}

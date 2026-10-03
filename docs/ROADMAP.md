@@ -31,9 +31,9 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `RunnerProfile` seed (`dart`, `flutter`) — `manage.py load_profiles` (`make migrate` ishga tushiradi) `profiles/*/profile.json` dan; fayli yo'q profil o'chiriladi, o'chirilmaydi
 - [x] `Task` / `TaskVersion`: yaratish ustasi, paket yuklash va struktura tekshiruvi, build job, jonli build logi, e'lon qilish — `apps/tasks/views.py` (3 qadam: topshiriq va paket → image yig'ish → e'lon), paket saytda tekshiriladi, image `judge.adapters.jobs.run_build` da; log har qadamda yangilanadi
 - [x] `Assignment`: guruhga biriktirish, muddat — `/tasks/<id>/assign/`: ochilish vaqti, muddat, kechikishga ruxsat, urinishlar limiti; bir guruhga bir marta, muddat ochilishdan keyin (baza cheklovi)
-- [ ] `Submission`: yuklash, validatsiya, cooldown va faol yechimlar limiti, `Job` yaratish
+- [x] `Submission`: yuklash, validatsiya, cooldown va faol yechimlar limiti, `Job` yaratish — `apps/submissions/services.py`: muddat, urinishlar, faol limit, cooldown, o'quvchi bo'yicha qulf; zip saytda worker bilan bir xil funksiya bilan tekshiriladi, rad etilgani darhol "Rad etildi" oladi va navbatga tushmaydi; "Topshiriqlarim" va topshiriq sahifasi (shart, boshlang'ich loyiha, muhit, urinishlar tarixi)
 - [x] `judge_worker`: slotlar va lane'lar, SKIP LOCKED, lease/heartbeat, reaper, xotira sig'ishi tekshiruvi — `make worker`; `judge/adapters/worker.py` (slot thread'lari), `apps/system/queue.py` (claim/lease/reap, 3 urinishdan keyin `system_error`); image'i yo'q node uni paketdan qayta yig'adi; heavy slot bo'sh qolsa fast ishni oladi
-- [ ] Jonli natija sahifasi: HTMX polling, navbatdagi o'rin, verdict muhri
+- [x] Jonli natija sahifasi: HTMX polling, navbatdagi o'rin, verdict muhri — `/submissions/<id>/`: daftar qatorlari, "yozilmoqda" qatori, muhr, kompilyatsiya xatosi tozalangan holda; o'qituvchi, admin va menejer uchun kod (Pygments), o'qituvchiga "Qayta tekshirish"; real worker bilan brauzerda tekshirildi
 - [ ] Jurnal
 - [ ] `compose.prod.yml`, Caddy, `docs/deploy.md`; serverga birinchi deploy
 - [ ] **Qaror nuqtasi:** bitta haqiqiy guruh bilan sinov

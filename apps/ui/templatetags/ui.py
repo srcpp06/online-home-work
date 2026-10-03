@@ -1,4 +1,4 @@
-"""Design system tags: {% icon %} and {% status_badge %} (docs/UI.md §5)."""
+"""Design system tags: {% icon %}, {% status_badge %} and {% stamp %} (docs/UI.md §3, §5)."""
 
 import re
 from functools import cache
@@ -52,4 +52,13 @@ def status_badge(status: str, failed_test: int | None = None) -> SafeString:
     look = status_look(status, failed_test)
     return render_to_string(
         "ui/components/status_badge.html", {"look": look, "icon_svg": icon(look.icon, "size-5")}
+    )
+
+
+@register.simple_tag
+def stamp(verdict: str, failed_test: int | None = None) -> SafeString:
+    """The final verdict as a stamp under the notebook page (docs/UI.md §3)."""
+    look = status_look(verdict, failed_test)
+    return mark_safe(  # noqa: S308 -- the label is escaped
+        f'<span class="stamp tone-{look.tone}">{escape(look.label)}</span>'
     )

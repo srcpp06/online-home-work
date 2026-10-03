@@ -3,7 +3,7 @@
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 from apps.accounts.forms import LoginForm, NewPasswordForm
@@ -38,5 +38,4 @@ def home(request: HttpRequest) -> HttpResponse:
             return redirect("accounts:teachers")
         case Role.TEACHER:
             return redirect("accounts:groups")
-    # Students: assignments come with the tasks (docs/ROADMAP.md); until then, the empty state.
-    return render(request, "accounts/home_student.html")
+    return redirect("submissions:assignments")

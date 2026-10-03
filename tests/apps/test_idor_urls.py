@@ -15,6 +15,8 @@ from django.test import Client
 from django.urls import URLPattern, URLResolver, get_resolver, include, path, re_path, reverse
 
 from apps.accounts.models import Group, User
+from apps.submissions.models import Submission
+from apps.system.models import Job
 from apps.tasks.models import Assignment, Task, TaskVersion
 from tests.apps.world import World
 
@@ -38,6 +40,14 @@ def _version(name: str) -> Callable[[World], list[str]]:
     return lambda w: [reverse(name, args=[w.b.task.pk, w.b.version.number])]
 
 
+def _assignment(name: str) -> Callable[[World], list[str]]:
+    return lambda w: [reverse(name, args=[w.b.assignment.pk])]
+
+
+def _submission(name: str) -> Callable[[World], list[str]]:
+    return lambda w: [reverse(name, args=[w.b.submission.pk])]
+
+
 # URL name -> the addresses of centre b's objects.
 IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
     "tasks:task": _task("tasks:task"),
@@ -50,6 +60,11 @@ IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
     "tasks:version_publish": _version("tasks:version_publish"),
     "tasks:version_package": _version("tasks:version_package"),
     "tasks:version_starter": _version("tasks:version_starter"),
+    "submissions:assignment": _assignment("submissions:assignment"),
+    "submissions:assignment_starter": _assignment("submissions:assignment_starter"),
+    "submissions:submission": _submission("submissions:submission"),
+    "submissions:submission_live": _submission("submissions:submission_live"),
+    "submissions:submission_rejudge": _submission("submissions:submission_rejudge"),
     "accounts:person": _people("accounts:person"),
     "accounts:person_edit": _people("accounts:person_edit"),
     "accounts:person_password": _people("accounts:person_password"),
@@ -112,7 +127,7 @@ def test_every_url_with_an_id_has_an_idor_case() -> None:
 
 
 def snapshot(world: World) -> list[tuple[object, ...]]:
-    """Centre b's people and group, as stored."""
+    """Centre b's people, groups, tasks and submissions, as stored."""
     b = world.b
     people = User.objects.filter(center=b.center).order_by("pk")
     groups = Group.objects.filter(center=b.center).order_by("pk")
@@ -130,6 +145,10 @@ def snapshot(world: World) -> list[tuple[object, ...]]:
         *Group.students.through.objects.filter(group__center=b.center)
         .order_by("pk")
         .values_list("group_id", "user_id"),
+        *Submission.objects.filter(assignment__group__center=b.center)
+        .order_by("pk")
+        .values_list("pk", "status", "verdict"),
+        ("jobs", Job.objects.filter(submission__assignment__group__center=b.center).count()),
     ]
 
 

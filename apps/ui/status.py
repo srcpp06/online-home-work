@@ -34,7 +34,7 @@ STATUSES: dict[str, StatusLook] = {
     "runtime_error": StatusLook("Bajarilishda xato", "triangle-alert", Tone.FAIL),
     "rejected": StatusLook("Rad etildi", "ban", Tone.FAIL),
     "system_error": StatusLook(
-        "Tizim xatosi — yechim qayta tekshiriladi", "server-crash", Tone.NEUTRAL
+        "Tizim xatosi — urinish hisoblanmaydi", "server-crash", Tone.NEUTRAL
     ),
 }
 

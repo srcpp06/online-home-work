@@ -4,6 +4,6 @@
          name="{{ widget.name }}"
          class="sr-only"
          {% include "django/forms/widgets/attrs.html" %}>
-  <span class="flex items-center gap-2">{% icon "upload" %}{{ widget.prompt }} yoki <span class="text-ink underline">kompyuterdan tanlang</span></span>
+  <span class="flex items-start gap-2">{% icon "upload" "size-5 shrink-0 mt-0.5" %}<span>{{ widget.prompt }} yoki <span class="text-ink underline">kompyuterdan tanlang</span></span></span>
   <span class="upload-zone-file" data-upload-file hidden></span>
 </label>

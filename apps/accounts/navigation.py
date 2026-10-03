@@ -32,7 +32,7 @@ MENUS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Topshiriqlar", "tasks:tasks"),
     ),
     Role.TEACHER: (("Guruhlarim", "accounts:groups"), ("Topshiriqlar", "tasks:tasks")),
-    Role.STUDENT: (("Topshiriqlarim", "accounts:home"),),
+    Role.STUDENT: (("Topshiriqlarim", "submissions:assignments"),),
 }
 
 

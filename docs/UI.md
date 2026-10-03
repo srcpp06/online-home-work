@@ -147,5 +147,5 @@ Kirish sahifasi: sokin, markazda daftar sahifasi ichidagi forma. Birinchi kirish
 | memory_limit | Xotira limiti oshdi |
 | runtime_error | Bajarilishda xato |
 | rejected | Rad etildi |
-| system_error | Tizim xatosi — yechim qayta tekshiriladi |
+| system_error | Tizim xatosi — urinish hisoblanmaydi |
 | teacher / student / center admin / center manager | Oʻqituvchi / Oʻquvchi / Markaz admini / Markaz menejeri |

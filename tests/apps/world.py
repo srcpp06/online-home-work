@@ -113,6 +113,11 @@ def make_task(author: User, title: str, *, publish: bool = True) -> tuple[Task, 
                 {"name": "Chegirma", "stage": 1, "visibility": "hidden"},
             ]
         },
+        import_rules={
+            "package_name": "cart",
+            "allowed_packages": ["cart"],
+            "forbidden_dart": ["ffi", "io", "isolate", "mirrors"],
+        },
         time_limit_s=15,
     )
     if publish:

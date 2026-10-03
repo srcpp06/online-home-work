@@ -1,0 +1,65 @@
+{% extends "layouts/app.html" %}
+{% load ui %}
+{% block title %}
+  {{ assignment.task.title }}: natija
+{% endblock title %}
+{% block content %}
+  {% if is_student %}
+    <a class="text-sm"
+       href="{% url 'submissions:assignment' assignment.pk %}">{{ assignment.task.title }}</a>
+  {% else %}
+    <a class="text-sm" href="{% url 'tasks:task' assignment.task_id %}">{{ assignment.task.title }}</a>
+  {% endif %}
+  <div class="page-head mt-2">
+    <h1>
+      {% if is_student %}
+        Natija
+      {% else %}
+        {{ submission.student.display_name }}
+      {% endif %}
+    </h1>
+    {% if can_rejudge and submission.is_finished and submission.verdict != "rejected" %}
+      <form method="post"
+            action="{% url 'submissions:submission_rejudge' submission.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-secondary" type="submit">{% icon "rotate-ccw" %} Qayta tekshirish</button>
+      </form>
+    {% endif %}
+  </div>
+  <p class="mt-2 text-text-2">
+    Yuborilgan: {{ submission.created_at|date:"d.m.Y H:i:s" }}
+    {% if submission.is_late %}<span class="tone-warn">— kechikkan</span>{% endif %}
+    {% if not is_student %}— {{ assignment.group.name }}, {{ submission.task_version.number }}-versiya{% endif %}
+  </p>
+  <div class="mt-6 max-w-3xl">{% include "submissions/_live.html" %}</div>
+  {% if is_student %}
+    <p class="mt-8">
+      <a href="{% url 'submissions:assignment' assignment.pk %}">Topshiriqqa qaytish</a>
+    </p>
+  {% else %}
+    {% if submission.is_finished and submission.wall_ms is not None %}
+      <p class="mt-6 text-text-2">
+        Tekshiruv {{ submission.wall_ms }} ms davom etdi (limit {{ submission.task_version.time_limit_s }} s).
+      </p>
+    {% endif %}
+    <h2 class="mt-10">Kod</h2>
+    {% if code_problem %}
+      <p class="panel mt-4 p-6">{{ code_problem }}</p>
+    {% else %}
+      {% for file in files %}
+        <section class="mt-4" aria-label="{{ file.path }}">
+          <h3 class="font-mono text-sm">{{ file.path }}</h3>
+          <div class="code-view panel mt-2">{{ file.html }}</div>
+        </section>
+      {% empty %}
+        <p class="panel mt-4 p-6 text-text-2">Tekshiriladigan fayl yoʻq.</p>
+      {% endfor %}
+    {% endif %}
+    {% if show_log and submission.internal_log %}
+      <details class="mt-8">
+        <summary class="cursor-pointer font-semibold text-ink">Tekshiruv logi</summary>
+        <pre class="panel mt-2 p-4 text-sm overflow-x-auto max-h-[32rem]">{{ submission.internal_log }}</pre>
+      </details>
+    {% endif %}
+  {% endif %}
+{% endblock content %}

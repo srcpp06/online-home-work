@@ -1,0 +1,63 @@
+{% load ui %}
+{# Polled every second until the solution is judged; the 286 answer stops the polling. #}
+<div id="live"
+     {% if not submission.is_finished %}hx-get="{% url 'submissions:submission_live' submission.pk %}?seen={{ rows|length }}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}>
+  <div class="notebook">
+    <div class="notebook-title flex justify-between gap-4">
+      <span>{{ assignment.task.title }}</span>
+      <span class="font-sans font-normal text-base text-text-2">
+        {% if attempt %}
+          Urinish {{ attempt }}
+        {% elif submission.is_finished %}
+          Urinish hisoblanmaydi
+        {% endif %}
+      </span>
+    </div>
+    <div aria-live="polite">
+      {% if submission.status == "queued" %}
+        <p class="text-text-2">
+          {% if ahead %}
+            Navbatda. Oldingizda {{ ahead }} ta yechim.
+          {% else %}
+            Navbatda. Keyingi tekshiriladigan yechim — sizniki.
+          {% endif %}
+        </p>
+      {% endif %}
+      {% if rows or running %}
+        <ol>
+          {% for row in rows %}
+            <li class="notebook-row{% if row.index > seen %} row-appear{% endif %}">
+              {% if row.passed %}
+                <span class="notebook-mark tone-pass">{% icon "check" %}<span class="sr-only">Oʻtdi:</span></span>
+              {% else %}
+                <span class="notebook-mark tone-fail">{% icon "x" %}<span class="sr-only">Xato:</span></span>
+              {% endif %}
+              {{ row.index }}. {{ row.name }}
+              {% if row.duration_ms is not None %}<span class="text-sm text-text-2">{{ row.duration_ms }} ms</span>{% endif %}
+              {% if row.note %}
+                <div class="notebook-note whitespace-pre-wrap">{{ row.note }}</div>
+              {% elif row.hidden_note %}
+                <div class="notebook-note">Yashirin test: tafsiloti koʻrsatilmaydi.</div>
+              {% endif %}
+            </li>
+          {% endfor %}
+          {% if running %}
+            <li class="notebook-row">
+              <span class="notebook-mark tone-ink">{% icon "loader-circle" %}<span class="sr-only">Tekshirilmoqda:</span></span>
+              {{ running }} <span class="text-sm text-text-2">yozilmoqda…</span>
+            </li>
+          {% endif %}
+        </ol>
+      {% elif submission.status == "running" %}
+        <p class="text-text-2">Tekshiruv boshlandi: kod kompilyatsiya qilinmoqda.</p>
+      {% endif %}
+      {% if submission.is_finished %}
+        {% if submission.public_message %}
+          <pre class="notebook-note mt-6 whitespace-pre-wrap font-mono text-sm">{{ submission.public_message }}</pre>
+        {% endif %}
+        {% if stopped_at %}<p class="notebook-note mt-6">{{ stopped_at }}-test bajarilayotganda toʻxtatildi.</p>{% endif %}
+        <div class="mt-6 text-right">{% stamp submission.verdict submission.failed_test_index %}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>

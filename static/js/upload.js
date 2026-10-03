@@ -29,3 +29,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// The submit button during the cooldown (docs/UI.md §5): counts the seconds down, then
+// lets the student send. Without JavaScript the page shows the wait and a reload frees it.
+document.addEventListener("DOMContentLoaded", () => {
+  for (const button of document.querySelectorAll("[data-cooldown]")) {
+    const label = button.textContent.replace(/\s*\(\d+ s\)$/, "");
+    let left = Number(button.dataset.cooldown);
+    const tick = () => {
+      left -= 1;
+      if (left <= 0) {
+        button.disabled = false;
+        button.textContent = label;
+        return;
+      }
+      button.textContent = `${label} (${left} s)`;
+      setTimeout(tick, 1000);
+    };
+    setTimeout(tick, 1000);
+  }
+});

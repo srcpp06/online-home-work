@@ -1,0 +1,6 @@
+{% load ui %}
+{% if submission.is_finished %}
+  {% status_badge submission.verdict submission.failed_test_index %}
+{% else %}
+  {% status_badge submission.status %}
+{% endif %}

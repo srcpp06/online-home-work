@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Count, Max
-from django.http import FileResponse, Http404, HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -20,6 +20,7 @@ from apps.accounts.access import get_for_user_or_404, visible_to
 from apps.accounts.permissions import Action, can
 from apps.accounts.views._guard import require
 from apps.system.queue import enqueue_build
+from apps.tasks.files import private_download
 from apps.tasks.forms import AssignmentForm, PublishForm, TaskForm, VersionForm
 from apps.tasks.markdown import render_markdown
 from apps.tasks.models import Assignment, Task, TaskVersion
@@ -189,22 +190,13 @@ def version_publish(request: HttpRequest, pk: int, number: int) -> HttpResponse:
 def version_package(request: HttpRequest, pk: int, number: int) -> HttpResponse:
     require(request, Action.MANAGE_TASKS)  # the package holds the solution and hidden tests
     version = _version(request, pk, number)
-    return _download(version.package, f"task-{pk}-v{number}.zip")
+    return private_download(version.package, f"task-{pk}-v{number}.zip")
 
 
 def version_starter(request: HttpRequest, pk: int, number: int) -> HttpResponse:
     require(request, Action.VIEW_TASKS)
     version = _version(request, pk, number)
-    return _download(version.starter, f"task-{pk}-v{number}-starter.zip")
-
-
-def _download(file: object, name: str) -> FileResponse:
-    """Uploaded files leave only through views like this one, never a public URL."""
-    if not file:
-        raise Http404
-    response = FileResponse(file.open("rb"), as_attachment=True, filename=name)  # type: ignore[attr-defined]
-    response["Cache-Control"] = "private, no-store"
-    return response
+    return private_download(version.starter, f"task-{pk}-v{number}-starter.zip")
 
 
 def assign(request: HttpRequest, pk: int) -> HttpResponse:

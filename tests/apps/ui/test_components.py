@@ -59,6 +59,18 @@ def test_badge_for_a_failed_test() -> None:
     assert "3-testda xato" in html
 
 
+@pytest.mark.parametrize(
+    ("source", "html"),
+    [
+        ('{% stamp "accepted" %}', '<span class="stamp tone-pass">Qabul qilindi</span>'),
+        ('{% stamp "wrong_answer" 3 %}', '<span class="stamp tone-fail">3-testda xato</span>'),
+        ('{% stamp "time_limit" %}', '<span class="stamp tone-warn">Vaqt limiti oshdi</span>'),
+    ],
+)
+def test_stamp_is_the_verdict_in_words(source: str, html: str) -> None:
+    assert render(source) == html
+
+
 def test_icon_escapes_its_class() -> None:
     assert '<svg class="size-4 &quot;&gt;"' in str(icon("check", 'size-4 ">'))
 

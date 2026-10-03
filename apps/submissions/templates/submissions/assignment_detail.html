@@ -1,0 +1,96 @@
+{% extends "layouts/app.html" %}
+{% load ui %}
+{% block title %}
+  {{ task.title }}
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'submissions:assignments' %}">Topshiriqlarimga qaytish</a>
+  <h1 class="mt-2">{{ task.title }}</h1>
+  <dl class="panel mt-6 p-6 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
+    <dt class="text-text-2">Guruh</dt>
+    <dd>
+      {{ assignment.group.name }}
+    </dd>
+    <dt class="text-text-2">Muddat</dt>
+    <dd>
+      {% if assignment.deadline %}
+        {{ assignment.deadline|date:"d.m.Y H:i" }}
+        {% if assignment.allow_late %}
+          <span class="text-text-2">— keyin ham yuborish mumkin, kechikkan deb belgilanadi</span>
+        {% endif %}
+      {% else %}
+        muddatsiz
+      {% endif %}
+    </dd>
+    <dt class="text-text-2">Urinishlar</dt>
+    <dd>
+      {% if state.max_attempts %}
+        {{ state.attempts_used }} / {{ state.max_attempts }}
+      {% else %}
+        {{ state.attempts_used }} <span class="text-text-2">(cheksiz)</span>
+      {% endif %}
+    </dd>
+    {% if version.runtime_info %}
+      <dt class="text-text-2">Muhit</dt>
+      <dd>
+        {{ version.runtime_info }} <span class="text-text-2">— oʻz kompyuteringizda ham shu versiyadan foydalaning</span>
+      </dd>
+    {% endif %}
+    {% if version.time_limit_s %}
+      <dt class="text-text-2">Vaqt limiti</dt>
+      <dd>
+        {{ version.time_limit_s }} s
+      </dd>
+    {% endif %}
+  </dl>
+  <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <section aria-labelledby="statement">
+      <h2 id="statement" class="sr-only">Shart</h2>
+      {% include "tasks/_statement.html" %}
+    </section>
+    <aside>
+      <a class="btn btn-secondary"
+         href="{% url 'submissions:assignment_starter' assignment.pk %}">{% icon "download" %} Boshlangʻich loyihani yuklab olish</a>
+      <h2 class="mt-8">Yechimni yuborish</h2>
+      {% if state.can_submit or state.blocked_by == "cooldown" %}
+        <form class="panel mt-4 p-6"
+              method="post"
+              enctype="multipart/form-data"
+              novalidate>
+          {% csrf_token %}
+          {% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+          {% for field in form %}
+            {% include "layouts/_field.html" %}
+          {% endfor %}
+          {% if state.late %}
+            <p class="mt-4 text-sm tone-warn">Muddat oʻtgan: yechim kechikkan deb belgilanadi.</p>
+          {% endif %}
+          {% if state.blocked_by == "cooldown" %}
+            <button class="btn btn-primary mt-6"
+                    type="submit"
+                    disabled
+                    data-cooldown="{{ state.wait_s }}">Yechimni yuborish ({{ state.wait_s }} s)</button>
+          {% else %}
+            <button class="btn btn-primary mt-6" type="submit">Yechimni yuborish</button>
+          {% endif %}
+        </form>
+      {% else %}
+        <p class="panel mt-4 p-6">{{ state.refusal }}</p>
+      {% endif %}
+      <h2 class="mt-8">Urinishlar tarixi</h2>
+      {% if history %}
+        <ol class="mt-4 space-y-2">
+          {% for submission in history %}
+            <li class="panel p-4">
+              <a href="{% url 'submissions:submission' submission.pk %}">{{ submission.created_at|date:"d.m.Y H:i" }}</a>
+              {% if submission.is_late %}<span class="text-sm tone-warn">kechikkan</span>{% endif %}
+              <div class="mt-1">{% include "submissions/_submission_badge.html" %}</div>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="mt-4 text-text-2">Hali yechim yuborilmagan.</p>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock content %}

@@ -429,6 +429,21 @@
     color: var(--ink);
   }
 
+  /* A submission's code (apps.submissions.code): Pygments colours, line numbers inline. */
+  .code-view pre {
+    margin: 0;
+    padding: 12px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .code-view .linenos {
+    color: var(--text-2);
+    padding-right: 12px;
+    user-select: none;
+  }
+
   /* Wizard steps: a real sequence, so numbers are right here (docs/UI.md §5). */
   .steps {
     display: flex;
