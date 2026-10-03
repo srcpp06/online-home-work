@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help setup test test-docker lint format check base-images poc fixtures-dart
-.PHONY: needs-uv needs-docker
+.PHONY: help setup db db-down migrate dev test test-docker lint format check
+.PHONY: base-images poc fixtures-dart needs-uv needs-docker needs-compose
+COMPOSE_DEV = docker compose -f compose.dev.yml
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-14s %s\n", $$1, $$2}'
@@ -22,16 +23,32 @@ needs-docker:
 		echo "       and allow your user: sudo usermod -aG docker \$$USER, then log out and in again." >&2; \
 		exit 1; }
 
-# The settings every command reads; created once, never overwritten.
+needs-compose: needs-docker
+	@docker compose version > /dev/null 2>&1 || { \
+		echo "error: docker compose is not installed. CachyOS: sudo pacman -S docker-compose" >&2; \
+		exit 1; }
+
+# The settings every command reads; created once with a new secret key, never overwritten.
 .env:
-	cp .env.example .env
-	@echo "Created .env from .env.example"
+	scripts/create-env.sh
 
 setup: needs-uv .env ## Install dependencies and git hooks, create .env
 	$(UV) sync
 	$(UV) run pre-commit install
 
-test: needs-uv ## Fast tests (no Docker)
+db: needs-compose .env ## Start the development PostgreSQL (compose.dev.yml)
+	$(COMPOSE_DEV) up --detach --wait db
+
+db-down: needs-compose ## Stop the development PostgreSQL; its data stays
+	$(COMPOSE_DEV) down
+
+migrate: needs-uv db ## Apply database migrations
+	$(UV) run python manage.py migrate
+
+dev: migrate ## Run the site at http://127.0.0.1:8000 with the development database
+	$(UV) run python manage.py runserver
+
+test: needs-uv db ## Fast tests: the judge without Docker, the site with the development PostgreSQL
 	$(UV) run pytest -m "not docker"
 
 test-docker: needs-uv needs-docker .env ## Integration tests that need Docker

@@ -24,7 +24,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 
 ## Phase 1 — MVP veb
 
-- [ ] Django loyiha, env orqali settings, PostgreSQL (`compose.dev.yml`)
+- [x] Django loyiha, env orqali settings, PostgreSQL (`compose.dev.yml`) — `config/` (sozlamalar `config/env.py` orqali, kodda standart qiymat yo'q), `apps/accounts` da birinchi migratsiyadan o'z `User` modeli, `make db`/`migrate`/`dev`; veb testlari haqiqiy PostgreSQL 17 da (`tests/config/`)
 - [ ] `User` (rollar), `Center`, `Group`; ruxsatlar qatlami (`for_user`, `get_for_user_or_404`) + IDOR testlari
 - [ ] Superadmin uchun Django admin; markaz admini sahifalari (CRUD, parolni tiklash), birinchi kirishda parol almashtirish
 - [ ] Dizayn tizimi asoslari: tokenlar, shriftlar, base layout, daftar sahifasi, holat belgisi

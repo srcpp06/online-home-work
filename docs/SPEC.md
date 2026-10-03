@@ -172,6 +172,8 @@ Zip validator: hajm limiti (o'quvchi `SUBMISSION_MAX_ZIP_MB`, o'qituvchi `TASK_M
 
 ## 6. Konfiguratsiya (`.env`)
 
+Quyida prod qiymatlari. `.env.example` da dev qiymatlari turadi (`DJANGO_DEBUG=true`, `localhost` dagi `compose.dev.yml` bazasi, `MEDIA_ROOT=media`); `make setup` `.env` ni yangi `DJANGO_SECRET_KEY` bilan yaratadi.
+
 ```
 DJANGO_SECRET_KEY=
 DJANGO_DEBUG=false

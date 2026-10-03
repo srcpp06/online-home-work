@@ -102,12 +102,14 @@ tests/               pytest testlari, kod papkalari tuzilishini takrorlaydi (tes
 ## Buyruqlar
 
 ```
-make setup         # uv sync, pre-commit
-make dev           # Postgres (compose.dev.yml) + runserver + tailwind watch
+make setup         # uv sync, pre-commit, .env (yangi DJANGO_SECRET_KEY bilan)
+make db            # dev PostgreSQL 17 (compose.dev.yml); make db-down — to'xtatish
+make migrate       # migratsiyalarni qo'llash
+make dev           # Postgres (compose.dev.yml) + migrate + runserver + tailwind watch
 make worker        # python manage.py judge_worker
 make base-images   # profiles/* ni joriy arxitekturada yig'ish
 make poc           # examples/ ni judge orqali ishlatish va o'lchash (Markdown jadval)
-make test          # tez testlar (Docker'siz)
+make test          # tez testlar: judge Docker'siz, sayt dev PostgreSQL bilan (make o'zi yoqadi)
 make test-docker   # Docker talab qiladigan integration testlar (marker: docker)
 make lint          # ruff check, ruff format --check, djlint
 make check         # lint + test — har commitdan oldin

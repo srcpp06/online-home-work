@@ -20,7 +20,7 @@ Quyidagi buyruqlar Fish'da ham, bash'da ham ishlaydi.
 Bir martalik tayyorgarlik:
 
 ```
-sudo pacman -S --needed docker docker-buildx uv make git zip
+sudo pacman -S --needed docker docker-buildx docker-compose uv make git zip
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 ```
@@ -99,6 +99,8 @@ make poc
 | pacman: `failed retrieving file ... .sig ... 404` | Oyna (mirror) hali to'liq yangilanmagan: `sudo cachyos-rate-mirrors`, `sudo pacman -Syu`, keyin qayta o'rnating. `uv` uchun muqobil: `curl -LsSf https://astral.sh/uv/install.sh \| sh` va Fish'da `fish_add_path ~/.local/bin` |
 | `error: uv is not installed` | `sudo pacman -S uv` (serverda: `curl -LsSf https://astral.sh/uv/install.sh \| sh`, keyin qayta ulaning) |
 | `error: docker is not installed` | `sudo pacman -S docker docker-buildx` |
+| `error: docker compose is not installed` | `sudo pacman -S docker-compose` (serverda `get.docker.com` uni o'zi o'rnatadi) |
+| `missing settings: DJANGO_SECRET_KEY, ...` | `.env` Phase 0 dagi eski nusxa: `rm .env`, keyin `make setup` |
 | `error: can't reach the Docker daemon` | `sudo systemctl enable --now docker` va `sudo usermod -aG docker $USER`, keyin tizimdan chiqib qayta kiring |
 | `error: DART_VERSION is not set` (yoki boshqa sozlama) | `.env` eski: yetishmagan qatorni `.env.example` dan ko'chiring yoki `.env` ni o'chirib `make setup` qiling |
 | `429 Too Many Requests` | Docker Hub limiti: `docker login` yoki biroz kutib qayta urining |

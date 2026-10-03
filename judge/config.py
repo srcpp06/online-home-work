@@ -1,11 +1,10 @@
 """Judge settings from .env and the environment (SPEC §6), and runner profiles.
 
-Django-free: the CLI reads them here, the Django settings will read the same names. There
-are no defaults in code: .env.example is the one place where values live.
+Django-free: the CLI reads them here; .env itself is read by judge.env, which the Django
+settings share. There are no defaults in code: .env.example is where values live.
 """
 
 import json
-import os
 import re
 import string
 from collections.abc import Mapping
@@ -14,10 +13,11 @@ from pathlib import Path
 from typing import Self
 
 from judge.core.profile import RunnerProfile
+from judge.env import REPO_ROOT, ConfigError
+from judge.env import read_env as read_env  # re-exported: the CLI and tools import it here
 from judge.infra.sandbox import NodeSettings
 from judge.packaging.zip_validator import ZipLimits
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
 PROFILES_DIR = REPO_ROOT / "profiles"
 REQUIRED = (
     "JUDGE_CPU_SHARES",
@@ -32,30 +32,6 @@ REQUIRED = (
 )
 _MB = 1024 * 1024
 _PROFILE_SLUG = re.compile(r"[a-z0-9][a-z0-9-]*")
-
-
-class ConfigError(Exception):
-    """Settings are missing or wrong; the message says which."""
-
-
-def read_env(
-    path: Path = REPO_ROOT / ".env", environ: Mapping[str, str] = os.environ
-) -> dict[str, str]:
-    """Values from the .env file (if there is one), overridden by the environment."""
-    values: dict[str, str] = {}
-    if path.is_file():
-        for number, line in enumerate(path.read_text().splitlines(), start=1):
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            name, separator, value = line.partition("=")
-            if not separator or not name.strip():
-                raise ConfigError(f"{path}:{number}: expected NAME=value")
-            value = value.strip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-                value = value[1:-1]
-            values[name.strip()] = value
-    return {**values, **environ}
 
 
 @dataclass(frozen=True)

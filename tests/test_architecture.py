@@ -2,6 +2,7 @@
 
 Dependencies point inwards: core depends on nothing else in judge, parsers and
 packaging use only core, Docker lives only in infra and Django only in adapters.
+judge/env.py imports nothing from the project: the Django settings read .env through it.
 """
 
 import ast
@@ -13,17 +14,19 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 JUDGE_DIR = REPO_ROOT / "judge"
 
 _OUTER = ("judge.infra", "judge.adapters", "judge.cli")
+# The Django project: only the adapters may use it.
+_WEB = ("django", "config", "apps")
 
 # Layer (first package under judge) -> module prefixes it must never import.
 LAYER_RULES: dict[str, tuple[str, ...]] = {
-    "core": ("django", "docker", "judge.parsers", "judge.packaging", *_OUTER),
-    "parsers": ("django", "docker", "judge.packaging", *_OUTER),
-    "packaging": ("django", "docker", "judge.parsers", *_OUTER),
-    "infra": ("django", "judge.adapters", "judge.cli"),
+    "core": (*_WEB, "docker", "judge.parsers", "judge.packaging", *_OUTER),
+    "parsers": (*_WEB, "docker", "judge.packaging", *_OUTER),
+    "packaging": (*_WEB, "docker", "judge.parsers", *_OUTER),
+    "infra": (*_WEB, "judge.adapters", "judge.cli"),
     "adapters": (),
 }
-# judge/__init__.py, judge/cli.py: the CLI must run without Django.
-DEFAULT_RULE = ("django", "judge.adapters")
+# judge/__init__.py, judge/cli.py, judge/config.py, judge/env.py: they run without Django.
+DEFAULT_RULE = (*_WEB, "judge.adapters")
 
 
 def module_name(path: Path) -> str:
@@ -101,3 +104,12 @@ def test_imported_modules_resolves_absolute_and_relative_imports(
 ) -> None:
     names = {name for name, _ in imported_modules(source, module, is_package)}
     assert expected in names
+
+
+def test_env_module_imports_nothing_from_the_project() -> None:
+    path = JUDGE_DIR / "env.py"
+    imports = imported_modules(path.read_text(), "judge.env", is_package=False)
+    project = sorted(
+        name for name, _ in imports if name.split(".")[0] in ("judge", "config", "apps")
+    )
+    assert not project, f"judge.env must stay dependency-free: {project}"
