@@ -1,0 +1,15 @@
+{% load ui %}
+{% if form.checklist %}
+  <ul class="panel mt-4 p-4 space-y-1" aria-label="Paket tarkibi">
+    {% for item in form.checklist %}
+      <li class="flex items-center gap-2">
+        {% if item.found %}
+          <span class="tone-pass">{% icon "check" "size-4" %}</span>
+        {% else %}
+          <span class="tone-fail">{% icon "x" "size-4" %}</span>
+        {% endif %}
+        <code>{{ item.label }}</code> — {{ item.detail }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

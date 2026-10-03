@@ -15,6 +15,7 @@ from django.test import Client
 from django.urls import URLPattern, URLResolver, get_resolver, include, path, re_path, reverse
 
 from apps.accounts.models import Group, User
+from apps.tasks.models import Assignment, Task, TaskVersion
 from tests.apps.world import World
 
 
@@ -29,8 +30,26 @@ def _group(name: str) -> Callable[[World], list[str]]:
     return lambda w: [reverse(name, args=[w.b.group.pk])]
 
 
+def _task(name: str) -> Callable[[World], list[str]]:
+    return lambda w: [reverse(name, args=[w.b.task.pk])]
+
+
+def _version(name: str) -> Callable[[World], list[str]]:
+    return lambda w: [reverse(name, args=[w.b.task.pk, w.b.version.number])]
+
+
 # URL name -> the addresses of centre b's objects.
 IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
+    "tasks:task": _task("tasks:task"),
+    "tasks:task_edit": _task("tasks:task_edit"),
+    "tasks:task_archive": _task("tasks:task_archive"),
+    "tasks:assign": _task("tasks:assign"),
+    "tasks:version_add": _task("tasks:version_add"),
+    "tasks:version": _version("tasks:version"),
+    "tasks:version_status": _version("tasks:version_status"),
+    "tasks:version_publish": _version("tasks:version_publish"),
+    "tasks:version_package": _version("tasks:version_package"),
+    "tasks:version_starter": _version("tasks:version_starter"),
     "accounts:person": _people("accounts:person"),
     "accounts:person_edit": _people("accounts:person_edit"),
     "accounts:person_password": _people("accounts:person_password"),
@@ -41,6 +60,8 @@ IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
     "accounts:group_delete": _group("accounts:group_delete"),
 }
 DENIED = (403, 404)
+# A POST-only view answers GET with 405 before it looks anything up.
+DENIED_GET = (*DENIED, 405)
 VIEWERS = ("admin", "manager", "teacher", "student")
 # Django admin is the superadmin's: no other role gets in (tests/apps/accounts/test_admin.py).
 SKIPPED_NAMESPACES = ("admin",)
@@ -95,8 +116,16 @@ def snapshot(world: World) -> list[tuple[object, ...]]:
     b = world.b
     people = User.objects.filter(center=b.center).order_by("pk")
     groups = Group.objects.filter(center=b.center).order_by("pk")
+    tasks = Task.objects.filter(center=b.center).order_by("pk")
     return [
         *people.values_list("pk", "username", "first_name", "password", "is_active"),
+        *tasks.values_list("pk", "title", "is_archived", "published_version_id"),
+        *TaskVersion.objects.filter(task__center=b.center)
+        .order_by("pk")
+        .values_list("pk", "number", "time_limit_s"),
+        *Assignment.objects.filter(group__center=b.center)
+        .order_by("pk")
+        .values_list("pk", "group_id"),
         *groups.values_list("pk", "name", "teacher_id"),
         *Group.students.through.objects.filter(group__center=b.center)
         .order_by("pk")
@@ -115,7 +144,7 @@ def test_another_centres_object_is_out_of_reach(
     data = {"first_name": "Hacked", "last_name": "Hacked", "username": "hacked", "name": "Hacked"}
 
     for url in IDOR_URLS[name](world):
-        assert client.get(url).status_code in DENIED, url
+        assert client.get(url).status_code in DENIED_GET, url
         assert client.post(url, data).status_code in DENIED, url
 
     assert snapshot(world) == before

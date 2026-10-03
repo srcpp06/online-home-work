@@ -1,0 +1,56 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {% if creating %}
+    Topshiriq yaratish
+  {% else %}
+    {{ task.title }}: tahrirlash
+  {% endif %}
+{% endblock title %}
+{% block content %}
+  {% if creating %}
+    <h1>Topshiriq yaratish</h1>
+    {% include "tasks/_steps.html" with step=1 %}
+  {% else %}
+    <h1>{{ task.title }}: tahrirlash</h1>
+  {% endif %}
+  <form class="panel mt-6 p-6 max-w-3xl"
+        method="post"
+        enctype="multipart/form-data"
+        novalidate>
+    {% csrf_token %}
+    {% for error in form.non_field_errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+    {% for field in form %}
+      {% if field.name == "profile" %}
+        <fieldset class="mt-4">
+          <legend class="font-semibold">{{ field.label }}</legend>
+          <div class="checks mt-1">{{ field }}</div>
+          {% for error in field.errors %}<p class="field-error mt-1">{{ error }}</p>{% endfor %}
+        </fieldset>
+      {% else %}
+        {% include "layouts/_field.html" %}
+      {% endif %}
+      {% if field.name == "statement_md" %}
+        <button class="btn btn-secondary mt-2"
+                type="button"
+                hx-post="{% url 'tasks:preview' %}"
+                hx-include="[name=statement_md]"
+                hx-target="#statement-preview">Koʻrish</button>
+        <div id="statement-preview" class="mt-4" aria-live="polite"></div>
+      {% endif %}
+      {% if field.name == "package" %}
+        {% include "tasks/_checklist.html" %}
+      {% endif %}
+    {% endfor %}
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button class="btn btn-primary" type="submit">
+        {% if creating %}
+          Yaratish va image yigʻish
+        {% else %}
+          Saqlash
+        {% endif %}
+      </button>
+      <a class="btn btn-secondary"
+         href="{% if creating %}{% url 'tasks:tasks' %}{% else %}{% url 'tasks:task' task.pk %}{% endif %}">Bekor qilish</a>
+    </div>
+  </form>
+{% endblock content %}

@@ -1,0 +1,8 @@
+{% load ui %}
+{% if version.status == "ready" %}
+  <span class="status tone-pass">{% icon "check" "size-4" %}<span>Tayyor</span></span>
+{% elif version.status == "build_failed" %}
+  <span class="status tone-fail">{% icon "x" "size-4" %}<span>Yigʻilmadi</span></span>
+{% else %}
+  <span class="status tone-ink">{% icon "loader-circle" "size-4" %}<span>Yigʻilmoqda</span></span>
+{% endif %}

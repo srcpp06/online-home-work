@@ -67,3 +67,20 @@ def test_icon_escapes_its_class() -> None:
 def test_unknown_or_bad_icon_names_fail_loudly(name: str) -> None:
     with pytest.raises(ValueError, match="icon"):
         icon(name)
+
+
+def test_upload_zone_works_without_javascript() -> None:
+    from django import forms
+
+    from apps.ui.widgets import UploadZone
+
+    class Form(forms.Form):
+        package = forms.FileField(widget=UploadZone)
+
+    html = Form().as_div()
+
+    assert 'type="file"' in html
+    assert 'name="package"' in html
+    assert 'accept=".zip,application/zip"' in html
+    assert "<label" in html and "data-upload" in html  # clicking the zone opens the picker
+    assert "kompyuterdan tanlang" in html

@@ -1,0 +1,25 @@
+{% extends "accounts/person_form.html" %}
+{% block title %}
+  {{ task.title }}: guruhga biriktirish
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'tasks:task' task.pk %}">{{ task.title }}</a>
+  <h1 class="mt-2">Guruhga biriktirish</h1>
+  {% if not form.fields.group.queryset.exists %}
+    <p class="panel mt-6 p-6 text-text-2">
+      Topshiriq sizning barcha guruhlaringizga allaqachon biriktirilgan yoki sizda hali guruh yoʻq.
+    </p>
+  {% else %}
+    <form class="panel mt-6 p-6 max-w-xl" method="post" novalidate>
+      {% csrf_token %}
+      {% for error in form.non_field_errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+      {% for field in form %}
+        {% include "layouts/_field.html" %}
+      {% endfor %}
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button class="btn btn-primary" type="submit">Guruhga biriktirish</button>
+        <a class="btn btn-secondary" href="{{ cancel_url }}">Bekor qilish</a>
+      </div>
+    </form>
+  {% endif %}
+{% endblock content %}

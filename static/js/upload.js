@@ -1,0 +1,31 @@
+// Upload zones (apps/ui/widgets.py): drag and drop, and the chosen file's name and size.
+document.addEventListener("DOMContentLoaded", () => {
+  for (const zone of document.querySelectorAll("[data-upload]")) {
+    const input = zone.querySelector("input[type=file]");
+    const label = zone.querySelector("[data-upload-file]");
+    const show = () => {
+      const file = input.files[0];
+      label.hidden = !file;
+      if (file) {
+        const size = file.size < 1024 * 1024
+          ? `${Math.max(1, Math.round(file.size / 1024))} KB`
+          : `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+        label.textContent = `Tanlangan fayl: ${file.name}, ${size}`;
+      }
+    };
+    input.addEventListener("change", show);
+    zone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      zone.classList.add("is-dragging");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("is-dragging"));
+    zone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      zone.classList.remove("is-dragging");
+      if (event.dataTransfer.files.length) {
+        input.files = event.dataTransfer.files;
+        show();
+      }
+    });
+  }
+});

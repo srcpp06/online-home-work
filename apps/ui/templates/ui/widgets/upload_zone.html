@@ -1,0 +1,9 @@
+{% load ui %}
+<label class="upload-zone mt-1" data-upload>
+  <input type="{{ widget.type }}"
+         name="{{ widget.name }}"
+         class="sr-only"
+         {% include "django/forms/widgets/attrs.html" %}>
+  <span class="flex items-center gap-2">{% icon "upload" %}{{ widget.prompt }} yoki <span class="text-ink underline">kompyuterdan tanlang</span></span>
+  <span class="upload-zone-file" data-upload-file hidden></span>
+</label>

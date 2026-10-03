@@ -1,0 +1,25 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  Yangi versiya
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'tasks:task' task.pk %}">{{ task.title }}</a>
+  <h1 class="mt-2">Yangi versiya yuklash</h1>
+  <p class="mt-2 max-w-[72ch] text-text-2">
+    Yangi paketdan alohida image yigʻiladi. Uni eʼlon qilmaguningizcha oʻquvchilar avvalgi versiya bilan ishlaydi.
+  </p>
+  <form class="panel mt-6 p-6 max-w-3xl"
+        method="post"
+        enctype="multipart/form-data"
+        novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      {% include "layouts/_field.html" %}
+    {% endfor %}
+    {% include "tasks/_checklist.html" %}
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button class="btn btn-primary" type="submit">Yuklash va image yigʻish</button>
+      <a class="btn btn-secondary" href="{% url 'tasks:task' task.pk %}">Bekor qilish</a>
+    </div>
+  </form>
+{% endblock content %}

@@ -1,8 +1,10 @@
 """Two centres with every role, for permission and IDOR tests."""
 
 import io
+import zipfile
 from dataclasses import dataclass
 from datetime import timedelta
+from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.core.management import call_command
@@ -101,6 +103,7 @@ def make_task(author: User, title: str, *, publish: bool = True) -> tuple[Task, 
         task=task,
         number=1,
         package=ContentFile(b"PK\x05\x06" + bytes(18), name="package.zip"),
+        starter=ContentFile(b"PK\x05\x06" + bytes(18), name="starter.zip"),
         sha256="1" * 64,
         status=TaskVersion.Status.READY,
         image_tag=f"ohw-task:{task.pk}-111111111111",
@@ -129,3 +132,15 @@ def make_world() -> World:
     call_command("load_profiles", stdout=io.StringIO())
     superadmin = User.objects.create_superuser(username="erkin", password=PASSWORD)
     return World(superadmin=superadmin, a=make_center("a"), b=make_center("b"))
+
+
+def zip_folder(folder: Path, *, leave_out: str = "") -> bytes:
+    """A zip of a folder (examples/...), optionally without the paths starting with leave_out."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(p for p in folder.rglob("*") if p.is_file()):
+            name = path.relative_to(folder).as_posix()
+            if leave_out and name.startswith(leave_out):
+                continue
+            archive.writestr(zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0)), path.read_bytes())
+    return buffer.getvalue()

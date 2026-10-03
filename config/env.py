@@ -39,6 +39,12 @@ class Env:
             raise ImproperlyConfigured(f"{name} must be true or false, got {value!r}")
         return value == "true"
 
+    def positive_int(self, name: str) -> int:
+        value = self.text(name)
+        if not value.isdigit() or int(value) < 1:
+            raise ImproperlyConfigured(f"{name} must be a whole number above 0, got {value!r}")
+        return int(value)
+
     def comma_list(self, name: str) -> list[str]:
         items = [item.strip() for item in self.text(name).split(",")]
         if not all(items):

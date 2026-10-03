@@ -22,7 +22,7 @@ class LoginForm(AuthenticationForm):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "Login"
         self.fields["password"].label = "Parol"
-        _style(self)
+        style_fields(self)
 
     def confirm_login_allowed(self, user: User) -> None:  # type: ignore[override]
         super().confirm_login_allowed(user)
@@ -59,7 +59,7 @@ class NewPasswordForm(PasswordChangeForm):
         rules = "Kamida 8 belgi; faqat raqamdan iborat, oddiy yoki loginga oʻxshash boʻlmasin."
         self.fields["new_password1"].help_text = rules
         self.fields["new_password2"].help_text = "Yangi parolni takrorlang."
-        _style(self)
+        style_fields(self)
 
     def clean_new_password1(self) -> str:
         new = self.cleaned_data["new_password1"]
@@ -78,7 +78,7 @@ class NewPasswordForm(PasswordChangeForm):
 _TEXT_INPUT_CLASS = "field mt-1"
 
 
-def _style(form: forms.BaseForm) -> None:
+def style_fields(form: forms.BaseForm) -> None:
     """Text inputs get the design system's look; checkboxes keep the browser's."""
     for field in form.fields.values():
         if isinstance(field.widget, forms.TextInput | forms.Select | forms.PasswordInput):
@@ -113,7 +113,7 @@ class PersonForm(forms.ModelForm):
             self.fields["directions"].required = True
         if creating:
             del self.fields["is_active"]
-        _style(self)
+        style_fields(self)
 
 
 class GroupForm(forms.ModelForm):
@@ -142,7 +142,7 @@ class GroupForm(forms.ModelForm):
         self.fields["students"].required = False
         for name in ("teacher", "students"):
             self.fields[name].label_from_instance = _person_label
-        _style(self)
+        style_fields(self)
 
     def clean_students(self) -> Any:
         students = self.cleaned_data["students"]

@@ -1,0 +1,74 @@
+{# Polled every second while the image builds; the 286 answer stops the polling. #}
+<div id="version-status"
+     class="mt-6"
+     {% if version.status == "building" %}hx-get="{% url 'tasks:version_status' task.pk version.number %}" hx-trigger="every 1s" hx-swap="outerHTML"{% endif %}>
+  <div class="panel p-6" aria-live="polite">
+    {% include "tasks/_version_badge.html" %}
+    {% if version.status == "building" %}
+      <p class="mt-2 text-text-2">
+        Kutubxonalar oʻrnatilmoqda va testlar oʻqituvchi yechimi bilan ishga tushirilmoqda. Bu bir necha daqiqa olishi mumkin; sahifa oʻzi yangilanadi.
+      </p>
+    {% elif version.status == "build_failed" %}
+      <ul class="mt-2 space-y-1">
+        {% for error in version.build_errors %}<li class="field-error whitespace-pre-line">{{ error }}</li>{% endfor %}
+      </ul>
+      {% if is_author %}
+        <p class="mt-4">
+          Paketni tuzatib, <a href="{% url 'tasks:version_add' task.pk %}">yangi versiya yuklang</a>.
+        </p>
+      {% endif %}
+    {% else %}
+      <p class="mt-2">
+        {{ tests|length }} ta test. Oʻqituvchi yechimi tayyor image'da {{ version.warm_wall_ms|default:0|floatformat:0 }} ms da tekshirildi.
+        {% if version.runtime_info %}Muhit: {{ version.runtime_info }}.{% endif %}
+      </p>
+    {% endif %}
+  </div>
+  {% if tests %}
+    <h2 class="mt-8">Testlar</h2>
+    <ol class="panel mt-4 p-6 space-y-1">
+      {% for test in tests %}
+        <li>
+          {{ forloop.counter }}. {{ test.name }}
+          <span class="text-text-2">—
+            {% if test.visibility == "public" %}
+              ochiq
+            {% else %}
+              yashirin
+            {% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+  {% if publish_form %}
+    <h2 class="mt-8">Eʼlon qilish</h2>
+    <form class="panel mt-4 p-6 max-w-xl"
+          method="post"
+          action="{% url 'tasks:version_publish' task.pk version.number %}">
+      {% csrf_token %}
+      {% for field in publish_form %}
+        {% include "layouts/_field.html" %}
+      {% endfor %}
+      <button class="btn btn-primary mt-6" type="submit">
+        {% if is_published %}
+          Limitni saqlash
+        {% else %}
+          Eʼlon qilish
+        {% endif %}
+      </button>
+    </form>
+  {% endif %}
+  <p class="mt-8 flex flex-wrap gap-4 text-sm">
+    <a href="{% url 'tasks:version_starter' task.pk version.number %}">Boshlangʻich loyihani yuklab olish</a>
+    {% if is_author %}
+      <a href="{% url 'tasks:version_package' task.pk version.number %}">Paketni yuklab olish</a>
+    {% endif %}
+  </p>
+  {% if show_log and version.build_log %}
+    <details class="mt-8">
+      <summary class="cursor-pointer font-semibold text-ink">Image yigʻish logi</summary>
+      <pre class="panel mt-2 p-4 text-sm overflow-x-auto max-h-[32rem]">{{ version.build_log }}</pre>
+    </details>
+  {% endif %}
+</div>

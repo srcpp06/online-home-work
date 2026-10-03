@@ -1,0 +1,122 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ task.title }}
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'tasks:tasks' %}">Topshiriqlarga qaytish</a>
+  <div class="page-head mt-2">
+    <h1>{{ task.title }}</h1>
+    {% if can_manage %}
+      <div class="flex flex-wrap gap-3">
+        {% if task.published_version and not task.is_archived %}
+          <a class="btn btn-primary" href="{% url 'tasks:assign' task.pk %}">Guruhga biriktirish</a>
+        {% endif %}
+        <a class="btn btn-secondary" href="{% url 'tasks:task_edit' task.pk %}">Tahrirlash</a>
+        <a class="btn btn-secondary"
+           href="{% url 'tasks:version_add' task.pk %}">Yangi versiya yuklash</a>
+      </div>
+    {% endif %}
+  </div>
+  <dl class="panel mt-6 p-6 grid grid-cols-[12rem_1fr] gap-y-2">
+    <dt class="text-text-2">Profil</dt>
+    <dd>
+      {{ task.profile.title }}
+    </dd>
+    <dt class="text-text-2">Muallif</dt>
+    <dd>
+      {{ task.author.display_name }}
+    </dd>
+    <dt class="text-text-2">Eʼlon qilingan</dt>
+    <dd>
+      {% if task.published_version %}
+        {{ task.published_version.number }}-versiya, vaqt limiti {{ task.published_version.time_limit_s }} s
+      {% else %}
+        hali yoʻq
+      {% endif %}
+    </dd>
+    {% if task.is_archived %}
+      <dt class="text-text-2">Holat</dt>
+      <dd>
+        Arxivda — oʻquvchilar koʻrmaydi
+      </dd>
+    {% endif %}
+  </dl>
+  <h2 class="mt-10">Shart</h2>
+  <div class="mt-4">{% include "tasks/_statement.html" %}</div>
+  <h2 class="mt-10">Versiyalar</h2>
+  <div class="mt-4 overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Versiya</th>
+          <th scope="col">Holat</th>
+          <th scope="col">Testlar</th>
+          <th scope="col">Yuklangan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for version in versions %}
+          <tr>
+            <th scope="row">
+              <a href="{% url 'tasks:version' task.pk version.number %}">{{ version.number }}-versiya</a>
+              {% if version.pk == task.published_version_id %}<span class="text-text-2">— eʼlon qilingan</span>{% endif %}
+            </th>
+            <td>{% include "tasks/_version_badge.html" %}</td>
+            <td>{{ version.test_count|default:"—" }}</td>
+            <td>{{ version.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <h2 class="mt-10">Guruhlar</h2>
+  {% if assignments %}
+    <div class="mt-4 overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Guruh</th>
+            <th scope="col">Ochiladi</th>
+            <th scope="col">Muddat</th>
+            <th scope="col">Urinishlar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in assignments %}
+            <tr>
+              <th scope="row">
+                <a href="{% url 'accounts:group' assignment.group.pk %}">{{ assignment.group.name }}</a>
+              </th>
+              <td>{{ assignment.opens_at|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if assignment.deadline %}
+                  {{ assignment.deadline|date:"d.m.Y H:i" }}
+                  {% if assignment.allow_late %}<span class="text-text-2">(kechikishga ruxsat)</span>{% endif %}
+                {% else %}
+                  muddatsiz
+                {% endif %}
+              </td>
+              <td>{{ assignment.max_attempts|default:"cheksiz" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="panel mt-4 p-6 text-text-2">Topshiriq hali hech qaysi guruhga biriktirilmagan.</p>
+  {% endif %}
+  {% if can_manage %}
+    <form class="mt-10"
+          method="post"
+          action="{% url 'tasks:task_archive' task.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-secondary" type="submit">
+        {% if task.is_archived %}
+          Arxivdan qaytarish
+        {% else %}
+          Arxivlash
+        {% endif %}
+      </button>
+    </form>
+  {% endif %}
+{% endblock content %}

@@ -1,0 +1,16 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ task.title }}: {{ version.number }}-versiya
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'tasks:task' task.pk %}">{{ task.title }}</a>
+  <h1 class="mt-2">{{ version.number }}-versiya</h1>
+  {% if is_author and not is_published %}
+    {% if version.status == "building" %}
+      {% include "tasks/_steps.html" with step=2 %}
+    {% else %}
+      {% include "tasks/_steps.html" with step=3 %}
+    {% endif %}
+  {% endif %}
+  {% include "tasks/_version_status.html" %}
+{% endblock content %}

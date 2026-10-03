@@ -23,13 +23,15 @@ MENUS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Oʻquvchilar", "accounts:students"),
         ("Menejerlar", "accounts:managers"),
         ("Guruhlar", "accounts:groups"),
+        ("Topshiriqlar", "tasks:tasks"),
     ),
     Role.CENTER_MANAGER: (
         ("Oʻqituvchilar", "accounts:teachers"),
         ("Oʻquvchilar", "accounts:students"),
         ("Guruhlar", "accounts:groups"),
+        ("Topshiriqlar", "tasks:tasks"),
     ),
-    Role.TEACHER: (("Guruhlarim", "accounts:groups"),),
+    Role.TEACHER: (("Guruhlarim", "accounts:groups"), ("Topshiriqlar", "tasks:tasks")),
     Role.STUDENT: (("Topshiriqlarim", "accounts:home"),),
 }
 

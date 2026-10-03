@@ -62,7 +62,7 @@ def is_junk(path: str) -> bool:
 
 
 def read_task_package(files: Sequence[ArchiveFile]) -> TaskPackage:
-    files = _strip_common_root([f for f in files if not is_junk(f.path)])
+    files = strip_common_root([f for f in files if not is_junk(f.path)])
     errors: list[str] = []
     project: list[ArchiveFile] = []
     solution: list[ArchiveFile] = []
@@ -182,7 +182,7 @@ def _read_settings(data: bytes, errors: list[str]) -> TaskSettings:
     return TaskSettings(allow_dart_io=allow_dart_io)
 
 
-def _strip_common_root(files: list[ArchiveFile]) -> list[ArchiveFile]:
+def strip_common_root(files: list[ArchiveFile]) -> list[ArchiveFile]:
     """A zipped folder (cart_task/pubspec.yaml ...) is read as if zipped from inside."""
     if not files or any(file.path == "pubspec.yaml" for file in files):
         return files

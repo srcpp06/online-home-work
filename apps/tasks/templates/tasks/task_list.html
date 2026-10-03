@@ -1,0 +1,51 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  Topshiriqlar
+{% endblock title %}
+{% block content %}
+  <div class="page-head">
+    <h1>Topshiriqlar</h1>
+    {% if can_manage %}<a class="btn btn-primary" href="{% url 'tasks:task_add' %}">Topshiriq yaratish</a>{% endif %}
+  </div>
+  {% if tasks %}
+    <div class="mt-6 overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Topshiriq</th>
+            <th scope="col">Profil</th>
+            <th scope="col">Holat</th>
+            <th scope="col">Guruhlar</th>
+            {% if not can_manage %}<th scope="col">Oʻqituvchi</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+            <tr>
+              <th scope="row">
+                <a href="{% url 'tasks:task' task.pk %}">{{ task.title }}</a>
+              </th>
+              <td>{{ task.profile.title }}</td>
+              <td>
+                {% if task.is_archived %}
+                  <span class="text-text-2">Arxivda</span>
+                {% elif task.published_version %}
+                  Eʼlon qilingan ({{ task.published_version.number }}-versiya)
+                {% else %}
+                  <span class="text-text-2">Eʼlon qilinmagan</span>
+                {% endif %}
+              </td>
+              <td>{{ task.assignment_count }}</td>
+              {% if not can_manage %}<td>{{ task.author.display_name }}</td>{% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="panel mt-6 p-6 text-text-2">
+      Hali topshiriq yoʻq.
+      {% if can_manage %}<a href="{% url 'tasks:task_add' %}">Birinchi topshiriqni yarating.</a>{% endif %}
+    </p>
+  {% endif %}
+{% endblock content %}

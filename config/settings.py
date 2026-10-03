@@ -9,6 +9,7 @@ from pathlib import Path
 
 from config.env import Env
 from judge.env import read_env
+from judge.packaging.zip_validator import ZipLimits
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,6 +21,14 @@ env.require(
     "DATABASE_URL",
     "TIME_ZONE",
     "MEDIA_ROOT",
+    "SUBMISSION_COOLDOWN_S",
+    "SUBMISSION_MAX_ACTIVE_PER_STUDENT",
+    "SUBMISSION_MAX_ZIP_MB",
+    "SUBMISSION_MAX_UNPACKED_MB",
+    "SUBMISSION_MAX_FILES",
+    "TASK_MAX_ZIP_MB",
+    "TASK_MAX_UNPACKED_MB",
+    "TASK_MAX_FILES",
 )
 
 SECRET_KEY = env.text("DJANGO_SECRET_KEY")
@@ -146,3 +155,21 @@ SILENCED_SYSTEM_CHECKS = [
     "security.W005",
     "security.W021",
 ]
+
+# Uploads (SPEC §6). The site checks zips with the same limits as the worker.
+_MB = 1024 * 1024
+SUBMISSION_ZIP_LIMITS = ZipLimits(
+    max_zip_bytes=env.positive_int("SUBMISSION_MAX_ZIP_MB") * _MB,
+    max_unpacked_bytes=env.positive_int("SUBMISSION_MAX_UNPACKED_MB") * _MB,
+    max_files=env.positive_int("SUBMISSION_MAX_FILES"),
+)
+TASK_ZIP_LIMITS = ZipLimits(
+    max_zip_bytes=env.positive_int("TASK_MAX_ZIP_MB") * _MB,
+    max_unpacked_bytes=env.positive_int("TASK_MAX_UNPACKED_MB") * _MB,
+    max_files=env.positive_int("TASK_MAX_FILES"),
+)
+SUBMISSION_COOLDOWN_S = env.positive_int("SUBMISSION_COOLDOWN_S")
+SUBMISSION_MAX_ACTIVE_PER_STUDENT = env.positive_int("SUBMISSION_MAX_ACTIVE_PER_STUDENT")
+# Django refuses bigger request bodies before any view runs; packages are the biggest.
+DATA_UPLOAD_MAX_MEMORY_SIZE = TASK_ZIP_LIMITS.max_zip_bytes + _MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * _MB  # larger uploads are spooled to a temporary file
