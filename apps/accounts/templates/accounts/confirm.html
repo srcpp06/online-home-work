@@ -1,0 +1,16 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ title }}
+{% endblock title %}
+{% block content %}
+  <h1>{{ title }}</h1>
+  <form class="panel mt-6 p-6 max-w-xl" method="post">
+    {% csrf_token %}
+    <p>{{ text }}</p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button class="btn {% if danger %}btn-danger{% else %}btn-primary{% endif %}"
+              type="submit">{{ submit }}</button>
+      <a class="btn btn-secondary" href="{{ cancel_url }}">Bekor qilish</a>
+    </div>
+  </form>
+{% endblock content %}

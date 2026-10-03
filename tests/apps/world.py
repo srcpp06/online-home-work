@@ -8,6 +8,8 @@ PASSWORD = "test-Parol-2026"  # noqa: S105 -- test accounts only
 
 
 def make_user(username: str, role: Role, center: Center | None = None, **extra: object) -> User:
+    """A user past their first sign-in; tests of that sign-in set must_change_password."""
+    extra.setdefault("must_change_password", False)
     if role == Role.TEACHER:
         extra.setdefault("directions", [Direction.FLUTTER])
     return User.objects.create_user(

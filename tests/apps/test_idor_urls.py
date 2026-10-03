@@ -1,8 +1,10 @@
 """Every URL that takes an id gets an IDOR test (SPEC §1).
 
-Add each such URL to IDOR_URLS with a function that builds its address for centre b's
-object; the test signs in as each role of centre a and expects a 404. A URL left out
-fails test_every_url_with_an_id_has_an_idor_case.
+Add each such URL to IDOR_URLS with a function that builds its addresses for centre b's
+objects. Each role of centre a then tries them with GET and POST: the answer must be a 404
+(get_for_user_or_404) or a 403 (the role may not do this at all, refused before the object
+is looked up), and centre b's data must be unchanged. A URL left out fails
+test_every_url_with_an_id_has_an_idor_case.
 """
 
 from collections.abc import Callable, Iterator
@@ -10,12 +12,35 @@ from collections.abc import Callable, Iterator
 import pytest
 from django.http import HttpRequest, HttpResponse
 from django.test import Client
-from django.urls import URLPattern, URLResolver, get_resolver, include, path, re_path
+from django.urls import URLPattern, URLResolver, get_resolver, include, path, re_path, reverse
 
+from apps.accounts.models import Group, User
 from tests.apps.world import World
 
-# URL name -> the address of centre b's object.
-IDOR_URLS: dict[str, Callable[[World], str]] = {}
+
+def _people(name: str) -> Callable[[World], list[str]]:
+    """The URL for every person of centre b."""
+    return lambda w: [
+        reverse(name, args=[u.pk]) for u in (w.b.admin, w.b.manager, w.b.teacher, w.b.student)
+    ]
+
+
+def _group(name: str) -> Callable[[World], list[str]]:
+    return lambda w: [reverse(name, args=[w.b.group.pk])]
+
+
+# URL name -> the addresses of centre b's objects.
+IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
+    "accounts:person": _people("accounts:person"),
+    "accounts:person_edit": _people("accounts:person_edit"),
+    "accounts:person_password": _people("accounts:person_password"),
+    "accounts:person_new_password": _people("accounts:person_new_password"),
+    "accounts:person_delete": _people("accounts:person_delete"),
+    "accounts:group": _group("accounts:group"),
+    "accounts:group_edit": _group("accounts:group_edit"),
+    "accounts:group_delete": _group("accounts:group_delete"),
+}
+DENIED = (403, 404)
 VIEWERS = ("admin", "manager", "teacher", "student")
 # Django admin is the superadmin's: no other role gets in (tests/apps/accounts/test_admin.py).
 SKIPPED_NAMESPACES = ("admin",)
@@ -65,11 +90,32 @@ def test_every_url_with_an_id_has_an_idor_case() -> None:
     assert not missing, "add these to IDOR_URLS:\n" + "\n".join(missing)
 
 
+def snapshot(world: World) -> list[tuple[object, ...]]:
+    """Centre b's people and group, as stored."""
+    b = world.b
+    people = User.objects.filter(center=b.center).order_by("pk")
+    groups = Group.objects.filter(center=b.center).order_by("pk")
+    return [
+        *people.values_list("pk", "username", "first_name", "password", "is_active"),
+        *groups.values_list("pk", "name", "teacher_id"),
+        *Group.students.through.objects.filter(group__center=b.center)
+        .order_by("pk")
+        .values_list("group_id", "user_id"),
+    ]
+
+
 @pytest.mark.parametrize("viewer", VIEWERS)
 @pytest.mark.parametrize("name", sorted(IDOR_URLS))
-def test_another_centres_object_is_404(
+def test_another_centres_object_is_out_of_reach(
     client: Client, world: World, name: str, viewer: str
 ) -> None:
+    before = snapshot(world)
     client.force_login(getattr(world.a, viewer))
+    # Data that would change something if a view accepted it.
+    data = {"first_name": "Hacked", "last_name": "Hacked", "username": "hacked", "name": "Hacked"}
 
-    assert client.get(IDOR_URLS[name](world)).status_code == 404
+    for url in IDOR_URLS[name](world):
+        assert client.get(url).status_code in DENIED, url
+        assert client.post(url, data).status_code in DENIED, url
+
+    assert snapshot(world) == before

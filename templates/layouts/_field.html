@@ -1,0 +1,16 @@
+{# One form field: label, input, help and errors, wired for screen readers. #}
+<div class="mt-4">
+  {% if field.widget_type == "checkbox" %}
+    <label class="inline-flex items-center gap-2">{{ field }} {{ field.label }}</label>
+  {% else %}
+    <label class="block font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if field.widget_type == "checkboxselectmultiple" %}
+      <div class="checks mt-1">{{ field }}</div>
+    {% else %}
+      {{ field }}
+    {% endif %}
+  {% endif %}
+  {% if field.help_text %}<p class="mt-1 text-sm text-text-2"
+   id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="field-error mt-1">{{ error }}</p>{% endfor %}
+</div>

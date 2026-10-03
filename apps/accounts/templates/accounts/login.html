@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+  Kirish
+{% endblock title %}
+{% block body %}
+  <main class="min-h-dvh flex items-center justify-center px-4 py-10">
+    <div class="notebook w-full max-w-md">
+      <h1 class="notebook-title">Online Home Work</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+        {% for field in form %}
+          {% include "layouts/_field.html" %}
+        {% endfor %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-primary mt-6" type="submit">Kirish</button>
+      </form>
+    </div>
+  </main>
+{% endblock body %}

@@ -4,6 +4,7 @@ Every value comes from .env or the environment (read by judge.env, shared with t
 there are no defaults here: .env.example is the one place where values live.
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 from config.env import Env
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "django_tailwind_cli",
+    "axes",
     "apps.accounts",
     "apps.ui",
 ]
@@ -45,8 +47,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Every page needs a signed-in user unless its view says otherwise (@login_not_required).
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    "apps.accounts.middleware.PasswordChangeRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -62,6 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.accounts.navigation.navigation",
             ],
         },
     },
@@ -71,6 +78,24 @@ DATABASES = {"default": env.database("DATABASE_URL")}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # refuses locked-out logins first
+    "django.contrib.auth.backends.ModelBackend",
+]
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "accounts:home"
+LOGOUT_REDIRECT_URL = "accounts:login"
+# A session lasts a day at most: classroom computers are shared.
+SESSION_COOKIE_AGE = 24 * 60 * 60
+
+# Login lockout (django-axes, SPEC §5). A whole class shares one IP behind the centre's NAT,
+# so the lock is per login and IP: a mistyping student never locks out the others.
+AXES_FAILURE_LIMIT = 10
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_CLIENT_IP_CALLABLE = "apps.accounts.client_ip.client_ip"
+AXES_LOCKOUT_TEMPLATE = "accounts/locked.html"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

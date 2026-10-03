@@ -28,7 +28,7 @@ def test_createsuperuser_makes_the_superadmin() -> None:
 
 
 def test_new_users_change_their_password_first(center: Center) -> None:
-    user = make_user("ali", Role.STUDENT, center)
+    user = User.objects.create_user(username="ali", role=Role.STUDENT, center=center)
 
     assert user.must_change_password is True
     assert (user.is_staff, user.is_superuser) == (False, False)
@@ -128,3 +128,11 @@ def test_group_names_are_unique_within_a_centre(world: World) -> None:
 
     with pytest.raises(IntegrityError), transaction.atomic():
         Group.objects.create(center=world.a.center, name="Flutter 1", teacher=world.a.teacher)
+
+
+@pytest.mark.parametrize(
+    ("last", "first", "shown"),
+    [("Aliyev", "Vali", "Aliyev Vali"), ("", "Vali", "Vali"), ("", "", "vali01")],
+)
+def test_display_name_is_surname_first_or_the_login(last: str, first: str, shown: str) -> None:
+    assert User(username="vali01", last_name=last, first_name=first).display_name == shown

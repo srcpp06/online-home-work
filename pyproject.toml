@@ -7,6 +7,7 @@ requires-python = "==3.12.*"
 dependencies = [
     "dj-database-url>=3.0",
     "django>=5.2,<5.3",
+    "django-axes>=8",
     "django-tailwind-cli>=4",
     "docker>=7.2.0",
     "psycopg[binary]>=3.2",

@@ -259,6 +259,11 @@
     background: var(--paper);
     color: var(--ink);
   }
+  .btn-danger {
+    background: var(--pen-red);
+    border-color: var(--pen-red);
+    color: var(--paper);
+  }
   .btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
@@ -280,6 +285,63 @@
   .field-error {
     color: var(--pen-red);
     font-size: 14px;
+  }
+
+  /* A page title with its actions on the right; they wrap below it on phones. */
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+  }
+
+  /* Lists of people and groups: the journal's thin lines, left-aligned. */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--paper);
+    border: 1px solid var(--grid);
+  }
+  .table th,
+  .table td {
+    border-bottom: 1px solid var(--grid);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  .table thead th {
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .table tbody th {
+    font-weight: 400;
+  }
+
+  /* Checkbox lists (directions, a group's students). */
+  .checks > div {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 4px 16px;
+  }
+  .checks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Messages after an action: a coloured edge and words; no icon-free colour-only states. */
+  .notice {
+    background: var(--paper);
+    border: 1px solid var(--grid);
+    border-left: 4px solid var(--ink);
+    border-radius: var(--radius-control);
+    padding: 8px 12px;
+  }
+  .notice-success {
+    border-left-color: var(--pass);
+  }
+  .notice-error {
+    border-left-color: var(--pen-red);
   }
 
   /* The signature component (docs/UI.md §3): squared paper with a red margin line.

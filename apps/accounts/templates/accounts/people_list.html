@@ -1,0 +1,47 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ title }}
+{% endblock title %}
+{% block content %}
+  <div class="page-head">
+    <h1>{{ title }}</h1>
+    {% if add_url %}<a class="btn btn-primary" href="{{ add_url }}">{{ add_label }}</a>{% endif %}
+  </div>
+  {% if people %}
+    <div class="mt-6 overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Familiya, ism</th>
+            <th scope="col">Login</th>
+            <th scope="col">Guruhlar</th>
+            <th scope="col">Holat</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for person in people %}
+            <tr>
+              <th scope="row">
+                <a href="{% url 'accounts:person' person.pk %}">{{ person.display_name }}</a>
+              </th>
+              <td>{{ person.username }}</td>
+              <td>{{ person.group_count }}</td>
+              <td>
+                {% if person.is_active %}
+                  Faol
+                {% else %}
+                  <span class="text-text-2">Nofaol</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="panel mt-6 p-6 text-text-2">
+      {{ empty }}
+      {% if add_url %}<a href="{{ add_url }}">{{ add_label }}</a>{% endif %}
+    </p>
+  {% endif %}
+{% endblock content %}

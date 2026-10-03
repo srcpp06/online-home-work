@@ -1,0 +1,59 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ person.display_name }}
+{% endblock title %}
+{% block content %}
+  {% if list_url %}
+    <a class="text-sm" href="{{ list_url }}">Roʻyxatga qaytish</a>
+  {% endif %}
+  <div class="page-head mt-2">
+    <h1>{{ person.display_name }}</h1>
+    {% if can_manage %}
+      <div class="flex flex-wrap gap-3">
+        <a class="btn btn-secondary"
+           href="{% url 'accounts:person_edit' person.pk %}">Tahrirlash</a>
+        <a class="btn btn-secondary"
+           href="{% url 'accounts:person_password' person.pk %}">Parolni tiklash</a>
+        <a class="btn btn-secondary"
+           href="{% url 'accounts:person_delete' person.pk %}">Oʻchirish</a>
+      </div>
+    {% endif %}
+  </div>
+  <dl class="panel mt-6 p-6 grid grid-cols-[10rem_1fr] gap-y-2">
+    <dt class="text-text-2">Login</dt>
+    <dd>
+      {{ person.username }}
+    </dd>
+    <dt class="text-text-2">Rol</dt>
+    <dd>
+      {{ person.get_role_display }}
+    </dd>
+    {% if person.directions %}
+      <dt class="text-text-2">Yoʻnalishlar</dt>
+      <dd>
+        {{ person.directions_display }}
+      </dd>
+    {% endif %}
+    <dt class="text-text-2">Holat</dt>
+    <dd>
+      {% if person.is_active %}
+        Faol
+      {% else %}
+        Nofaol — tizimga kira olmaydi
+      {% endif %}
+    </dd>
+  </dl>
+  <h2 class="mt-10">Guruhlar</h2>
+  {% if groups %}
+    <ul class="panel mt-4 p-6 space-y-1">
+      {% for group in groups %}
+        <li>
+          <a href="{% url 'accounts:group' group.pk %}">{{ group.name }}</a>
+          {% if group.teacher_id == person.pk %}<span class="text-text-2">— oʻqituvchi</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="panel mt-4 p-6 text-text-2">Hech qaysi guruhda emas.</p>
+  {% endif %}
+{% endblock content %}

@@ -1,0 +1,39 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ title }}
+{% endblock title %}
+{% block content %}
+  <div class="page-head">
+    <h1>{{ title }}</h1>
+    {% if can_manage %}<a class="btn btn-primary" href="{% url 'accounts:group_add' %}">Guruh yaratish</a>{% endif %}
+  </div>
+  {% if groups %}
+    <div class="mt-6 overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Guruh</th>
+            <th scope="col">Oʻqituvchi</th>
+            <th scope="col">Oʻquvchilar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in groups %}
+            <tr>
+              <th scope="row">
+                <a href="{% url 'accounts:group' group.pk %}">{{ group.name }}</a>
+              </th>
+              <td>{{ group.teacher.display_name }}</td>
+              <td>{{ group.student_count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="panel mt-6 p-6 text-text-2">
+      {{ empty }}
+      {% if can_manage %}<a href="{% url 'accounts:group_add' %}">Guruh yaratish</a>{% endif %}
+    </p>
+  {% endif %}
+{% endblock content %}

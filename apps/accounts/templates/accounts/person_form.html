@@ -1,0 +1,18 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ title }}
+{% endblock title %}
+{% block content %}
+  <h1>{{ title }}</h1>
+  <form class="panel mt-6 p-6 max-w-xl" method="post" novalidate>
+    {% csrf_token %}
+    {% for error in form.non_field_errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
+    {% for field in form %}
+      {% include "layouts/_field.html" %}
+    {% endfor %}
+    <div class="mt-6 flex flex-wrap gap-3">
+      <button class="btn btn-primary" type="submit">{{ submit }}</button>
+      <a class="btn btn-secondary" href="{{ cancel_url }}">Bekor qilish</a>
+    </div>
+  </form>
+{% endblock content %}

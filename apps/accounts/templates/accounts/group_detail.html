@@ -1,0 +1,48 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ group.name }}
+{% endblock title %}
+{% block content %}
+  <a class="text-sm" href="{% url 'accounts:groups' %}">Guruhlarga qaytish</a>
+  <div class="page-head mt-2">
+    <h1>{{ group.name }}</h1>
+    {% if can_manage %}
+      <div class="flex flex-wrap gap-3">
+        <a class="btn btn-secondary"
+           href="{% url 'accounts:group_edit' group.pk %}">Tahrirlash</a>
+        <a class="btn btn-secondary"
+           href="{% url 'accounts:group_delete' group.pk %}">Oʻchirish</a>
+      </div>
+    {% endif %}
+  </div>
+  <dl class="panel mt-6 p-6 grid grid-cols-[12rem_1fr] gap-y-2">
+    <dt class="text-text-2">Oʻqituvchi</dt>
+    <dd>
+      {{ group.teacher.display_name }}
+    </dd>
+    <dt class="text-text-2">Jurnal oʻquvchilarga</dt>
+    <dd>
+      {% if group.show_journal_to_students %}
+        koʻrinadi
+      {% else %}
+        koʻrinmaydi
+      {% endif %}
+    </dd>
+  </dl>
+  <h2 class="mt-10">Oʻquvchilar ({{ students|length }})</h2>
+  {% if students %}
+    <ol class="panel mt-4 p-6 space-y-1 list-decimal list-inside">
+      {% for student in students %}
+        <li>
+          {% if can_open_people %}
+            <a href="{% url 'accounts:person' student.pk %}">{{ student.display_name }}</a>
+          {% else %}
+            {{ student.display_name }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="panel mt-4 p-6 text-text-2">Guruhda hali oʻquvchi yoʻq.</p>
+  {% endif %}
+{% endblock content %}

@@ -172,7 +172,8 @@ Zip validator: hajm limiti (o'quvchi `SUBMISSION_MAX_ZIP_MB`, o'qituvchi `TASK_M
 
 - Yuklangan fayllar (`MEDIA_ROOT`) faqat ruxsatni tekshiradigan view orqali beriladi.
 - Markdown har doim `nh3` bilan tozalanadi.
-- django-axes bilan login urinishlari cheklanadi; CSRF yoqilgan; prod'da `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS.
+- django-axes bilan login urinishlari cheklanadi: bitta login + IP juftligiga 10 ta xato, keyin 15 daqiqa blok (markazda butun sinf bitta IP ortida, shuning uchun faqat IP bo'yicha bloklanmaydi); CSRF yoqilgan; prod'da `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS.
+- Hamma sahifa standart bo'yicha login talab qiladi (`LoginRequiredMiddleware`); ochiq sahifa view'da `@login_not_required` bilan aniq belgilanadi.
 - Yuklash hajmi limiti Caddy (`request_body max_size`) va Django darajasida.
 - Sirlar faqat `.env` da; repoda faqat `.env.example`.
 - Admin harakatlari jurnali (audit log) — Phase 2.

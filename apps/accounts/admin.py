@@ -11,6 +11,9 @@ from apps.accounts.models import Center, Group, User, check_students
 
 # Django's permission groups are unused: what a user may do comes from their role.
 admin.site.unregister(PermissionGroup)
+admin.site.site_header = "Online Home Work — boshqaruv"
+admin.site.site_title = "Online Home Work"
+admin.site.index_title = "Boshqaruv"
 
 
 @admin.register(Center)

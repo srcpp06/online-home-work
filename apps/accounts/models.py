@@ -189,6 +189,15 @@ class User(AbstractUser):
         self.is_staff = self.is_superuser = self.role == Role.SUPERADMIN
         super().save(*args, **kwargs)
 
+    @property
+    def display_name(self) -> str:
+        """ "Familiya Ism" as in class journals; the login when no name was entered."""
+        return " ".join(filter(None, (self.last_name, self.first_name))) or self.username
+
+    @property
+    def directions_display(self) -> str:
+        return ", ".join(Direction(d).label for d in self.directions if d in Direction.values)
+
     def clean(self) -> None:
         super().clean()
         unknown = set(self.directions) - set(Direction.values)
