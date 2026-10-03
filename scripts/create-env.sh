@@ -3,7 +3,8 @@
 #
 #   scripts/create-env.sh                        development values (make setup)
 #   scripts/create-env.sh --production DOMAIN    the server's values (docs/deploy.md):
-#       DEBUG off, the domain, a new database password, /data/media, the docker group id
+#       DEBUG off, the domain, a new database password, /data/media, the docker group id,
+#       the secret of the superadmin's private door
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -31,6 +32,7 @@ if [[ "${1:-}" == "--production" ]]; then
         exit 1
     fi
     password=$(random 32)
+    gate=$(random 48)
     production=(
         -e "s|^DJANGO_DEBUG=.*|DJANGO_DEBUG=false|"
         -e "s|^DJANGO_ALLOWED_HOSTS=.*|DJANGO_ALLOWED_HOSTS=${domain}|"
@@ -41,6 +43,7 @@ if [[ "${1:-}" == "--production" ]]; then
         -e "s|^#DOCKER_GID=.*|DOCKER_GID=${gid}|"
         -e "s|^#GUNICORN_CMD_ARGS=|GUNICORN_CMD_ARGS=|"
         -e "s|^#UPLOAD_MAX_BODY=|UPLOAD_MAX_BODY=|"
+        -e "s|^#ADMIN_GATE_SECRET=.*|ADMIN_GATE_SECRET=${gate}|"
     )
 elif [[ $# -gt 0 ]]; then
     echo "usage: $0 [--production DOMAIN]" >&2

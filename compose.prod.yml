@@ -71,9 +71,12 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      # The superadmin's private door: on the server only, reached with an SSH tunnel.
+      - "127.0.0.1:8443:8443"
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env}
       UPLOAD_MAX_BODY: ${UPLOAD_MAX_BODY:-60MB}
+      ADMIN_GATE_SECRET: "${ADMIN_GATE_SECRET:?set ADMIN_GATE_SECRET in .env: docs/deploy.md, section 12}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

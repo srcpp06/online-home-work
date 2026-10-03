@@ -31,7 +31,7 @@ Jadvalning kod ko'rinishi — `apps/accounts/permissions.py` (`ROLE_ACTIONS`, `c
 Qoidalar:
 - Markazlar to'liq ajratilgan (multi-tenant). Har bir queryset `for_user(user)` orqali filtrlanadi; ID bilan obyekt olish faqat `get_for_user_or_404()` orqali.
 - Har bir URL uchun boshqa markaz foydalanuvchisi bilan IDOR testi yoziladi (parametrlangan test).
-- Superadmin `/admin/` (Django admin) dan foydalanadi; qolgan rollar uchun alohida sahifalar.
+- Superadmin `/admin/` (Django admin) dan foydalanadi; u internetdan ochilmaydi — faqat serverdagi maxfiy eshik (Caddy, `127.0.0.1:8443`, SSH tunnel) orqali (`docs/deploy.md`, 12-bo'lim). Qolgan rollar saytdagi ikki eshikdan kiradi: o'quvchilar `/login/`, xodimlar `/staff/login/`.
 - Foydalanuvchilarni yuqoridagi tartibda yaratishadi. Login — username, email shart emas. Birinchi kirishda parol almashtiriladi.
 - O'qituvchiga yo'nalishlar biriktiriladi: `flutter`, `backend`, `frontend`. Topshiriq yaratishda faqat shu yo'nalishlarning profillari ko'rinadi, forma ham shunga moslashadi.
 

@@ -33,6 +33,10 @@ class Env:
             self.require(name)
         return value
 
+    def optional(self, name: str) -> str:
+        """A setting whose empty value means something (documented in .env.example)."""
+        return self._values.get(name, "").strip()
+
     def flag(self, name: str) -> bool:
         value = self.text(name).lower()
         if value not in ("true", "false"):

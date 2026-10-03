@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.accounts.middleware.AdminGateMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -143,6 +144,15 @@ TAILWIND_CLI_DIST_CSS = "css/app.css"
 # Uploads are served only by views that check permissions (SPEC §5), so no MEDIA_URL.
 # A relative path is under the repository; production uses an absolute one.
 MEDIA_ROOT = BASE_DIR / env.text("MEDIA_ROOT")
+
+# The superadmin panel is not on the internet (SPEC §5, docs/deploy.md): in production
+# /admin/ answers only through Caddy's private door, https://localhost:8443 on the server
+# (reached with an SSH tunnel), which sends this secret. Empty: the panel stays closed.
+ADMIN_GATE_SECRET = env.optional("ADMIN_GATE_SECRET")
+ADMIN_GATE_REQUIRED = not DEBUG
+if ADMIN_GATE_REQUIRED and ADMIN_GATE_SECRET:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, "localhost"]
+    CSRF_TRUSTED_ORIGINS = ["https://localhost:8443"]
 
 # HTTPS ends at Caddy, which sets X-Forwarded-Proto; web is reachable only through it.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

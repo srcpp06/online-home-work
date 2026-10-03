@@ -52,7 +52,7 @@ Erkin birinchi deploydan keyin so'radi (2026-10-03): qulay, zamonaviy, imkoniyat
 **1-bosqich — rollar, kirish, profil**
 - [x] Yangi rollar: menejer hammasini ko'radi va faqat adminlarni boshqaradi; admin faqat o'qituvchi, o'quvchi va guruhlar bilan ishlaydi, topshiriq, natija va jurnallarni ko'rmaydi; menejerni superadmin yaratadi
 - [x] Alohida kirish: o'quvchilar va xodimlar (o'qituvchi, menejer, admin) uchun alohida sahifa; bosh sahifa — `/login/`, `/staff/login/`, `/` (oddiy bosh sahifa; animatsiyali — 6-bosqich)
-- [ ] Superadmin paneli internetdan yopiq: faqat serverga SSH tunnel orqali
+- [x] Superadmin paneli internetdan yopiq: faqat serverga SSH tunnel orqali — `AdminGateMiddleware`, Caddy'ning `127.0.0.1:8443` eshigi, `docs/deploy.md` 12-bo'lim
 - [ ] Shaxsiy profil: rasm, aloqa, o'zi haqida, rolga qarab statistika
 
 **2-bosqich — admin ish joyi**

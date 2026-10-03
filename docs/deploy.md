@@ -74,7 +74,7 @@ mv .env .env.poc
 scripts/create-env.sh --production ohw.markaz.uz
 ```
 
-Skript o'zi qo'yadi: yangi `DJANGO_SECRET_KEY`, baza paroli (`POSTGRES_PASSWORD` va `DATABASE_URL` da bir xil), `DJANGO_DEBUG=false`, domen, `MEDIA_ROOT=/data/media`, `DOCKER_GID` (worker Docker'ga ulanishi uchun) va gunicorn sozlamalari. Qolgan qiymatlar `.env.example` dagidek; kerak bo'lsa `nano .env` bilan o'zgartir:
+Skript o'zi qo'yadi: yangi `DJANGO_SECRET_KEY`, baza paroli (`POSTGRES_PASSWORD` va `DATABASE_URL` da bir xil), `DJANGO_DEBUG=false`, domen, `MEDIA_ROOT=/data/media`, `DOCKER_GID` (worker Docker'ga ulanishi uchun), superadmin eshigining siri (`ADMIN_GATE_SECRET`) va gunicorn sozlamalari. Qolgan qiymatlar `.env.example` dagidek; kerak bo'lsa `nano .env` bilan o'zgartir:
 
 - `JUDGE_SLOTS=heavy:1,fast:1` — parallel tekshiruvlar. Server kuchaytirilganda faqat shu o'zgaradi.
 - `JUDGE_RESERVED_MEMORY_MB=3072` — sayt va baza uchun RAM. Worker ishga tushganda slotlar sig'ishini tekshiradi; sig'masa, logda aniq xabar bilan to'xtaydi.
@@ -96,7 +96,7 @@ Superadmin hisobi:
 docker compose -f compose.prod.yml exec web python manage.py createsuperuser
 ```
 
-Brauzerda `https://<domen>` ni och va superadmin bilan kir. Admin panelda markaz va markaz adminini yarat; qolganini markaz admini o'z sahifalarida qiladi (o'qituvchilar, o'quvchilar, guruhlar).
+Superadmin paneli internetdan ochilmaydi: unga SSH tunnel orqali kirasan (12-bo'lim). Panelda markaz va markaz menejerini yarat. Menejer saytning xodimlar eshigidan (`https://<domen>/staff/login/`) kirib adminlarni qo'shadi, admin esa o'qituvchi, o'quvchi va guruhlarni.
 
 ### Tekshiruv ro'yxati
 
@@ -166,3 +166,23 @@ make deploy
 
 - Instance uzoq vaqt deyarli bo'sh tursa (CPU, tarmoq, xotira 7 kun davomida juda past), Oracle uni to'xtatishi mumkin. Ta'til paytlarida konsolda holatini kuzatib tur; to'xtasa — konsoldan *Start*, servislar o'zi qaytadi (`restart: unless-stopped`).
 - Ikkinchi server qo'shish (keyin): yangi serverda faqat `worker` ishga tushiriladi — o'sha `DATABASE_URL` va umumiy storage bilan (SPEC §3.9). Buning uchun baza tarmoqqa ochilishi va media umumiy bo'lishi kerak; bu alohida vazifa.
+
+## 12. Superadmin paneli (faqat SSH orqali)
+
+`/admin/` internetdan ochilmaydi: `https://<domen>/admin/` har doim 404 beradi. Panelning alohida "maxfiy eshigi" bor: Caddy uni faqat serverning o'zida, `127.0.0.1:8443` da ochadi. Unga SSH tunnel bilan kirasan — parol o'g'irlansa ham, serverga SSH kaliti bo'lmagan odam panelga yetib bora olmaydi.
+
+1. Laptopda tunnelni och (terminal ochiq tursin):
+
+   ```
+   ssh -i ~/.ssh/oracle_server -N -L 8443:127.0.0.1:8443 ubuntu@SERVER_IP
+   ```
+
+2. Brauzerda `https://localhost:8443/admin/` ni och. Sertifikat Caddy'ning o'zi bergani uchun brauzer bir marta ogohlantiradi: *Advanced → Proceed to localhost*. Trafik baribir SSH ichida shifrlangan.
+3. Superadmin login va paroli bilan kir. Ish tugagach, tunnel terminalida Ctrl+C.
+
+Eski `.env` da `ADMIN_GATE_SECRET` bo'lmasa, `make deploy` "set ADMIN_GATE_SECRET in .env" deb to'xtaydi. Serverda bir marta qo'sh:
+
+```
+echo "ADMIN_GATE_SECRET=$(head -c 48 /dev/urandom | base64 | tr -d '/+=\n')" >> .env
+make deploy
+```

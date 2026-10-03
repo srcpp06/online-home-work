@@ -92,6 +92,8 @@ def test_production_fills_in_the_server_values(tmp_path: Path) -> None:
     assert env["DOCKER_GID"] == "988"
     assert env["GUNICORN_CMD_ARGS"] == "--workers 3 --timeout 120"
     assert len(env["DJANGO_SECRET_KEY"]) >= 50
+    assert len(env["ADMIN_GATE_SECRET"]) >= 50
+    assert env["ADMIN_GATE_SECRET"] not in (env["DJANGO_SECRET_KEY"], password)
     # Everything else keeps the example's value.
     assert env["JUDGE_SLOTS"] == values(root / ".env.example")["JUDGE_SLOTS"]
 

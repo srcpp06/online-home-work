@@ -1,4 +1,9 @@
-# HTTPS for SITE_DOMAIN (certificates are automatic), everything else to Django.
+{
+	# The private door's certificate is Caddy's own; nothing to install on the server.
+	skip_install_trust
+}
+
+# The site: HTTPS for SITE_DOMAIN (certificates are automatic), everything to Django.
 {$SITE_DOMAIN} {
 	encode zstd gzip
 	# Uploads are limited here first, then by Django (SPEC §5). Keep it above TASK_MAX_ZIP_MB.
@@ -6,5 +11,21 @@
 		max_size {$UPLOAD_MAX_BODY}
 	}
 	header -Server
-	reverse_proxy web:8000
+	# The superadmin panel is not on the internet (SPEC §5): only the private door opens it.
+	respond /admin* 404
+	reverse_proxy web:8000 {
+		# Nobody outside may claim to come through the private door.
+		header_up -X-Admin-Gate
+	}
+}
+
+# The private door to the superadmin panel. compose.prod.yml publishes it on 127.0.0.1
+# only, so it is reached from the server itself: an SSH tunnel (docs/deploy.md). The
+# secret header tells Django the request came this way.
+https://localhost:8443 {
+	tls internal
+	header -Server
+	reverse_proxy web:8000 {
+		header_up X-Admin-Gate {$ADMIN_GATE_SECRET}
+	}
 }
