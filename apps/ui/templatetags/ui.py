@@ -35,10 +35,13 @@ def _icon_body(name: str) -> str:
 
 @register.simple_tag
 def icon(name: str, css_class: str = "size-5") -> SafeString:
-    """A Lucide icon inlined in the page; decorative, so screen readers skip it."""
+    """A Lucide icon inlined in the page; decorative, so screen readers skip it.
+
+    width and height keep it icon-sized even without the CSS; the class overrides them.
+    """
     return mark_safe(  # noqa: S308 -- our own SVG files; the class is escaped
-        f'<svg class="{escape(css_class)}" xmlns="http://www.w3.org/2000/svg" '
-        'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+        f'<svg class="{escape(css_class)}" xmlns="http://www.w3.org/2000/svg" width="20" '
+        'height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
         'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
         f'focusable="false">{_icon_body(name)}</svg>'
     )

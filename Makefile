@@ -48,7 +48,8 @@ migrate: needs-uv db ## Apply database migrations
 css: needs-uv ## Build static/css/app.css from assets/source.css (Tailwind; first run downloads it)
 	$(UV) run python manage.py tailwind build
 
-dev: migrate ## Run the site at http://127.0.0.1:8000 and rebuild the CSS on every change
+# css first: a failed Tailwind download stops here with its error, not as unstyled pages.
+dev: migrate css ## Run the site at http://127.0.0.1:8000 and rebuild the CSS on every change
 	$(UV) run python manage.py tailwind runserver
 
 test: needs-uv db ## Fast tests: the judge without Docker, the site with the development PostgreSQL

@@ -47,6 +47,7 @@ def test_badge_has_icon_words_and_tone() -> None:
 
     assert 'class="status tone-warn"' in html
     assert '<svg class="size-5"' in html
+    assert 'width="20" height="20"' in html  # icon-sized even when the CSS is missing
     assert 'aria-hidden="true"' in html
     assert "<span>Vaqt limiti oshdi</span>" in html
 
