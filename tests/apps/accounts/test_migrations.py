@@ -7,7 +7,7 @@ import pytest
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
-from apps.accounts.models import Role, User
+from apps.accounts.models import Role
 from tests.apps.world import PASSWORD
 
 BEFORE = [("accounts", "0001_initial")]
@@ -36,8 +36,14 @@ def test_existing_superuser_becomes_the_superadmin(executor: MigrationExecutor) 
     executor.loader.build_graph()
     executor.migrate(AFTER)
 
-    user = User.objects.get(username="erkin")
-    assert (user.role, user.center, user.must_change_password) == (Role.SUPERADMIN, None, False)
+    # The model as of AFTER: today's User has columns later migrations add.
+    user = executor.loader.project_state(AFTER).apps.get_model("accounts", "User")
+    erkin = user.objects.get(username="erkin")
+    assert (erkin.role, erkin.center_id, erkin.must_change_password) == (
+        Role.SUPERADMIN,
+        None,
+        False,
+    )
 
 
 def test_other_existing_users_stop_the_migration(executor: MigrationExecutor) -> None:

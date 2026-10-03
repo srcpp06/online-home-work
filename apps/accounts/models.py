@@ -7,6 +7,7 @@ through get_for_user_or_404 (apps.accounts.access).
 
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Self
+from uuid import uuid4
 
 from django import forms
 from django.contrib.auth.models import AbstractUser
@@ -105,6 +106,11 @@ class UserManager(DjangoUserManager.from_queryset(UserQuerySet)):
         return super().create_superuser(username, email, password, **extra)
 
 
+def _avatar_path(user: "User", filename: str) -> str:
+    """A new name for each picture, so a browser never shows a stale one from its cache."""
+    return f"avatars/{user.center_id or 0}/{user.pk}/{uuid4().hex}.webp"
+
+
 class DirectionsField(ArrayField):
     """A list of directions, edited as checkboxes instead of comma-separated text."""
 
@@ -144,6 +150,11 @@ class User(AbstractUser):
         blank=True,
     )
     must_change_password = models.BooleanField("parolni almashtirishi kerak", default=True)
+    # The profile (apps.accounts.views.profile): what the person says about themselves.
+    avatar = models.FileField("rasm", upload_to=_avatar_path, max_length=300, blank=True)
+    phone = models.CharField("telefon", max_length=20, blank=True)
+    telegram = models.CharField("Telegram", max_length=33, blank=True)
+    bio = models.TextField("oʻzi haqida", max_length=500, blank=True)
 
     REQUIRED_FIELDS: list[str] = []  # noqa: RUF012 -- Django's documented class attribute
 
@@ -187,6 +198,12 @@ class User(AbstractUser):
     def display_name(self) -> str:
         """ "Familiya Ism" as in class journals; the login when no name was entered."""
         return " ".join(filter(None, (self.last_name, self.first_name))) or self.username
+
+    @property
+    def initials(self) -> str:
+        """Two letters for the picture's place when there is no picture."""
+        letters = [name[0] for name in (self.first_name, self.last_name) if name]
+        return ("".join(letters) or self.username[:2]).upper()
 
     @property
     def directions_display(self) -> str:

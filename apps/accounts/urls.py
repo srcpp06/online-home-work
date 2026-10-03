@@ -2,7 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from apps.accounts.models import Role
-from apps.accounts.views import auth, groups, people
+from apps.accounts.views import auth, groups, people, profile
 
 app_name = "accounts"
 urlpatterns = [
@@ -17,7 +17,9 @@ urlpatterns = [
     path("students/add/", people.person_create, {"role": Role.STUDENT}, name="student_add"),
     path("admins/", people.people_list, {"role": Role.CENTER_ADMIN}, name="admins"),
     path("admins/add/", people.person_create, {"role": Role.CENTER_ADMIN}, name="admin_add"),
+    path("profile/", profile.profile, name="profile"),
     path("people/<int:pk>/", people.person_detail, name="person"),
+    path("people/<int:pk>/avatar/", profile.person_avatar, name="person_avatar"),
     path("people/<int:pk>/edit/", people.person_edit, name="person_edit"),
     path("people/<int:pk>/password/", people.person_reset_password, name="person_password"),
     path("people/<int:pk>/password/new/", people.person_new_password, name="person_new_password"),

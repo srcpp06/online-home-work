@@ -1,0 +1,64 @@
+{% extends "layouts/app.html" %}
+{% load ui %}
+{% block title %}
+  Profil
+{% endblock title %}
+{% block content %}
+  <h1>Profil</h1>
+  <div class="mt-6">{% include "accounts/_profile_card.html" %}</div>
+  <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <section aria-labelledby="edit">
+      <h2 id="edit">Maʼlumotlarim</h2>
+      <form class="panel mt-4 p-6"
+            method="post"
+            enctype="multipart/form-data"
+            novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          {% include "layouts/_field.html" %}
+        {% endfor %}
+        <p class="mt-4 text-sm text-text-2">Ism, familiya va loginni markaz admini oʻzgartiradi.</p>
+        <button class="btn btn-primary mt-6" type="submit">Saqlash</button>
+      </form>
+    </section>
+    <aside>
+      <h2>Hisob</h2>
+      <dl class="panel mt-4 p-6 grid grid-cols-[6rem_1fr] gap-y-2">
+        <dt class="text-text-2">Login</dt>
+        <dd>
+          {{ person.username }}
+        </dd>
+        {% if person.last_login %}
+          <dt class="text-text-2">Oxirgi kirish</dt>
+          <dd>
+            {{ person.last_login|date:"d.m.Y H:i" }}
+          </dd>
+        {% endif %}
+      </dl>
+      <a class="btn btn-secondary mt-4"
+         href="{% url 'accounts:password_change' %}">Parolni almashtirish</a>
+      {% if groups %}
+        <h2 class="mt-8">Guruhlarim</h2>
+        <ul class="panel mt-4 p-6 space-y-1">
+          {% for group in groups %}
+            <li>
+              {{ group.name }}
+              {% if group.teacher_id != person.pk %}<span class="text-text-2">— {{ group.teacher.display_name }}</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if recent %}
+        <h2 class="mt-8">Oxirgi yechimlar</h2>
+        <ol class="mt-4 space-y-2">
+          {% for submission in recent %}
+            <li class="panel p-4">
+              <a href="{% url 'submissions:submission' submission.pk %}">{{ submission.assignment.task.title }}</a>
+              <div class="mt-1">{% include "submissions/_submission_badge.html" %}</div>
+            </li>
+          {% endfor %}
+        </ol>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock content %}

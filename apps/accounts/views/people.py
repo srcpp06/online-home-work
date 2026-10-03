@@ -19,6 +19,7 @@ from apps.accounts.forms import PersonForm
 from apps.accounts.models import Group, Role, User
 from apps.accounts.passwords import temporary_password
 from apps.accounts.permissions import Action, manages
+from apps.accounts.stats import person_stats, recent_submissions
 from apps.accounts.views._guard import require
 
 # Role -> (list title, list URL name, add button, empty state).
@@ -104,6 +105,8 @@ def person_detail(request: HttpRequest, pk: int) -> HttpResponse:
         {
             "person": person,
             "groups": groups,
+            "stats": person_stats(person, request.user),
+            "recent": recent_submissions(person, request.user),
             "list_url": reverse(KINDS[person.role][1]) if person.role in KINDS else "",
             "can_manage": manages(request.user, person.role) and person.pk != request.user.pk,
         },

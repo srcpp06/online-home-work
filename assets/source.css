@@ -429,6 +429,72 @@
     color: var(--ink);
   }
 
+  /* People: a round picture, or the initials on the desk colour. */
+  .avatar {
+    flex: none;
+    border-radius: 9999px;
+    object-fit: cover;
+    background: var(--desk);
+  }
+  .avatar-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+  .avatar-md {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
+  .avatar-lg {
+    width: 96px;
+    height: 96px;
+    font-size: 30px;
+  }
+  .avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    color: var(--ink);
+    border: 1px solid var(--grid);
+  }
+  .account-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .account-link:hover .font-semibold {
+    text-decoration: underline;
+  }
+  .profile-card {
+    padding: 24px;
+  }
+  /* Numbers at a glance: a label over a big figure, in a wrapping row. */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 12px;
+  }
+  .stat {
+    padding: 12px 14px;
+    border: 1px solid var(--grid);
+    border-radius: var(--radius-control);
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .stat-value {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
   /* The landing page's two doors: students, staff. */
   .door {
     display: flex;

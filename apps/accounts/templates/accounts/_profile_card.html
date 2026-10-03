@@ -1,0 +1,38 @@
+{% load people %}
+{# A person at a glance: picture, name, role, contacts, about, numbers. #}
+<section class="panel profile-card" aria-label="{{ person.display_name }}">
+  <div class="flex flex-wrap items-center gap-5">
+    {% avatar person "lg" %}
+    <div class="min-w-0">
+      <p class="font-serif text-2xl font-semibold text-ink">{{ person.display_name }}</p>
+      <p class="text-text-2">
+        {{ person.get_role_display }}
+        {% if person.center %}— {{ person.center.name }}{% endif %}
+      </p>
+      {% if person.directions %}<p class="text-sm text-text-2">Yoʻnalishlar: {{ person.directions_display }}</p>{% endif %}
+      {% if person.phone or person.telegram %}
+        <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {% if person.phone %}<a href="tel:{{ person.phone|cut:' ' }}">{{ person.phone }}</a>{% endif %}
+          {% if person.telegram %}
+            <a href="https://t.me/{{ person.telegram }}"
+               rel="noopener noreferrer"
+               target="_blank">@{{ person.telegram }}</a>
+          {% endif %}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+  {% if person.bio %}<p class="mt-5 max-w-[72ch] whitespace-pre-line">{{ person.bio }}</p>{% endif %}
+  {% if stats %}
+    <dl class="stat-grid mt-6">
+      {% for stat in stats %}
+        <div class="stat">
+          <dt class="stat-label">{{ stat.label }}</dt>
+          <dd class="stat-value">
+            {{ stat.value }}
+          </dd>
+        </div>
+      {% endfor %}
+    </dl>
+  {% endif %}
+</section>

@@ -67,6 +67,7 @@ IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
     "submissions:submission_live": _submission("submissions:submission_live"),
     "submissions:submission_rejudge": _submission("submissions:submission_rejudge"),
     "accounts:person": _people("accounts:person"),
+    "accounts:person_avatar": _people("accounts:person_avatar"),
     "accounts:person_edit": _people("accounts:person_edit"),
     "accounts:person_password": _people("accounts:person_password"),
     "accounts:person_new_password": _people("accounts:person_new_password"),

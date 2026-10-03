@@ -1,14 +1,18 @@
 """Sign-in and password forms, with the messages in Uzbek (docs/UI.md §8)."""
 
+import re
 from typing import Any
 
 from django import forms
 from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.utils.html import format_html
 
+from apps.accounts.avatars import avatar_from_upload
 from apps.accounts.models import Group, Role, User, check_students
+from apps.ui.widgets import UploadZone
 
 STAFF_ROLES = frozenset({Role.TEACHER, Role.CENTER_MANAGER, Role.CENTER_ADMIN})
 
@@ -180,3 +184,78 @@ def _person_label(user: User) -> str:
         if user.last_name or user.first_name
         else user.username
     )
+
+
+class ProfileForm(forms.ModelForm):
+    """What a person says about themselves; the name, login and role are the admin's."""
+
+    picture = forms.FileField(
+        label="Rasm",
+        required=False,
+        widget=UploadZone(
+            attrs={"accept": "image/png,image/jpeg,image/webp,image/gif"},
+            prompt="Rasmni shu yerga tashlang",
+        ),
+        help_text="JPG, PNG yoki WebP, 5 MB gacha. Kvadrat qilib qirqiladi.",
+    )
+    remove_picture = forms.BooleanField(label="Rasmni olib tashlash", required=False)
+
+    class Meta:
+        model = User
+        fields = ("phone", "telegram", "bio")
+        labels = {  # noqa: RUF012 -- Django's documented form attribute
+            "phone": "Telefon",
+            "telegram": "Telegram",
+            "bio": "Oʻzim haqimda",
+        }
+        help_texts = {  # noqa: RUF012
+            "phone": "Masalan: +998 90 123 45 67",
+            "telegram": "Foydalanuvchi nomi, masalan: @erkin_dev",
+            "bio": "500 belgigacha: nimani oʻrganyapsiz yoki oʻrgatasiz, qiziqishlaringiz.",
+        }
+        widgets = {"bio": forms.Textarea(attrs={"rows": 4})}  # noqa: RUF012
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.picture_data: bytes | None = None
+        if not self.instance.avatar:
+            del self.fields["remove_picture"]
+        style_fields(self)
+        self.fields["bio"].widget.attrs["class"] = "field mt-1"
+
+    def clean_phone(self) -> str:
+        phone = self.cleaned_data["phone"].strip()
+        if phone and not _PHONE.fullmatch(phone):
+            raise forms.ValidationError(
+                "Telefon raqamini raqamlar bilan yozing, masalan: +998 90 123 45 67."
+            )
+        return phone
+
+    def clean_telegram(self) -> str:
+        name = self.cleaned_data["telegram"].strip().removeprefix("@")
+        if name and not _TELEGRAM.fullmatch(name):
+            raise forms.ValidationError(
+                "Telegram nomi 5 dan 32 belgigacha: lotin harflari, raqamlar va _, "
+                "harf bilan boshlanadi."
+            )
+        return name
+
+    def clean_picture(self) -> Any:
+        upload = self.cleaned_data.get("picture")
+        if upload:
+            self.picture_data = avatar_from_upload(upload)
+        return upload
+
+    def save(self, commit: bool = True) -> User:
+        user: User = super().save(commit=False)
+        if self.picture_data is not None or self.cleaned_data.get("remove_picture"):
+            user.avatar.delete(save=False)
+        if self.picture_data is not None:
+            user.avatar.save("avatar.webp", ContentFile(self.picture_data), save=False)
+        if commit:
+            user.save()
+        return user
+
+
+_PHONE = re.compile(r"\+?[0-9][0-9 ()-]{6,19}")
+_TELEGRAM = re.compile(r"[A-Za-z][A-Za-z0-9_]{4,31}")
