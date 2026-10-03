@@ -1,9 +1,10 @@
 # Phase 0 o'lchovlari
 
-Har bir o'lchovning to'liq hisoboti `docs/poc/` da; bu yerda — xulosa va qaror nuqtasi uchun takliflar. O'lchov vositasi va yo'riqnoma: `make poc`, [`docs/poc.md`](poc.md).
+Har bir o'lchovning to'liq hisoboti `docs/poc/` da; bu yerda — xulosa, qaror nuqtasi va uning tasdig'i. O'lchov vositasi va yo'riqnoma: `make poc`, [`docs/poc.md`](poc.md).
 
 | O'lchov | Mashina | Hisobot | Holat |
 |---|---|---|---|
+| Prod, qarordan keyin | Oracle A1, linux/arm64, 2 OCPU, yangi limitlar (`1d43ec4`) | [`aarch64-20261003-0744.md`](poc/aarch64-20261003-0744.md) | ✓ 17/17, limitlar tasdiqlandi |
 | Prod (rasmiy) | Oracle A1, linux/arm64, 2 OCPU, 11.6 GiB, Ubuntu 24.04, cgroup v2, Docker 29.8.2 | [`aarch64-20261003-0710.md`](poc/aarch64-20261003-0710.md), [`aarch64-20261003-0716.md`](poc/aarch64-20261003-0716.md) | ✓ ikki o'tish, har biri 17/17 |
 | Lokal (rasmiy) | CachyOS, x86_64, 4 CPU, 11.5 GiB, cgroup v2, Docker 29.8.1 | [`x86_64-20261001-2059.md`](poc/x86_64-20261001-2059.md) | ✓ 17/17 verdict kutilgandek |
 | Bulut sessiyasi (mo'ljal) | Ubuntu 24.04, x86_64, 4 CPU, 15.7 GiB, cgroup v1 | [`x86_64-cloud-sandbox-20261001.md`](poc/x86_64-cloud-sandbox-20261001.md) | ✓ 17/17 |
@@ -90,3 +91,20 @@ Quyidagi takliflar o'zgarishsiz qabul qilindi va kodga kiritildi; yozuv — `doc
 | `two_stage` | yo'q | MVP'da o'chiq, Phase 2'da qayta ko'rib chiqiladi | iliq image'da yutuq kichik; o'qituvchiga qo'shimcha cheklov |
 | `JUDGE_SLOTS` | heavy:1, fast:1 | heavy:1, fast:1 | ARM'da sekinlashuv 1.09–1.14x; yuklama oshsa `fast:2` faqat konfiguratsiya bilan sinaladi |
 | `JUDGE_RESERVED_MEMORY_MB` | 3072 | 3072 | heavy 1536 + fast 1024 + 3072 = 5.6 GB ≤ 11.6 GiB, ikkinchi heavy slotga joy qoladi |
+
+## Qarordan keyingi tasdiqlash (Oracle A1, 2026-10-03 07:44)
+
+Yangi kod (`1d43ec4`) bilan `make poc`: 17/17 verdict kutilgandek, [`aarch64-20261003-0744.md`](poc/aarch64-20261003-0744.md).
+
+| | Dart (`dart-cart`) | Flutter (`flutter-todo`) |
+|---|---|---|
+| O'qituvchi yechimi: sovuq / iliq | 11.9 / 1.5 s | 13.5 / 4.6 s |
+| Vaqt limiti (oldin → endi) | 30 → **15 s** (profil minimumi) | 90 → **30 s** (profil minimumi) |
+| Cheksiz sikl slotni band qiladi | 30.3 → **15.3 s** | 90.3 → **30.3 s** |
+| Xotira limiti (oldin → endi) | 1024 MB | 3072 → **1536 MB** |
+| Xotira limiti ishlagan vaqt | 3.2 s, 1002 MB | 12.2–12.6 → **6.3 s**, 1528 MB |
+| Sovuq kompilyatsiya cho'qqisi | 439–471 MB | 927–941 MB — 1536 MB limitga sig'adi |
+| Yig'ish vaqti (iliq qayta tekshirish bilan) | 15.6 → 19.0 s | 21.3 → 29.4 s |
+
+To'g'ri yechimlar va boshqa verdictlar o'zgarmadi; yig'ish iliq qayta tekshirish hisobiga 3–8 s uzaydi, bu bir martalik narx.
+
