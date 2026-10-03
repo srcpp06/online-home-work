@@ -7,7 +7,12 @@
   <h1>Topshiriqlarim</h1>
   {% for group, rows in groups.items %}
     <section class="mt-8" aria-labelledby="group-{{ group.pk }}">
-      <h2 id="group-{{ group.pk }}">{{ group.name }}</h2>
+      <div class="flex flex-wrap items-baseline justify-between gap-4">
+        <h2 id="group-{{ group.pk }}">{{ group.name }}</h2>
+        {% if group.show_journal_to_students %}
+          <a href="{% url 'submissions:journal' group.pk %}">Guruh jurnali</a>
+        {% endif %}
+      </div>
       <ul class="mt-4 space-y-3">
         {% for row in rows %}
           <li class="panel p-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">

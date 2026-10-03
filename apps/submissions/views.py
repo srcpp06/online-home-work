@@ -16,11 +16,12 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.accounts.access import get_for_user_or_404, visible_to
-from apps.accounts.models import Group, User
+from apps.accounts.models import Group, Role, User
 from apps.accounts.permissions import Action, can
 from apps.accounts.views._guard import require
 from apps.submissions.code import student_code
 from apps.submissions.forms import SubmitForm
+from apps.submissions.journal import build_rows, column_letter
 from apps.submissions.models import Submission, SubmissionTestResult
 from apps.submissions.services import ACTIVE, SubmitRefused, rejudge, submit, submit_state
 from apps.system.models import Job
@@ -134,6 +135,9 @@ def submission_detail(request: HttpRequest, pk: int) -> HttpResponse:
         context |= {
             "files": files,
             "code_problem": code_problem,
+            "attempts": visible_to(Submission, request.user)
+            .filter(assignment_id=submission.assignment_id, student_id=submission.student_id)
+            .order_by("-created_at"),
             "show_log": can(request.user, Action.VIEW_FULL_LOG),
             "can_rejudge": can(request.user, Action.MANAGE_TASKS),
         }
@@ -164,6 +168,38 @@ def submission_rejudge(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         messages.success(request, "Yechim qayta tekshirish navbatiga qoʻyildi.")
     return redirect("submissions:submission", submission.pk)
+
+
+def journal(request: HttpRequest, pk: int) -> HttpResponse:
+    """The group's results, acmp style (docs/UI.md §4). Students see it only where the
+    group shows it, and open only their own solutions from it."""
+    require(request, Action.VIEW_JOURNAL)
+    group = get_for_user_or_404(Group, request.user, pk=pk)
+    is_student = request.user.role == Role.STUDENT
+    if is_student and not group.show_journal_to_students:
+        raise Http404
+    assignments = list(
+        visible_to(Assignment, request.user)
+        .filter(group=group)
+        .select_related("task")
+        .order_by("opens_at", "pk")
+    )
+    students = list(group.students.order_by("last_name", "first_name", "username"))
+    submissions = Submission.objects.filter(assignment__in=assignments, student__in=students).only(
+        "pk", "student_id", "assignment_id", "status", "verdict", "is_late", "created_at"
+    )
+    rows = build_rows(students, [a.pk for a in assignments], submissions)
+    return render(
+        request,
+        "submissions/journal.html",
+        {
+            "group": group,
+            "columns": [(column_letter(i), a) for i, a in enumerate(assignments)],
+            # (row, whether its cells link to the solutions): a student opens only their own.
+            "rows": [(row, not is_student or row.student.pk == request.user.pk) for row in rows],
+            "is_student": is_student,
+        },
+    )
 
 
 def _submission(request: HttpRequest, pk: int) -> Submission:

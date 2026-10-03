@@ -6,14 +6,16 @@
   <a class="text-sm" href="{% url 'accounts:groups' %}">Guruhlarga qaytish</a>
   <div class="page-head mt-2">
     <h1>{{ group.name }}</h1>
-    {% if can_manage %}
-      <div class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-3">
+      <a class="btn btn-primary"
+         href="{% url 'submissions:journal' group.pk %}">Jurnal</a>
+      {% if can_manage %}
         <a class="btn btn-secondary"
            href="{% url 'accounts:group_edit' group.pk %}">Tahrirlash</a>
         <a class="btn btn-secondary"
            href="{% url 'accounts:group_delete' group.pk %}">Oʻchirish</a>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
   <dl class="panel mt-6 p-6 grid grid-cols-[12rem_1fr] gap-y-2">
     <dt class="text-text-2">Oʻqituvchi</dt>

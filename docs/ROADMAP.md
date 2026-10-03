@@ -34,16 +34,16 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `Submission`: yuklash, validatsiya, cooldown va faol yechimlar limiti, `Job` yaratish — `apps/submissions/services.py`: muddat, urinishlar, faol limit, cooldown, o'quvchi bo'yicha qulf; zip saytda worker bilan bir xil funksiya bilan tekshiriladi, rad etilgani darhol "Rad etildi" oladi va navbatga tushmaydi; "Topshiriqlarim" va topshiriq sahifasi (shart, boshlang'ich loyiha, muhit, urinishlar tarixi)
 - [x] `judge_worker`: slotlar va lane'lar, SKIP LOCKED, lease/heartbeat, reaper, xotira sig'ishi tekshiruvi — `make worker`; `judge/adapters/worker.py` (slot thread'lari), `apps/system/queue.py` (claim/lease/reap, 3 urinishdan keyin `system_error`); image'i yo'q node uni paketdan qayta yig'adi; heavy slot bo'sh qolsa fast ishni oladi
 - [x] Jonli natija sahifasi: HTMX polling, navbatdagi o'rin, verdict muhri — `/submissions/<id>/`: daftar qatorlari, "yozilmoqda" qatori, muhr, kompilyatsiya xatosi tozalangan holda; o'qituvchi, admin va menejer uchun kod (Pygments), o'qituvchiga "Qayta tekshirish"; real worker bilan brauzerda tekshirildi
-- [ ] Jurnal
+- [x] Jurnal — `/groups/<id>/journal/` (`apps/submissions/journal.py`): `+`, `+N`, `−N`, `…`, kechikkan `*`; saralash yechildi ↓, urinishlar ↑, ism; sticky sarlavha va ism ustuni; katak yechimni ochadi, yechim sahifasida o'quvchining barcha urinishlari; o'quvchiga faqat guruhda yoqilgan bo'lsa va faqat o'z kataklari ochiladi
 - [ ] `compose.prod.yml`, Caddy, `docs/deploy.md`; serverga birinchi deploy
 - [ ] **Qaror nuqtasi:** bitta haqiqiy guruh bilan sinov
 
 ## Phase 2 — Sifat
 
-- [ ] Starter zip generatsiyasi va yuklab olish
+- [x] Starter zip generatsiyasi va yuklab olish — Phase 1 da qilindi (`judge/packaging/starter.py`, o'quvchi topshiriq sahifasidan yuklab oladi)
 - [ ] Flutter 2 bosqichli tekshiruv (PoC natijasiga qarab)
-- [ ] Kompilyatsiya xatolarini tozalash; hidden test xabarlarini yashirish
-- [ ] Qayta tekshirish (rejudge)
+- [x] Kompilyatsiya xatolarini tozalash; hidden test xabarlarini yashirish — Phase 1 da qilindi (`judge/parsers/compile_message.py`; yashirin test xabari faqat `VIEW_FULL_LOG` rollariga)
+- [x] Qayta tekshirish (rejudge) — Phase 1 da qilindi: o'qituvchi yechim sahifasidan, o'sha versiya bilan, eng past prioritetda
 - [ ] CSV import (o'quvchilar), jurnal eksporti (CSV)
 - [ ] Markaz topshiriqlar banki: o'qituvchilar bir-birining topshirig'idan nusxa oladi
 - [ ] `/system` sahifasi

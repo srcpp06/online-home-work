@@ -9,6 +9,7 @@ from django.test import Client
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.submissions.journal import MINUS
 from apps.submissions.models import Submission, SubmissionTestResult
 from apps.system.models import Job
 from apps.system.queue import enqueue_judge
@@ -380,3 +381,83 @@ class TestRejudge:
 
         assert response.status_code == 403
         assert not Job.objects.exists()
+
+
+class TestJournal:
+    def test_the_teacher_sees_marks_and_opens_the_solutions(
+        self, client: Client, world: World
+    ) -> None:
+        a = world.a
+        as_(client, a.teacher)
+
+        page = client.get(f"/groups/{a.group.pk}/journal/").content.decode()
+
+        assert '<abbr title="Savat hisobi">A</abbr>' in page
+        assert a.student.display_name in page
+        assert f'href="/submissions/{a.submission.pk}/"' in page
+        assert 'class="cell-pass"' in page
+
+    @pytest.mark.parametrize("who", ["admin", "manager"])
+    def test_the_centre_watches_it_too(self, client: Client, world: World, who: str) -> None:
+        as_(client, getattr(world.a, who))
+
+        assert client.get(f"/groups/{world.a.group.pk}/journal/").status_code == 200
+
+    def test_another_teachers_group_is_a_404(self, client: Client, world: World) -> None:
+        as_(client, world.a.other_teacher)
+
+        assert client.get(f"/groups/{world.a.group.pk}/journal/").status_code == 404
+
+    def test_students_see_it_only_when_the_group_shows_it(
+        self, client: Client, world: World
+    ) -> None:
+        a = world.a
+        classmate = User.objects.create_user(
+            username="a-classmate", role="student", center=a.center, last_name="Zokirov"
+        )
+        a.group.add_students([classmate])
+        Submission.objects.create(
+            assignment=a.assignment,
+            student=classmate,
+            task_version=a.version,
+            archive="x.zip",
+            sha256="0" * 64,
+            status=Submission.Status.FINISHED,
+            verdict=Verdict.WRONG_ANSWER,
+        )
+        as_(client, a.student)
+        url = f"/groups/{a.group.pk}/journal/"
+
+        assert client.get(url).status_code == 404
+        assert "Guruh jurnali" not in client.get("/assignments/").content.decode()
+
+        a.group.show_journal_to_students = True
+        a.group.save()
+        page = client.get(url).content.decode()
+
+        assert "Guruh jurnali" in client.get("/assignments/").content.decode()
+        assert "Zokirov" in page
+        assert f"{MINUS}1" in page  # the classmate's mark is shown...
+        assert f'href="/submissions/{a.submission.pk}/"' in page  # ...own cells open
+        classmate_submission = Submission.objects.get(student=classmate)
+        assert f"/submissions/{classmate_submission.pk}/" not in page  # theirs don't
+
+    def test_staff_see_every_attempt_on_the_result_page(self, client: Client, world: World) -> None:
+        a = world.a
+        older = Submission.objects.create(
+            assignment=a.assignment,
+            student=a.student,
+            task_version=a.version,
+            archive="x.zip",
+            sha256="0" * 64,
+            status=Submission.Status.FINISHED,
+            verdict=Verdict.WRONG_ANSWER,
+            failed_test_index=2,
+        )
+        as_(client, a.teacher)
+
+        page = client.get(f"/submissions/{a.submission.pk}/").content.decode()
+
+        assert f'href="/submissions/{older.pk}/"' in page
+        assert "2-testda xato" in page
+        assert "shu yechim" in page

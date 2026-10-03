@@ -584,6 +584,11 @@
     background: color-mix(in srgb, var(--pen-red) 10%, var(--paper));
     color: var(--pen-red);
   }
+  /* A mark that opens the solution keeps its cell's colour; the underline says "link". */
+  .journal td a {
+    color: inherit;
+    font-weight: 600;
+  }
 }
 
 @layer utilities {

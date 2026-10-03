@@ -62,6 +62,7 @@ IDOR_URLS: dict[str, Callable[[World], list[str]]] = {
     "tasks:version_starter": _version("tasks:version_starter"),
     "submissions:assignment": _assignment("submissions:assignment"),
     "submissions:assignment_starter": _assignment("submissions:assignment_starter"),
+    "submissions:journal": _group("submissions:journal"),
     "submissions:submission": _submission("submissions:submission"),
     "submissions:submission_live": _submission("submissions:submission_live"),
     "submissions:submission_rejudge": _submission("submissions:submission_rejudge"),

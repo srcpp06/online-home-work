@@ -42,6 +42,20 @@
         Tekshiruv {{ submission.wall_ms }} ms davom etdi (limit {{ submission.task_version.time_limit_s }} s).
       </p>
     {% endif %}
+    <h2 class="mt-10">Urinishlar</h2>
+    <ol class="mt-4 space-y-2">
+      {% for attempt in attempts %}
+        <li class="flex flex-wrap items-center gap-x-4 gap-y-1">
+          {% if attempt.pk == submission.pk %}
+            <span class="font-semibold">{{ attempt.created_at|date:"d.m.Y H:i" }} — shu yechim</span>
+          {% else %}
+            <a href="{% url 'submissions:submission' attempt.pk %}">{{ attempt.created_at|date:"d.m.Y H:i" }}</a>
+          {% endif %}
+          {% include "submissions/_submission_badge.html" with submission=attempt %}
+          {% if attempt.is_late %}<span class="text-sm tone-warn">kechikkan</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
     <h2 class="mt-10">Kod</h2>
     {% if code_problem %}
       <p class="panel mt-4 p-6">{{ code_problem }}</p>

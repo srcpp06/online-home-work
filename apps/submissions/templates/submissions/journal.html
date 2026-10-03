@@ -1,0 +1,91 @@
+{% extends "layouts/app.html" %}
+{% block title %}
+  {{ group.name }}: jurnal
+{% endblock title %}
+{% block content %}
+  {% if is_student %}
+    <a class="text-sm" href="{% url 'submissions:assignments' %}">Topshiriqlarimga qaytish</a>
+  {% else %}
+    <a class="text-sm" href="{% url 'accounts:group' group.pk %}">{{ group.name }}</a>
+  {% endif %}
+  <h1 class="mt-2">{{ group.name }}: jurnal</h1>
+  {% if columns and rows %}
+    <div class="mt-6 max-h-[75vh] overflow-auto">
+      <table class="journal">
+        <thead>
+          <tr>
+            <th scope="col">Oʻquvchi</th>
+            {% for letter, assignment in columns %}
+              <th scope="col">
+                <abbr title="{{ assignment.task.title }}">{{ letter }}</abbr>
+              </th>
+            {% endfor %}
+            <th scope="col">Yechildi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row, opens in rows %}
+            <tr>
+              <th scope="row" class="font-normal">{{ row.student.display_name }}</th>
+              {% for cell in row.cells %}
+                <td {% if cell.tone %}class="cell-{{ cell.tone }}"{% endif %}>
+                  {% if cell.mark %}
+                    {% if opens and cell.submission_id %}
+                      <a href="{% url 'submissions:submission' cell.submission_id %}"
+                         title="{{ cell.title }}"
+                         aria-label="{{ cell.title }}">{{ cell.mark }}{% if cell.late %}*{% endif %}</a>
+                    {% else %}
+                      <span title="{{ cell.title }}">{{ cell.mark }}{% if cell.late %}*{% endif %}</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              {% endfor %}
+              <td>{{ row.solved }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="mt-8">Topshiriqlar</h2>
+    <ol class="mt-4 space-y-1">
+      {% for letter, assignment in columns %}
+        <li>
+          <span class="font-semibold">{{ letter }}</span> —
+          {% if is_student %}
+            <a href="{% url 'submissions:assignment' assignment.pk %}">{{ assignment.task.title }}</a>
+          {% else %}
+            <a href="{% url 'tasks:task' assignment.task_id %}">{{ assignment.task.title }}</a>
+          {% endif %}
+          {% if assignment.deadline %}<span class="text-text-2">(muddat {{ assignment.deadline|date:"d.m.Y H:i" }})</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+    <h2 class="mt-8">Belgilar</h2>
+    <dl class="mt-4 grid grid-cols-[3rem_1fr] gap-y-1">
+      <dt class="font-semibold tone-pass">+</dt>
+      <dd>
+        qabul qilindi, birinchi urinishda
+      </dd>
+      <dt class="font-semibold tone-pass">+2</dt>
+      <dd>
+        qabul qilindi, oldin 2 ta xato
+      </dd>
+      <dt class="font-semibold tone-fail">−3</dt>
+      <dd>
+        3 ta urinish, hali qabul yoʻq
+      </dd>
+      <dt class="font-semibold">…</dt>
+      <dd>
+        tekshirilmoqda
+      </dd>
+      <dt class="font-semibold">*</dt>
+      <dd>
+        kechikkan: muddatdan keyin qabul qilingan
+      </dd>
+    </dl>
+  {% elif not columns %}
+    <p class="panel mt-6 p-6 text-text-2">Guruhga hali topshiriq biriktirilmagan.</p>
+  {% else %}
+    <p class="panel mt-6 p-6 text-text-2">Guruhda hali oʻquvchi yoʻq.</p>
+  {% endif %}
+{% endblock content %}
