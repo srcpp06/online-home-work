@@ -19,7 +19,7 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `python -m judge.cli build` va `python -m judge.cli run` — `judge/cli.py`, `judge/config.py`, `judge_zip`; image o'z ma'lumotini label'da saqlaydi, `run --json` PoC o'lchovlari uchun
 - [x] `examples/dart-*` va `examples/flutter-*` — barcha yechim turlari bilan (SPEC §7) — `examples/dart-cart`, `examples/flutter-todo`; 17 ta yechim `tests/examples/` da, `make poc` jadval chiqaradi
 - [x] Lokal o'lchov (x86_64) — CachyOS, 17/17 verdict kutilgandek; `docs/poc/x86_64-20261001-2059.md`, xulosa va takliflar `docs/poc-results.md` da
-- [ ] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga. Yo'riqnoma: `docs/poc.md`.
+- [x] ARM64 serverda o'lchov: cold va warm vaqt, RAM cho'qqisi, 2 slot bir vaqtda; `dart test` Flutter loyiha ichida ishlashi; isitilgan kesh qancha tezlashtirgani. Natijalar `docs/poc-results.md` ga. Yo'riqnoma: `docs/poc.md`. — Oracle A1 (2 OCPU, Ubuntu 24.04), 2026-10-03: `make test-docker` 117/117, `make poc` ikki marta 17/17; `docs/poc/aarch64-20261003-*.md`
 - [ ] **Qaror nuqtasi:** natijalarni Erkin bilan ko'rib chiqish; profil limitlari va `two_stage` bo'yicha qaror
 
 ## Phase 1 — MVP veb

@@ -67,16 +67,17 @@ Docker, uv va vositalar:
 
 ```
 sudo apt-get update
-sudo apt-get install -y make git zip
+sudo apt-get install -y make git zip tmux
 curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker $USER
 curl -LsSf https://astral.sh/uv/install.sh | sh
 exit
 ```
 
-Qayta ulaning (`ssh ubuntu@<server-ip>`), keyin lokal kompyuterdagi kabi:
+Qayta ulaning (`ssh ubuntu@<server-ip>`), `docker run --rm hello-world` bilan Docker'ni tekshiring va uzoq ishlarni `tmux` ichida boshlang — SSH uzilsa ham o'lchov to'xtamaydi:
 
 ```
+tmux new -s poc
 git clone https://github.com/srcpp06/online-home-work.git
 cd online-home-work
 git switch claude/peaceful-darwin-r5riyt
@@ -89,6 +90,8 @@ make poc
 
 `make poc` ikki marta ishlatiladi: ikkinchi o'tish natijalar qanchalik barqarorligini ko'rsatadi. Ko'proq takrorlash kerak bo'lsa: `uv run python -m scripts.poc --repeat 5`.
 
+`tmux` dan ish to'xtamasdan chiqish: `Ctrl+b`, keyin `d`; qaytish: `tmux attach -t poc`. Hammasi taxminan 40 daqiqa oladi.
+
 ## Muammolar
 
 | Xabar | Sabab va yechim |
@@ -99,10 +102,16 @@ make poc
 | `error: can't reach the Docker daemon` | `sudo systemctl enable --now docker` va `sudo usermod -aG docker $USER`, keyin tizimdan chiqib qayta kiring |
 | `error: DART_VERSION is not set` (yoki boshqa sozlama) | `.env` eski: yetishmagan qatorni `.env.example` dan ko'chiring yoki `.env` ni o'chirib `make setup` qiling |
 | `429 Too Many Requests` | Docker Hub limiti: `docker login` yoki biroz kutib qayta urining |
+| `scp`: `Permission denied (publickey)` | `scp` ga ham `ssh` dagi kalitni bering: `scp -i ~/.ssh/<kalit> ...`. `scp` laptopda ishga tushadi, serverda emas |
 
 ## Natijani yuborish
 
-`docs/poc/` dagi yangi fayllarni commit qilib push qiling yoki matnini Claude'ga yuboring. Natijalar asosida qaror nuqtasida quyidagilar hal qilinadi:
+`docs/poc/` dagi yangi fayllarni commit qilib push qiling yoki matnini Claude'ga yuboring. Serverdagi hisobotlarni laptopga olish (laptop terminalida, Fish'da qo'shtirnoq shart):
+
+```
+scp -i ~/.ssh/<kalit> 'ubuntu@<server-ip>:online-home-work/docs/poc/aarch64-*.md' .
+```
+ Natijalar asosida qaror nuqtasida quyidagilar hal qilinadi:
 
 | Savol | Qaysi jadvaldan |
 |---|---|
