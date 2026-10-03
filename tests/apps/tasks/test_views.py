@@ -124,10 +124,9 @@ class TestBuildPage:
             "hidden test source"
             in as_(client, a.teacher).get(f"/tasks/{a.task.pk}/versions/1/").content.decode()
         )
-        for viewer in (a.manager, a.admin):
-            page = as_(client, viewer).get(f"/tasks/{a.task.pk}/versions/1/").content.decode()
-            assert "hidden test source" not in page
-            assert "Savat boʻsh" in page  # test names are fine to see
+        page = as_(client, a.manager).get(f"/tasks/{a.task.pk}/versions/1/").content.decode()
+        assert "hidden test source" not in page
+        assert "Savat boʻsh" in page  # test names are fine to see
 
 
 class TestPublishing:
@@ -170,16 +169,21 @@ class TestPublishing:
 
 
 class TestWhoMayDoWhat:
-    def test_manager_and_admin_look_without_changing(self, client: Client, world: World) -> None:
+    def test_manager_looks_without_changing(self, client: Client, world: World) -> None:
         a = world.a
-        for viewer in (a.manager, a.admin):
-            as_(client, viewer)
-            listing = client.get("/tasks/").content.decode()
-            assert "Savat hisobi" in listing
-            assert "Topshiriq yaratish" not in listing
-            assert client.get("/tasks/add/").status_code == 403
-            assert client.get(f"/tasks/{a.task.pk}/versions/1/package/").status_code == 403
-            assert client.get(f"/tasks/{a.task.pk}/versions/1/starter/").status_code == 200
+        as_(client, a.manager)
+        listing = client.get("/tasks/").content.decode()
+        assert "Savat hisobi" in listing
+        assert "Topshiriq yaratish" not in listing
+        assert client.get("/tasks/add/").status_code == 403
+        assert client.get(f"/tasks/{a.task.pk}/versions/1/package/").status_code == 403
+        assert client.get(f"/tasks/{a.task.pk}/versions/1/starter/").status_code == 200
+
+    def test_admin_has_no_task_pages(self, client: Client, world: World) -> None:
+        a = world.a
+        as_(client, a.admin)
+        for url in ("/tasks/", f"/tasks/{a.task.pk}/", f"/tasks/{a.task.pk}/versions/1/"):
+            assert client.get(url).status_code == 403, url
 
     def test_students_have_no_task_pages(self, client: Client, world: World) -> None:
         as_(client, world.a.student)

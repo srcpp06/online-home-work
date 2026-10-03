@@ -76,7 +76,7 @@ class TaskQuerySet(models.QuerySet["Task"]):
         match viewer.role:
             case Role.SUPERADMIN:
                 return self.all()
-            case Role.CENTER_ADMIN | Role.CENTER_MANAGER:
+            case Role.CENTER_MANAGER:
                 return self.filter(center_id=viewer.center_id)
             case Role.TEACHER:
                 return self.filter(author=viewer)
@@ -206,7 +206,7 @@ class AssignmentQuerySet(models.QuerySet["Assignment"]):
         match viewer.role:
             case Role.SUPERADMIN:
                 return self.all()
-            case Role.CENTER_ADMIN | Role.CENTER_MANAGER:
+            case Role.CENTER_MANAGER:
                 return self.filter(group__center_id=viewer.center_id)
             case Role.TEACHER:
                 return self.filter(group__teacher=viewer)

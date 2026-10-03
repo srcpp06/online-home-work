@@ -99,9 +99,9 @@ O'qituvchi:
 - Guruhga biriktirish (ochilish vaqti, muddat, kechikishga ruxsat, urinishlar limiti).
 - Yechim tafsiloti: kod, to'liq log, vaqtlar; "Qayta tekshirish".
 
-Markaz admini: markaz menejerlari, o'qituvchilar, o'quvchilar, guruhlar; parolni tiklash; CSV import (Phase 2).
+Markaz admini: o'qituvchilar, o'quvchilar, guruhlar (o'quvchilarni biriktirish); parolni tiklash; CSV import (Phase 1.5). Topshiriq, yechim va jurnallar unga ko'rsatilmaydi.
 
-Markaz menejeri (faqat ko'rish): markaz bo'yicha umumiy ko'rinish — guruhlar, o'qituvchilar va ularning topshiriqlari; istalgan guruh jurnali; yechim tafsiloti (kod va test natijalari, log'siz). Tahrirlash, yaratish va "Qayta tekshirish" tugmalari unga ko'rsatilmaydi.
+Markaz menejeri (markaz rahbari): adminlarni qo'shadi va tahrirlaydi; qolgan hamma narsani ko'radi — o'qituvchilar va ularning topshiriqlari, istalgan guruh jurnali, yechim tafsiloti (kod va test natijalari, log'siz), keyin statistika va reytinglar. Boshqa tahrirlash, yaratish va "Qayta tekshirish" tugmalari unga ko'rsatilmaydi.
 
 Superadmin: Django admin + `/system` (navbat, nodelar, o'rtacha kutish).
 

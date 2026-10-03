@@ -181,8 +181,8 @@ def test_client_ip_is_the_last_forwarded_address(meta: dict[str, str], ip: str) 
     ("who", "labels"),
     [
         ("superadmin", ["Admin panel"]),
-        ("a.admin", ["Oʻqituvchilar", "Oʻquvchilar", "Menejerlar", "Guruhlar", "Topshiriqlar"]),
-        ("a.manager", ["Oʻqituvchilar", "Oʻquvchilar", "Guruhlar", "Topshiriqlar"]),
+        ("a.admin", ["Oʻqituvchilar", "Oʻquvchilar", "Guruhlar"]),
+        ("a.manager", ["Adminlar", "Oʻqituvchilar", "Oʻquvchilar", "Guruhlar", "Topshiriqlar"]),
         ("a.teacher", ["Guruhlarim", "Topshiriqlar"]),
         ("a.student", ["Topshiriqlarim"]),
     ],

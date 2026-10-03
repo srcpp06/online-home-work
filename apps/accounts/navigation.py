@@ -18,18 +18,17 @@ class NavItem:
 # Role -> (label, URL name). Pages arrive task by task (docs/ROADMAP.md).
 MENUS: dict[str, tuple[tuple[str, str], ...]] = {
     Role.SUPERADMIN: (("Admin panel", "admin:index"),),
-    Role.CENTER_ADMIN: (
+    Role.CENTER_MANAGER: (
+        ("Adminlar", "accounts:admins"),
         ("Oʻqituvchilar", "accounts:teachers"),
         ("Oʻquvchilar", "accounts:students"),
-        ("Menejerlar", "accounts:managers"),
         ("Guruhlar", "accounts:groups"),
         ("Topshiriqlar", "tasks:tasks"),
     ),
-    Role.CENTER_MANAGER: (
+    Role.CENTER_ADMIN: (
         ("Oʻqituvchilar", "accounts:teachers"),
         ("Oʻquvchilar", "accounts:students"),
         ("Guruhlar", "accounts:groups"),
-        ("Topshiriqlar", "tasks:tasks"),
     ),
     Role.TEACHER: (("Guruhlarim", "accounts:groups"), ("Topshiriqlar", "tasks:tasks")),
     Role.STUDENT: (("Topshiriqlarim", "submissions:assignments"),),

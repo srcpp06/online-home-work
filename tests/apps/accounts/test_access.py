@@ -25,13 +25,12 @@ def test_superadmin_sees_everything(world: World) -> None:
         assert seen(model, world.superadmin) == set(model.objects.all())
 
 
-def test_center_admin_sees_their_centre_only(world: World) -> None:
+def test_center_admin_sees_their_centres_teachers_and_students(world: World) -> None:
     a = world.a
 
     assert seen(Center, a.admin) == {a.center}
     assert seen(User, a.admin) == {
         a.admin,
-        a.manager,
         a.teacher,
         a.other_teacher,
         a.student,
@@ -46,6 +45,7 @@ def test_center_manager_watches_their_whole_centre(world: World) -> None:
     assert seen(Center, a.manager) == {a.center}
     assert seen(User, a.manager) == {
         a.manager,
+        a.admin,
         a.teacher,
         a.other_teacher,
         a.student,
@@ -126,7 +126,7 @@ def test_another_centres_object_is_404(world: World, viewer: str, target: str) -
         (lambda w: w.a.student, lambda w: w.a.other_student),
         (lambda w: w.a.student, lambda w: w.a.teacher),
         (lambda w: w.a.admin, lambda w: w.superadmin),
-        (lambda w: w.a.manager, lambda w: w.a.admin),
+        (lambda w: w.a.admin, lambda w: w.a.manager),
         (lambda w: w.a.manager, lambda w: w.superadmin),
         (lambda w: w.a.teacher, lambda w: w.a.manager),
         (lambda w: w.a.student, lambda w: w.a.manager),
@@ -139,7 +139,7 @@ def test_another_centres_object_is_404(world: World, viewer: str, target: str) -
         "student-other-student",
         "student-teacher",
         "centre-admin-superadmin",
-        "manager-centre-admin",
+        "centre-admin-manager",
         "manager-superadmin",
         "teacher-manager",
         "student-manager",

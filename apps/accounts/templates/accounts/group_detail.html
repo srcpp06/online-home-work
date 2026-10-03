@@ -7,8 +7,10 @@
   <div class="page-head mt-2">
     <h1>{{ group.name }}</h1>
     <div class="flex flex-wrap gap-3">
-      <a class="btn btn-primary"
-         href="{% url 'submissions:journal' group.pk %}">Jurnal</a>
+      {% if can_view_journal %}
+        <a class="btn btn-primary"
+           href="{% url 'submissions:journal' group.pk %}">Jurnal</a>
+      {% endif %}
       {% if can_manage %}
         <a class="btn btn-secondary"
            href="{% url 'accounts:group_edit' group.pk %}">Tahrirlash</a>

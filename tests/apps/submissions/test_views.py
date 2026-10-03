@@ -397,11 +397,18 @@ class TestJournal:
         assert f'href="/submissions/{a.submission.pk}/"' in page
         assert 'class="cell-pass"' in page
 
-    @pytest.mark.parametrize("who", ["admin", "manager"])
-    def test_the_centre_watches_it_too(self, client: Client, world: World, who: str) -> None:
-        as_(client, getattr(world.a, who))
+    def test_the_manager_watches_it_too(self, client: Client, world: World) -> None:
+        as_(client, world.a.manager)
 
         assert client.get(f"/groups/{world.a.group.pk}/journal/").status_code == 200
+
+    def test_the_admin_does_not_see_results(self, client: Client, world: World) -> None:
+        as_(client, world.a.admin)
+
+        assert client.get(f"/groups/{world.a.group.pk}/journal/").status_code == 403
+        assert client.get(f"/submissions/{world.a.submission.pk}/").status_code == 403
+        group_page = client.get(f"/groups/{world.a.group.pk}/").content.decode()
+        assert f"/groups/{world.a.group.pk}/journal/" not in group_page
 
     def test_another_teachers_group_is_a_404(self, client: Client, world: World) -> None:
         as_(client, world.a.other_teacher)

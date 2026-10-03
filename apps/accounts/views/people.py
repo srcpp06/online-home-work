@@ -1,7 +1,8 @@
-"""A centre's teachers, students and managers (SPEC §1, docs/UI.md §6).
+"""A centre's admins, teachers and students (SPEC §1, docs/UI.md §6).
 
-The centre admin manages them; the centre manager and teachers only look. The superadmin
-works in Django admin, so these pages send them there.
+Who manages whom is MANAGES (apps.accounts.permissions): the manager its admins, the admin
+teachers and students. The manager watches everyone, a teacher their students. The
+superadmin works in Django admin, so these pages send them there.
 """
 
 from typing import Any
@@ -17,11 +18,12 @@ from apps.accounts.access import get_for_user_or_404, visible_to
 from apps.accounts.forms import PersonForm
 from apps.accounts.models import Group, Role, User
 from apps.accounts.passwords import temporary_password
-from apps.accounts.permissions import Action, can
+from apps.accounts.permissions import Action, manages
 from apps.accounts.views._guard import require
 
 # Role -> (list title, list URL name, add button, empty state).
 KINDS: dict[str, tuple[str, str, str, str]] = {
+    Role.CENTER_ADMIN: ("Adminlar", "accounts:admins", "Admin qoʻshish", "Hali admin yoʻq."),
     Role.TEACHER: (
         "Oʻqituvchilar",
         "accounts:teachers",
@@ -29,12 +31,12 @@ KINDS: dict[str, tuple[str, str, str, str]] = {
         "Hali oʻqituvchi yoʻq.",
     ),
     Role.STUDENT: ("Oʻquvchilar", "accounts:students", "Oʻquvchi qoʻshish", "Hali oʻquvchi yoʻq."),
-    Role.CENTER_MANAGER: (
-        "Menejerlar",
-        "accounts:managers",
-        "Menejer qoʻshish",
-        "Hali menejer yoʻq.",
-    ),
+}
+# The lists each role opens; which rows it sees is for_user's job.
+LISTS: dict[str, frozenset[str]] = {
+    Role.CENTER_MANAGER: frozenset({Role.CENTER_ADMIN, Role.TEACHER, Role.STUDENT}),
+    Role.CENTER_ADMIN: frozenset({Role.TEACHER, Role.STUDENT}),
+    Role.TEACHER: frozenset({Role.STUDENT}),
 }
 _NEW_PASSWORD = "accounts.new_password"  # noqa: S105 -- a session key
 
@@ -48,7 +50,7 @@ def _managed(request: HttpRequest, pk: int) -> User:
     """Someone the user may manage: never themselves (their own password has its page)."""
     require(request, Action.MANAGE_PEOPLE)
     person = get_for_user_or_404(User, request.user, pk=pk)
-    if person.pk == request.user.pk:
+    if person.pk == request.user.pk or not manages(request.user, person.role):
         raise PermissionDenied
     return person
 
@@ -57,8 +59,8 @@ def people_list(request: HttpRequest, role: str) -> HttpResponse:
     if request.user.role == Role.SUPERADMIN:
         return _admin_users(role)
     require(request, Action.VIEW_PEOPLE)
-    if role == Role.CENTER_MANAGER:
-        require(request, Action.MANAGE_PEOPLE)
+    if role not in LISTS.get(request.user.role, ()):
+        raise PermissionDenied
     title, _, add_label, empty = KINDS[role]
     people = (
         visible_to(User, request.user)
@@ -77,7 +79,7 @@ def people_list(request: HttpRequest, role: str) -> HttpResponse:
             "role": role,
             "people": people,
             "add_url": reverse(f"accounts:{role.removeprefix('center_')}_add")
-            if can(request.user, Action.MANAGE_PEOPLE)
+            if manages(request.user, role)
             else "",
             "add_label": add_label,
             "empty": empty,
@@ -103,7 +105,7 @@ def person_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "person": person,
             "groups": groups,
             "list_url": reverse(KINDS[person.role][1]) if person.role in KINDS else "",
-            "can_manage": can(request.user, Action.MANAGE_PEOPLE) and person.pk != request.user.pk,
+            "can_manage": manages(request.user, person.role) and person.pk != request.user.pk,
         },
     )
 
@@ -112,6 +114,8 @@ def person_create(request: HttpRequest, role: str) -> HttpResponse:
     if request.user.role == Role.SUPERADMIN:
         return redirect("admin:accounts_user_add")
     require(request, Action.MANAGE_PEOPLE)
+    if not manages(request.user, role):
+        raise PermissionDenied
     person = User(role=role, center=request.user.center, must_change_password=True)
     form = PersonForm(request.POST or None, instance=person, creating=True)
     if request.method == "POST" and form.is_valid():

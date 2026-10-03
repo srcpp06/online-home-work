@@ -33,7 +33,7 @@ def test_teacher_sees_only_the_profiles_of_their_directions(world: World) -> Non
 def test_tasks_are_seen_by_their_centre_and_author(world: World) -> None:
     a, b = world.a, world.b
 
-    assert set(visible_to(Task, a.admin)) == {a.task}
+    assert not visible_to(Task, a.admin).exists()  # the admin works with people only
     assert set(visible_to(Task, a.manager)) == {a.task}
     assert set(visible_to(Task, a.teacher)) == {a.task}
     assert not visible_to(Task, a.other_teacher).exists()

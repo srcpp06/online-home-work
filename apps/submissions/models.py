@@ -30,7 +30,7 @@ class SubmissionQuerySet(models.QuerySet["Submission"]):
         match viewer.role:
             case Role.SUPERADMIN:
                 return self.all()
-            case Role.CENTER_ADMIN | Role.CENTER_MANAGER:
+            case Role.CENTER_MANAGER:
                 return self.filter(assignment__group__center_id=viewer.center_id)
             case Role.TEACHER:
                 return self.filter(assignment__group__teacher=viewer)

@@ -17,7 +17,7 @@ def test_each_role_sees_its_submissions(world: World) -> None:
     assert not visible_to(Submission, a.other_student).exists()
     assert set(visible_to(Submission, a.teacher)) == {a.submission}
     assert not visible_to(Submission, a.other_teacher).exists()
-    assert set(visible_to(Submission, a.admin)) == {a.submission}
+    assert not visible_to(Submission, a.admin).exists()
     assert set(visible_to(Submission, a.manager)) == {a.submission}
     assert set(visible_to(Submission, world.superadmin)) == {a.submission, b.submission}
 

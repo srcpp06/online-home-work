@@ -48,6 +48,7 @@ def group_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "group": group,
             "students": group.students.order_by("last_name", "first_name", "username"),
             "can_manage": can(request.user, Action.MANAGE_GROUPS),
+            "can_view_journal": can(request.user, Action.VIEW_JOURNAL),
             "can_open_people": can(request.user, Action.VIEW_PEOPLE),
         },
     )

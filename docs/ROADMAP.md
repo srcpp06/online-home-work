@@ -45,6 +45,37 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [ ] Jurnalni o'quvchilarga ochishni faqat markaz admini qila oladi (guruh tahriri); o'qituvchi ham o'z guruhida qila olsin
 - [ ] Yashirin test xabarini o'quvchiga ochish sozlamasi (`show_hidden_messages`, SPEC §3.8) yo'q
 
+## Phase 1.5 — Erkin sinovidan keyin: professional platforma
+
+Erkin birinchi deploydan keyin so'radi (2026-10-03): qulay, zamonaviy, imkoniyatlari ko'p, premium. Javoblari `docs/decisions.md` da. Har bosqich oxirida: testlar, skrinshotlar, deploy.
+
+**1-bosqich — rollar, kirish, profil**
+- [ ] Yangi rollar: menejer hammasini ko'radi va faqat adminlarni boshqaradi; admin faqat o'qituvchi, o'quvchi va guruhlar bilan ishlaydi, topshiriq, natija va jurnallarni ko'rmaydi; menejerni superadmin yaratadi
+- [ ] Alohida kirish: o'quvchilar va xodimlar (o'qituvchi, menejer, admin) uchun alohida sahifa; bosh sahifa
+- [ ] Superadmin paneli internetdan yopiq: faqat serverga SSH tunnel orqali
+- [ ] Shaxsiy profil: rasm, aloqa, o'zi haqida, rolga qarab statistika
+
+**2-bosqich — admin ish joyi**
+- [ ] Har ro'yxatda qidiruv va filtrlar (guruh, yo'nalish, holat), sahifalash
+- [ ] O'quvchilarni belgilab, ommaviy guruhga qo'shish; guruh ichida qidirib qo'shish; CSV import
+- [ ] Admin bosh sahifasi: raqamlar, oxirgi o'zgarishlar
+
+**3-bosqich — mavzular daraxti va topshiriq muharriri**
+- [ ] Har o'qituvchining Notion kabi mavzular daraxti (mavzu → ichki mavzu → topshiriqlar); o'quvchi topshiriqqa o'qituvchisining daraxti orqali kiradi
+- [ ] Muharrir: tugmali panel (Markdown ichkarida), o'ngda daftar varag'ida jonli ko'rinish, LaTeX formulalar (KaTeX, self-hosted), rasm yuklash; qiyinchilik, toifa, ball
+- [ ] Paket formati sxemasi va namuna paketlar (Dart, Flutter) sahifadan yuklab olinadi
+- [ ] Topshiriqlarda qidiruv va filtr
+
+**4-bosqich — algoritmik masalalar (acmp kabi)**
+- [ ] Yangi tur: stdin/stdout testlari (kiruvchi va chiquvchi ma'lumot), vaqt va xotira limiti, namunaviy testlar sahifada; checker (aniq moslik, keyin maxsus checker)
+
+**5-bosqich — statistika va yulduzlar**
+- [ ] O'qituvchi va menejer uchun statistika: kim ko'p bajaryapti — guruh, yo'nalish, markaz kesimida
+- [ ] O'quvchi topshiriqni yechgach yulduz qo'yadi; o'qituvchi reytingi — jami yulduzlar; menejerga o'qituvchilar reytingi
+
+**6-bosqich — bosh sahifa va sayqal**
+- [ ] Animatsiyali bosh sahifa (sayt haqida), butun sayt premium darajada; bo'sh joylardan unumli foydalanish
+
 ## Phase 2 — Sifat
 
 - [x] Starter zip generatsiyasi va yuklab olish — Phase 1 da qilindi (`judge/packaging/starter.py`, o'quvchi topshiriq sahifasidan yuklab oladi)

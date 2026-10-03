@@ -4,31 +4,35 @@ Bu hujjat platforma nima qilishi va qanday ishlashi kerakligini belgilaydi. Unda
 
 ## 1. Rollar va ruxsatlar
 
-Besh rol: superadmin (Erkin), markaz admini, markaz menejeri, o'qituvchi, o'quvchi.
+Besh rol: superadmin (Erkin), markaz menejeri, markaz admini, o'qituvchi, o'quvchi. Kim kimni boshqaradi: superadmin — markazlar va menejerlar; menejer — adminlar; admin — o'qituvchi va o'quvchilar (`MANAGES`).
 
-| Amal | Superadmin | Markaz admini | Markaz menejeri | O'qituvchi | O'quvchi |
+| Amal | Superadmin | Markaz menejeri | Markaz admini | O'qituvchi | O'quvchi |
 |---|---|---|---|---|---|
-| Markazlar va markaz adminlari | ✓ | — | — | — | — |
-| Markaz menejerlari, o'qituvchi va o'quvchilar: qo'shish, tahrirlash, o'chirish, parolni tiklash | ✓ | o'z markazi | — | — | — |
-| Guruhlar: yaratish, tahrirlash | ✓ | o'z markazi | — | — | — |
+| Markazlar va markaz menejerlari | ✓ | — | — | — | — |
+| Markaz adminlari: qo'shish, tahrirlash, o'chirish, parolni tiklash | ✓ | o'z markazi | — | — | — |
+| O'qituvchi va o'quvchilar: qo'shish, tahrirlash, o'chirish, parolni tiklash | ✓ | — | o'z markazi | — | — |
+| Odamlarni ko'rish | ✓ | o'z markazi | o'qituvchi va o'quvchilar | o'z o'quvchilari | — |
+| Guruhlar: yaratish, tahrirlash, o'quvchilarni biriktirish | ✓ | — | o'z markazi | — | — |
 | Guruhlarni ko'rish (o'qituvchi, o'quvchilar) | ✓ | o'z markazi | o'z markazi | o'z guruhlari | — |
 | Topshiriq yaratish, paket yuklash, guruhga biriktirish, qayta tekshirish | — | — | — | o'z guruhlari | — |
-| Topshiriqlarni ko'rish: shart, sozlamalar, test nomlari (paket va yashirin test kodi emas) | ✓ | o'z markazi | o'z markazi | o'z guruhlari | biriktirilganlari |
-| Jurnal | ✓ | o'z markazi | o'z markazi | o'z guruhlari | guruhda yoqilgan bo'lsa |
-| Yechim kodi va test natijalari | ✓ | o'z markazi | o'z markazi | o'z guruhlari | faqat o'ziniki |
-| Tekshiruvchining to'liq logi | ✓ | o'z markazi | — | o'z guruhlari | — |
+| Topshiriqlarni ko'rish: shart, sozlamalar, test nomlari (paket va yashirin test kodi emas) | ✓ | o'z markazi | — | o'z guruhlari | biriktirilganlari |
+| Jurnal | ✓ | o'z markazi | — | o'z guruhlari | guruhda yoqilgan bo'lsa |
+| Yechim kodi va test natijalari | ✓ | o'z markazi | — | o'z guruhlari | faqat o'ziniki |
+| Tekshiruvchining to'liq logi | ✓ | — | — | o'z guruhlari | — |
 | Yechim yuborish | — | — | — | — | biriktirilgan topshiriqlarga |
 | Runner profillar, `/system` sahifasi | ✓ | — | — | — | — |
 
-Markaz menejeri — markaz rahbari uchun kuzatuvchi rol: o'z markazidagi o'qituvchilar ishini (topshiriqlar, guruhlar) va o'quvchilar natijalarini (jurnal, yechimlar) **faqat ko'radi**, hech narsani yaratmaydi, o'zgartirmaydi va o'chirmaydi. Yashirin test kodi (paket) va to'liq log unga ko'rsatilmaydi: kuzatish uchun kerak emas, ko'rgan odam qancha kam bo'lsa, sizib chiqish xavfi shuncha kichik. Menejerni superadmin yoki o'sha markaz admini yaratadi; admin panelga kira olmaydi.
+Markaz menejeri — markaz rahbari: o'z markazidagi hamma narsani ko'radi (o'qituvchilar topshiriqlari, guruhlar, jurnallar, yechimlar, keyin statistika va reytinglar) va faqat markaz adminlarini qo'shadi, tahrirlaydi. Boshqa hech narsani o'zgartirmaydi. Yashirin test kodi (paket) va to'liq log unga ko'rsatilmaydi: kuzatish uchun kerak emas. Menejerni superadmin yaratadi.
 
-Jadvalning kod ko'rinishi — `apps/accounts/permissions.py` (`ROLE_ACTIONS`, `can()`): `can()` rol bu turdagi amalni umuman bajara oladimi, `for_user()` qaysi obyektlarga — degan savolga javob beradi; har bir view ikkalasini tekshiradi.
+Markaz admini — odamlar bilan ishlaydi: o'qituvchi va o'quvchilarni qo'shadi, tahrirlaydi, guruhlarga biriktiradi. Topshiriqlar, yechimlar va jurnallarni ko'rmaydi.
+
+Jadvalning kod ko'rinishi — `apps/accounts/permissions.py` (`ROLE_ACTIONS`, `can()`, `MANAGES`, `manages()`): `can()` rol bu turdagi amalni umuman bajara oladimi, `for_user()` qaysi obyektlarga — degan savolga javob beradi; har bir view ikkalasini tekshiradi.
 
 Qoidalar:
 - Markazlar to'liq ajratilgan (multi-tenant). Har bir queryset `for_user(user)` orqali filtrlanadi; ID bilan obyekt olish faqat `get_for_user_or_404()` orqali.
 - Har bir URL uchun boshqa markaz foydalanuvchisi bilan IDOR testi yoziladi (parametrlangan test).
 - Superadmin `/admin/` (Django admin) dan foydalanadi; qolgan rollar uchun alohida sahifalar.
-- Foydalanuvchilarni admin yaratadi. Login — username, email shart emas. Birinchi kirishda parol almashtiriladi.
+- Foydalanuvchilarni yuqoridagi tartibda yaratishadi. Login — username, email shart emas. Birinchi kirishda parol almashtiriladi.
 - O'qituvchiga yo'nalishlar biriktiriladi: `flutter`, `backend`, `frontend`. Topshiriq yaratishda faqat shu yo'nalishlarning profillari ko'rinadi, forma ham shunga moslashadi.
 
 ## 2. Domen modeli

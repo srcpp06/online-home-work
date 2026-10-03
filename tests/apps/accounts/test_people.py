@@ -1,4 +1,5 @@
-"""The centre admin manages people; the manager and teachers only look (SPEC §1)."""
+"""Who manages whom (SPEC §1): the manager its admins, the admin teachers and students;
+the manager watches everyone, teachers see their students."""
 
 import re
 
@@ -26,7 +27,9 @@ def test_admin_sees_their_centres_teachers_only(client: Client, world: World) ->
     assert "Oʻqituvchi qoʻshish" in html
 
 
-def test_manager_looks_without_buttons(client: Client, world: World) -> None:
+def test_manager_watches_teachers_and_students_without_buttons(
+    client: Client, world: World
+) -> None:
     as_(client, world.a.manager)
 
     teachers = client.get("/teachers/").content.decode()
@@ -38,15 +41,32 @@ def test_manager_looks_without_buttons(client: Client, world: World) -> None:
         assert button not in person
 
 
-@pytest.mark.parametrize(
-    "url", ["/managers/", "/teachers/add/", "/students/add/", "/managers/add/"]
-)
-def test_manager_cannot_open_admin_pages(client: Client, world: World, url: str) -> None:
+def test_manager_manages_the_centres_admins(client: Client, world: World) -> None:
+    as_(client, world.a.manager)
+
+    admins = client.get("/admins/").content.decode()
+    person = client.get(f"/people/{world.a.admin.pk}/").content.decode()
+
+    assert world.a.admin.username in admins
+    assert world.b.admin.username not in admins
+    assert "Admin qoʻshish" in admins
+    assert "Tahrirlash" in person
+    client.post(
+        "/admins/add/", {"last_name": "Usmonova", "first_name": "Nodira", "username": "nodira"}
+    )
+    nodira = User.objects.get(username="nodira")
+    assert (nodira.role, nodira.center) == (Role.CENTER_ADMIN, world.a.center)
+
+
+@pytest.mark.parametrize("url", ["/teachers/add/", "/students/add/"])
+def test_manager_does_not_add_teachers_or_students(client: Client, world: World, url: str) -> None:
     assert as_(client, world.a.manager).get(url).status_code == 403
 
 
 @pytest.mark.parametrize("action", ["edit", "password", "delete"])
-def test_manager_cannot_change_people(client: Client, world: World, action: str) -> None:
+def test_manager_cannot_change_teachers_or_students(
+    client: Client, world: World, action: str
+) -> None:
     url = f"/people/{world.a.student.pk}/{action}/"
     as_(client, world.a.manager)
 
@@ -55,6 +75,15 @@ def test_manager_cannot_change_people(client: Client, world: World, action: str)
         client.post(url, {"first_name": "X", "last_name": "X", "username": "x"}).status_code == 403
     )
     assert User.objects.filter(pk=world.a.student.pk, first_name="").exists()
+
+
+@pytest.mark.parametrize("url", ["/admins/", "/admins/add/"])
+def test_admin_does_not_manage_admins(client: Client, world: World, url: str) -> None:
+    assert as_(client, world.a.admin).get(url).status_code == 403
+
+
+def test_admin_does_not_see_the_manager(client: Client, world: World) -> None:
+    assert as_(client, world.a.admin).get(f"/people/{world.a.manager.pk}/").status_code == 404
 
 
 def test_teacher_sees_only_their_students(client: Client, world: World) -> None:
@@ -130,16 +159,11 @@ class TestAdding:
         assert response.status_code == 200
         assert User.objects.filter(username=world.b.teacher.username).count() == 1
 
-    def test_students_and_managers_have_no_directions(self, client: Client, world: World) -> None:
+    def test_students_and_admins_have_no_directions(self, client: Client, world: World) -> None:
         as_(client, world.a.admin)
-
-        for url in ("/students/add/", "/managers/add/"):
-            assert 'name="directions"' not in client.get(url).content.decode()
-        client.post(
-            "/managers/add/",
-            {"last_name": "Usmonova", "first_name": "Nodira", "username": "nodira"},
-        )
-        assert User.objects.get(username="nodira").role == Role.CENTER_MANAGER
+        assert 'name="directions"' not in client.get("/students/add/").content.decode()
+        as_(client, world.a.manager)
+        assert 'name="directions"' not in client.get("/admins/add/").content.decode()
 
 
 class TestChanging:
