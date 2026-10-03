@@ -11,6 +11,7 @@ Bu fayl har sessiyada to'liq yuklanadi, shuning uchun qisqa. Batafsil ma'lumot a
 - `docs/UI.md` — dizayn tizimi, sahifalar, UI matnlari. Har qanday shablon yoki CSS ishidan oldin o'qi.
 - `docs/decisions.md` — arxitektura qarorlari jurnali (sana, qaror, sabab). Uni sen yuritasan.
 - `docs/poc-results.md` — Phase 0 o'lchovlari (Phase 0 davomida yaratiladi).
+- `docs/deploy.md` — serverga deploy, zaxira nusxalar, muammolar.
 
 ## Ishlash qoidalari
 
@@ -115,6 +116,9 @@ make test-docker   # Docker talab qiladigan integration testlar (marker: docker)
 make lint          # ruff check, ruff format --check, djlint
 make check         # lint + test — har commitdan oldin
 make fixtures-dart # dart_json parser fixture'larini qayta yozib olish (Docker + internet)
+make deploy        # prod: compose.prod.yml ni yig'ish va ishga tushirish/yangilash (docs/deploy.md)
+make prod-logs     # prod loglari (SERVICE=worker — bitta servis)
+make backup        # prod bazasining zaxira nusxasi (backups/)
 uv run python -m judge.cli build TASK.zip --profile dart        # task image
 uv run python -m judge.cli run TASK.zip YECHIM.zip --profile dart # tekshirish (--json, --log)
 ```

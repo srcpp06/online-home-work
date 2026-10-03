@@ -1,0 +1,17 @@
+# Only what the image needs; secrets and local state never go in.
+.env
+.env.*
+!.env.example
+.git
+.venv
+**/__pycache__
+.pytest_cache
+.ruff_cache
+media
+staticfiles
+static/css/app.css
+.django_tailwind_cli
+docs/poc
+examples
+tests
+backups

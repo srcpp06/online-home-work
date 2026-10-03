@@ -9,7 +9,7 @@ import pytest
 from apps.system import queue
 from apps.system.models import Job, WorkerNode
 from judge.adapters.worker import Worker, WorkerSettings, check_memory, parse_slots
-from judge.config import ConfigError
+from judge.config import ConfigError, read_env
 from tests.apps.world import World
 
 SETTINGS = WorkerSettings("node-t", {"fast": 2, "heavy": 1}, 0.05, 30, 0)
@@ -114,3 +114,26 @@ def test_a_heavy_slot_has_room_for_either_lane() -> None:
     """A heavy slot may run a fast job, so it is counted with the larger of the two."""
     with pytest.raises(ConfigError, match=r"need 2048 MB"):
         check_memory({"heavy": 1}, {"heavy": 1024, "fast": 2048}, 2000, 0)
+
+
+@pytest.mark.django_db
+def test_a_missing_base_image_stops_the_worker_with_the_fix(world: World) -> None:
+    """Without it every build would fail three times and end as "Tizim xatosi"."""
+    from docker.errors import ImageNotFound
+
+    from judge.adapters.worker import check_base_images
+    from judge.config import JudgeConfig
+
+    class Images:
+        def get(self, tag: str) -> object:
+            if tag.startswith("ohw-base-flutter"):
+                raise ImageNotFound(tag)
+            return object()
+
+    class Client:
+        images = Images()
+
+    config = JudgeConfig.from_env(read_env())
+
+    with pytest.raises(ConfigError, match=r"ohw-base-flutter:\S+ .*make base-images"):
+        check_base_images(Client(), config)  # type: ignore[arg-type]

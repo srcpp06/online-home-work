@@ -35,7 +35,8 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 - [x] `judge_worker`: slotlar va lane'lar, SKIP LOCKED, lease/heartbeat, reaper, xotira sig'ishi tekshiruvi — `make worker`; `judge/adapters/worker.py` (slot thread'lari), `apps/system/queue.py` (claim/lease/reap, 3 urinishdan keyin `system_error`); image'i yo'q node uni paketdan qayta yig'adi; heavy slot bo'sh qolsa fast ishni oladi
 - [x] Jonli natija sahifasi: HTMX polling, navbatdagi o'rin, verdict muhri — `/submissions/<id>/`: daftar qatorlari, "yozilmoqda" qatori, muhr, kompilyatsiya xatosi tozalangan holda; o'qituvchi, admin va menejer uchun kod (Pygments), o'qituvchiga "Qayta tekshirish"; real worker bilan brauzerda tekshirildi
 - [x] Jurnal — `/groups/<id>/journal/` (`apps/submissions/journal.py`): `+`, `+N`, `−N`, `…`, kechikkan `*`; saralash yechildi ↓, urinishlar ↑, ism; sticky sarlavha va ism ustuni; katak yechimni ochadi, yechim sahifasida o'quvchining barcha urinishlari; o'quvchiga faqat guruhda yoqilgan bo'lsa va faqat o'z kataklari ochiladi
-- [ ] `compose.prod.yml`, Caddy, `docs/deploy.md`; serverga birinchi deploy
+- [x] `compose.prod.yml`, Caddy, `docs/deploy.md` — bitta image (`Dockerfile`: web, worker, migrate), `scripts/create-env.sh --production DOMAIN`, `make deploy`, `scripts/backup.sh`; sandboxda to'liq stek bilan tekshirildi: HTTPS, build → yechim → "Qabul qilindi", worker'ning SIGTERM'da to'xtashi, zaxira
+- [ ] Serverga birinchi deploy — Erkin, `docs/deploy.md` bo'yicha
 - [ ] **Qaror nuqtasi:** bitta haqiqiy guruh bilan sinov
 
 ## Phase 2 — Sifat

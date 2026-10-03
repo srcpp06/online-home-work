@@ -2,8 +2,9 @@
 UV ?= uv
 
 .PHONY: help setup db db-down migrate css dev test test-docker lint format check
-.PHONY: worker base-images poc fixtures-dart needs-uv needs-docker needs-compose
+.PHONY: worker base-images poc fixtures-dart needs-uv needs-docker needs-compose deploy prod-logs backup
 COMPOSE_DEV = docker compose -f compose.dev.yml
+COMPOSE_PROD = docker compose -f compose.prod.yml
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-14s %s\n", $$1, $$2}'
@@ -83,3 +84,14 @@ poc: needs-uv needs-docker .env ## Run examples/ through the judge and print tim
 
 fixtures-dart: needs-docker ## Re-record dart_json parser fixtures (needs Docker and internet)
 	scripts/record-dart-json-fixtures.sh
+
+# --- Production (docs/deploy.md) ---
+deploy: needs-compose ## Production: build and start, or update, everything in compose.prod.yml
+	$(COMPOSE_PROD) up --detach --build
+	$(COMPOSE_PROD) ps --all
+
+prod-logs: needs-compose ## Production: follow the logs (SERVICE=worker for one service)
+	$(COMPOSE_PROD) logs --follow --tail 100 $(SERVICE)
+
+backup: needs-compose ## Production: save the database now (backups/)
+	scripts/backup.sh db

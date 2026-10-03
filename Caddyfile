@@ -1,0 +1,10 @@
+# HTTPS for SITE_DOMAIN (certificates are automatic), everything else to Django.
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	# Uploads are limited here first, then by Django (SPEC §5). Keep it above TASK_MAX_ZIP_MB.
+	request_body {
+		max_size {$UPLOAD_MAX_BODY}
+	}
+	header -Server
+	reverse_proxy web:8000
+}

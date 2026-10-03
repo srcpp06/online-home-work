@@ -1,0 +1,89 @@
+# Production (docs/deploy.md): docker compose -f compose.prod.yml up -d --build
+# Every setting comes from .env next to this file (docs/SPEC.md, section 6).
+
+x-app: &app
+  build: .
+  image: ohw-app:latest
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - media:/data/media
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ohw
+      POSTGRES_USER: ohw
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ohw -d ohw"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  # Runs once per deploy, before web and worker start.
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["sh", "-c", "python manage.py migrate --noinput && python manage.py load_profiles"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    # Workers and timeouts: GUNICORN_CMD_ARGS in .env.
+    command: ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # The only service that talks to Docker (CLAUDE.md, "Arxitektura"). Student code runs in
+  # the containers it starts, never in this one.
+  worker:
+    <<: *app
+    command: ["python", "manage.py", "judge_worker"]
+    volumes:
+      - media:/data/media
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:?set DOCKER_GID in .env: scripts/create-env.sh --production fills it}"
+    # On SIGTERM the worker takes no new jobs and finishes the running ones.
+    stop_grace_period: 6m
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env}
+      UPLOAD_MAX_BODY: ${UPLOAD_MAX_BODY:-60MB}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    logging: *logging
+
+volumes:
+  pgdata:
+  media:
+  caddy_data:
+  caddy_config:

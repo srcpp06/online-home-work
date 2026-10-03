@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from judge.adapters.worker import (
     Worker,
     WorkerSettings,
+    check_base_images,
     check_memory,
     lane_memory_mb,
     total_memory_mb,
@@ -38,6 +39,10 @@ class Command(BaseCommand):
             client = docker_client.connect()
         except docker.errors.DockerException as error:
             raise CommandError(f"can't reach Docker: {error}") from None
+        try:
+            check_base_images(client, config)
+        except ConfigError as error:
+            raise CommandError(str(error)) from None
 
         stop = threading.Event()
 

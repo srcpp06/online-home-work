@@ -21,8 +21,13 @@ Admin uchun birinchi foydalanuvchi: `uv run python manage.py createsuperuser`. D
 
 `.env` eski bo'lsa (sayt `missing settings` deb to'xtasa): `rm .env` va `make setup`.
 
+Tekshiruvlar uchun worker alohida terminalda: `make worker` (avval bir marta `make base-images`).
+
+Serverga o'rnatish: [docs/deploy.md](docs/deploy.md) (`make deploy`).
+
 ## Hujjatlar
 
 - [docs/SPEC.md](docs/SPEC.md): rollar, domen modeli, judge, xavfsizlik, konfiguratsiya
 - [docs/UI.md](docs/UI.md): dizayn tizimi va UI matnlari
 - [docs/decisions.md](docs/decisions.md): arxitektura qarorlari jurnali
+- [docs/deploy.md](docs/deploy.md): serverga deploy, zaxira nusxalar, muammolar

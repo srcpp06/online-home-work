@@ -19,6 +19,7 @@ from typing import Self
 import docker
 from django.db import close_old_connections, connection
 from django.utils import timezone
+from docker.errors import ImageNotFound
 
 from apps.system import queue
 from apps.system.models import Job, WorkerNode
@@ -106,6 +107,23 @@ def check_memory(
             f"the slots need {needed} MB ({parts}) but {available} MB is free "
             f"({total_mb} MB minus JUDGE_RESERVED_MEMORY_MB={reserved_mb}). "
             "Lower JUDGE_SLOTS or the reserve, or use a bigger server."
+        )
+
+
+def check_base_images(client: docker.DockerClient, config: JudgeConfig) -> None:
+    """Every active profile's base image is on this node. Without one every build would
+    fail three times and end as "Tizim xatosi"; refusing to start says what to do."""
+    missing = []
+    for profile in RunnerProfile.objects.filter(is_active=True).order_by("slug"):
+        tag = config.base_image(profile.judge_profile())
+        try:
+            client.images.get(tag)
+        except ImageNotFound:
+            missing.append(tag)
+    if missing:
+        raise ConfigError(
+            f"base images missing on this node: {', '.join(missing)}. "
+            "Build them on the host with `make base-images` (docs/deploy.md, step 4)."
         )
 
 
