@@ -107,4 +107,3 @@ Yangi kod (`1d43ec4`) bilan `make poc`: 17/17 verdict kutilgandek, [`aarch64-202
 | Yig'ish vaqti (iliq qayta tekshirish bilan) | 15.6 → 19.0 s | 21.3 → 29.4 s |
 
 To'g'ri yechimlar va boshqa verdictlar o'zgarmadi; yig'ish iliq qayta tekshirish hisobiga 3–8 s uzaydi, bu bir martalik narx.
-
