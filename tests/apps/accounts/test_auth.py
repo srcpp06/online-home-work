@@ -12,29 +12,92 @@ from tests.apps.world import PASSWORD, World, make_user
 pytestmark = pytest.mark.django_db
 
 
-def sign_in(client: Client, username: str, password: str = PASSWORD, **headers: Any) -> Any:
-    return client.post("/login/", {"username": username, "password": password}, **headers)
+STAFF_DOOR, STUDENT_DOOR = "/staff/login/", "/login/"
 
 
-def test_login_page_is_open_and_in_uzbek(client: Client) -> None:
-    html = client.get("/login/").content.decode()
+def door_of(username: str) -> str:
+    user = User.objects.filter(username=username).first()
+    return STUDENT_DOOR if user is None or user.role == Role.STUDENT else STAFF_DOOR
 
+
+def sign_in(
+    client: Client, username: str, password: str = PASSWORD, door: str = "", **headers: Any
+) -> Any:
+    """Signs in at the user's own door unless another one is given."""
+    data = {"username": username, "password": password}
+    return client.post(door or door_of(username), data, **headers)
+
+
+@pytest.mark.parametrize(
+    ("url", "title"),
+    [(STUDENT_DOOR, "Oʻquvchilar uchun kirish"), (STAFF_DOOR, "Xodimlar uchun kirish")],
+)
+def test_both_doors_are_open_and_in_uzbek(client: Client, url: str, title: str) -> None:
+    html = client.get(url).content.decode()
+
+    assert title in html
     assert ">Login<" in html
     assert ">Parol<" in html
     assert "Kirish</button>" in html
 
 
-def test_every_other_page_needs_a_login(client: Client, world: World) -> None:
-    for url in ("/", "/teachers/", f"/people/{world.a.student.pk}/", "/groups/", "/password/"):
+def test_the_landing_page_shows_both_doors(client: Client) -> None:
+    html = client.get("/").content.decode()
+
+    assert f'href="{STUDENT_DOOR}"' in html
+    assert f'href="{STAFF_DOOR}"' in html
+
+
+def test_every_other_page_sends_to_the_landing_page_and_keeps_the_address(
+    client: Client, world: World
+) -> None:
+    for url in ("/teachers/", f"/people/{world.a.student.pk}/", "/groups/", "/password/"):
         response = client.get(url)
         assert response.status_code == 302, url
-        assert response["Location"].startswith("/login/?next="), url
+        assert response["Location"].startswith("/?next="), url
+
+    landing = client.get("/?next=/groups/").content.decode()
+    assert f'href="{STAFF_DOOR}?next=%2Fgroups%2F"' in landing
+    assert f'href="{STUDENT_DOOR}?next=%2Fgroups%2F"' in landing
+
+
+@pytest.mark.parametrize("who", ["a.teacher", "a.manager", "a.admin"])
+def test_staff_at_the_students_door_are_sent_to_their_own(
+    client: Client, world: World, who: str
+) -> None:
+    user = getattr(world.a, who.split(".")[1])
+
+    response = sign_in(client, user.username, door=STUDENT_DOOR)
+
+    html = response.content.decode()
+    assert response.status_code == 200
+    assert "Bu xodim hisobi" in html
+    assert f'href="{STAFF_DOOR}"' in html
+    assert "_auth_user_id" not in client.session
+
+
+def test_a_student_at_the_staff_door_is_sent_to_theirs(client: Client, world: World) -> None:
+    response = sign_in(client, world.a.student.username, door=STAFF_DOOR)
+
+    html = response.content.decode()
+    assert "Bu oʻquvchi hisobi" in html
+    assert f'href="{STUDENT_DOOR}"' in html
+    assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.parametrize("door", [STUDENT_DOOR, STAFF_DOOR])
+def test_the_superadmin_never_signs_in_at_the_sites_doors(
+    client: Client, world: World, door: str
+) -> None:
+    response = sign_in(client, world.superadmin.username, door=door)
+
+    assert "Login yoki parol notoʻgʻri. Qayta kiriting." in response.content.decode()
+    assert "_auth_user_id" not in client.session
 
 
 @pytest.mark.parametrize(
     ("who", "home"),
     [
-        ("superadmin", "/admin/"),
         ("a.admin", "/teachers/"),
         ("a.manager", "/teachers/"),
         ("a.teacher", "/groups/"),
@@ -78,7 +141,7 @@ def test_sign_out_is_a_post(client: Client, world: World) -> None:
     client.force_login(world.a.teacher)
 
     assert client.get("/logout/").status_code == 405
-    assert client.post("/logout/")["Location"] == "/login/"
+    assert client.post("/logout/")["Location"] == "/"
     assert client.get("/groups/").status_code == 302
 
 
@@ -98,7 +161,7 @@ class TestFirstSignIn:
     def test_signing_out_still_works(self, client: Client, newcomer: User) -> None:
         sign_in(client, "yangi")
 
-        assert client.post("/logout/")["Location"] == "/login/"
+        assert client.post("/logout/")["Location"] == "/"
 
     def test_new_password_must_differ(self, client: Client, newcomer: User) -> None:
         sign_in(client, "yangi")
@@ -230,4 +293,4 @@ def test_admin_login_sends_other_roles_to_the_site_login(client: Client, world: 
     html = response.content.decode()
     assert response.status_code == 200
     assert "Admin panelga faqat superadmin kiradi" in html
-    assert 'href="/login/"' in html
+    assert 'href="/"' in html

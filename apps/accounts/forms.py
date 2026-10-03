@@ -10,26 +10,50 @@ from django.utils.html import format_html
 
 from apps.accounts.models import Group, Role, User, check_students
 
+STAFF_ROLES = frozenset({Role.TEACHER, Role.CENTER_MANAGER, Role.CENTER_ADMIN})
+
 
 class LoginForm(AuthenticationForm):
+    """One of the site's two doors: students sign in at theirs, staff at theirs.
+
+    Someone at the wrong door is told which one is theirs, but only after a correct
+    password. The superadmin has no door here (only /admin/) and gets the plain refusal.
+    """
+
     error_messages = {  # noqa: RUF012 -- Django's documented form attribute
         "invalid_login": "Login yoki parol notoʻgʻri. Qayta kiriting.",
         "inactive": "Bu hisob oʻchirilgan. Markaz administratoriga murojaat qiling.",
         "center_inactive": "Markazingiz hozir faol emas. Markaz administratoriga murojaat qiling.",
     }
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, for_staff: bool = False, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        self.for_staff = for_staff
         self.fields["username"].label = "Login"
         self.fields["password"].label = "Parol"
         style_fields(self)
 
     def confirm_login_allowed(self, user: User) -> None:  # type: ignore[override]
         super().confirm_login_allowed(user)
+        if user.role == Role.SUPERADMIN:
+            raise self.get_invalid_login_error()
+        if (user.role in STAFF_ROLES) != self.for_staff:
+            raise forms.ValidationError(self._wrong_door(user), code="wrong_door")
         if user.center is not None and not user.center.is_active:
             raise forms.ValidationError(
                 self.error_messages["center_inactive"], code="center_inactive"
             )
+
+    def _wrong_door(self, user: User) -> str:
+        if user.role in STAFF_ROLES:
+            return format_html(
+                'Bu xodim hisobi. <a href="{}">Xodimlar uchun kirish</a> sahifasidan kiring.',
+                reverse("accounts:staff_login"),
+            )
+        return format_html(
+            'Bu oʻquvchi hisobi. <a href="{}">Oʻquvchilar uchun kirish</a> sahifasidan kiring.',
+            reverse("accounts:login"),
+        )
 
 
 class AdminLoginForm(AdminAuthenticationForm):
@@ -42,8 +66,8 @@ class AdminLoginForm(AdminAuthenticationForm):
             "invalid_login": format_html(
                 "Login yoki parol notoʻgʻri. Admin panelga faqat superadmin kiradi; markaz "
                 'xodimlari, oʻqituvchi va oʻquvchilar <a href="{}">saytning kirish '
-                "sahifasidan</a> kiradi.",
-                reverse("accounts:login"),
+                "sahifalaridan</a> kiradi.",
+                reverse("accounts:home"),
             ),
         }
 

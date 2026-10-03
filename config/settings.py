@@ -94,9 +94,10 @@ AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",  # refuses locked-out logins first
     "django.contrib.auth.backends.ModelBackend",
 ]
-LOGIN_URL = "accounts:login"
+# Signed-out visitors land on the page with the two doors (students, staff).
+LOGIN_URL = "accounts:home"
 LOGIN_REDIRECT_URL = "accounts:home"
-LOGOUT_REDIRECT_URL = "accounts:login"
+LOGOUT_REDIRECT_URL = "accounts:home"
 # A session lasts a day at most: classroom computers are shared.
 SESSION_COOKIE_AGE = 24 * 60 * 60
 

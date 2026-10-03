@@ -8,6 +8,7 @@ app_name = "accounts"
 urlpatterns = [
     path("", auth.home, name="home"),
     path("login/", auth.LoginView.as_view(), name="login"),
+    path("staff/login/", auth.StaffLoginView.as_view(), name="staff_login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("password/", auth.PasswordChangeView.as_view(), name="password_change"),
     path("teachers/", people.people_list, {"role": Role.TEACHER}, name="teachers"),

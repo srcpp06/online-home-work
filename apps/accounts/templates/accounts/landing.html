@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}
+  Online Home Work
+{% endblock title %}
+{% block body %}
+  <main class="min-h-dvh px-4 py-10 sm:py-16">
+    <div class="mx-auto max-w-5xl">
+      <p class="font-serif text-lg text-ink">Online Home Work</p>
+      <h1 class="mt-4 max-w-3xl text-4xl sm:text-5xl leading-tight">
+        Uy vazifasi daftari: loyihalar va masalalar avtomatik tekshiriladi
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg text-text-2">
+        Oʻqituvchi topshiriq va testlarni beradi, oʻquvchi yechimini yuboradi. Platforma uni alohida, xavfsiz muhitda ishga tushirib, har bir test natijasini oʻsha zahoti daftar varagʻida koʻrsatadi.
+      </p>
+      {% if next %}<p class="mt-6 text-text-2" role="status">Davom etish uchun kiring.</p>{% endif %}
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 max-w-3xl">
+        <a class="door"
+           href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode:'' }}{% endif %}">
+          <span class="door-title">Oʻquvchi</span>
+          <span class="text-text-2">Topshiriqlar, yechim yuborish, natijalar</span>
+          <span class="door-go">Oʻquvchilar uchun kirish</span>
+        </a>
+        <a class="door"
+           href="{% url 'accounts:staff_login' %}{% if next %}?next={{ next|urlencode:'' }}{% endif %}">
+          <span class="door-title">Oʻqituvchi, menejer, admin</span>
+          <span class="text-text-2">Topshiriqlar, guruhlar, jurnal, statistika</span>
+          <span class="door-go">Xodimlar uchun kirish</span>
+        </a>
+      </div>
+      <ul class="mt-16 grid gap-8 sm:grid-cols-3">
+        <li>
+          <h2 class="text-lg">Jonli natija</h2>
+          <p class="mt-2 text-text-2">Har bir test oʻtishi bilan daftarga yoziladi: ✓ yoki ✗ va izoh.</p>
+        </li>
+        <li>
+          <h2 class="text-lg">Xavfsiz tekshiruv</h2>
+          <p class="mt-2 text-text-2">Kod internetsiz, limitlar bilan alohida konteynerda ishga tushadi.</p>
+        </li>
+        <li>
+          <h2 class="text-lg">Sinf jurnali</h2>
+          <p class="mt-2 text-text-2">Kim nimani yechgani, urinishlar va kechikishlar bir jadvalda.</p>
+        </li>
+      </ul>
+    </div>
+  </main>
+{% endblock body %}

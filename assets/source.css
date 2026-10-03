@@ -429,6 +429,34 @@
     color: var(--ink);
   }
 
+  /* The landing page's two doors: students, staff. */
+  .door {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    border: 1px solid var(--grid);
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .door:hover {
+    border-color: var(--ink);
+  }
+  .door-title {
+    font-family: var(--font-serif);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .door-go {
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
   /* A submission's code (apps.submissions.code): Pygments colours, line numbers inline. */
   .code-view pre {
     margin: 0;

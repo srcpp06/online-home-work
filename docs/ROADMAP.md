@@ -50,8 +50,8 @@ Maqsad: "topshiriq paketi + o'quvchi zipi → natija" zanjiri ARM64 serverda ish
 Erkin birinchi deploydan keyin so'radi (2026-10-03): qulay, zamonaviy, imkoniyatlari ko'p, premium. Javoblari `docs/decisions.md` da. Har bosqich oxirida: testlar, skrinshotlar, deploy.
 
 **1-bosqich — rollar, kirish, profil**
-- [ ] Yangi rollar: menejer hammasini ko'radi va faqat adminlarni boshqaradi; admin faqat o'qituvchi, o'quvchi va guruhlar bilan ishlaydi, topshiriq, natija va jurnallarni ko'rmaydi; menejerni superadmin yaratadi
-- [ ] Alohida kirish: o'quvchilar va xodimlar (o'qituvchi, menejer, admin) uchun alohida sahifa; bosh sahifa
+- [x] Yangi rollar: menejer hammasini ko'radi va faqat adminlarni boshqaradi; admin faqat o'qituvchi, o'quvchi va guruhlar bilan ishlaydi, topshiriq, natija va jurnallarni ko'rmaydi; menejerni superadmin yaratadi
+- [x] Alohida kirish: o'quvchilar va xodimlar (o'qituvchi, menejer, admin) uchun alohida sahifa; bosh sahifa — `/login/`, `/staff/login/`, `/` (oddiy bosh sahifa; animatsiyali — 6-bosqich)
 - [ ] Superadmin paneli internetdan yopiq: faqat serverga SSH tunnel orqali
 - [ ] Shaxsiy profil: rasm, aloqa, o'zi haqida, rolga qarab statistika
 
