@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help setup db db-down migrate dev test test-docker lint format check
+.PHONY: help setup db db-down migrate css dev test test-docker lint format check
 .PHONY: base-images poc fixtures-dart needs-uv needs-docker needs-compose
 COMPOSE_DEV = docker compose -f compose.dev.yml
 
@@ -45,8 +45,11 @@ db-down: needs-compose ## Stop the development PostgreSQL; its data stays
 migrate: needs-uv db ## Apply database migrations
 	$(UV) run python manage.py migrate
 
-dev: migrate ## Run the site at http://127.0.0.1:8000 with the development database
-	$(UV) run python manage.py runserver
+css: needs-uv ## Build static/css/app.css from assets/source.css (Tailwind; first run downloads it)
+	$(UV) run python manage.py tailwind build
+
+dev: migrate ## Run the site at http://127.0.0.1:8000 and rebuild the CSS on every change
+	$(UV) run python manage.py tailwind runserver
 
 test: needs-uv db ## Fast tests: the judge without Docker, the site with the development PostgreSQL
 	$(UV) run pytest -m "not docker"
@@ -54,13 +57,16 @@ test: needs-uv db ## Fast tests: the judge without Docker, the site with the dev
 test-docker: needs-uv needs-docker .env ## Integration tests that need Docker
 	$(UV) run pytest -m docker
 
-lint: needs-uv ## ruff check + ruff format --check
+lint: needs-uv ## ruff check + ruff format --check, djLint for templates
 	$(UV) run ruff check .
 	$(UV) run ruff format --check .
+	$(UV) run djlint templates apps --lint
+	$(UV) run djlint templates apps --check
 
-format: needs-uv ## Fix lint issues and format code
+format: needs-uv ## Fix lint issues and format code and templates
 	$(UV) run ruff check --fix .
 	$(UV) run ruff format .
+	$(UV) run djlint templates apps --reformat --quiet
 
 check: lint test ## lint + test, run before every commit
 

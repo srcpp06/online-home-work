@@ -1,5 +1,6 @@
+# Vendored files (static/vendor, static/fonts, apps/ui/icons) stay byte-identical to upstream.
 # Recorded runner outputs are test data and must stay byte-for-byte unchanged.
-exclude: ^tests/.*/fixtures/
+exclude: ^(tests/.*/fixtures/|static/(vendor|fonts)/|apps/ui/icons/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

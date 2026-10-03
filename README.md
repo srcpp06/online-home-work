@@ -10,12 +10,14 @@ Talablar: [uv](https://docs.astral.sh/uv/), GNU Make, Docker va Docker Compose (
 
 ```
 make setup   # kutubxonalar, pre-commit hook'lari, .env (yangi maxfiy kalit bilan)
-make dev     # PostgreSQL + migratsiyalar + sayt: http://127.0.0.1:8000/admin/
+make dev     # PostgreSQL + migratsiyalar + CSS + sayt: http://127.0.0.1:8000/admin/
 make check   # lint + testlar, har commitdan oldin
 make help    # barcha buyruqlar
 ```
 
-Admin uchun birinchi foydalanuvchi: `uv run python manage.py createsuperuser`.
+Admin uchun birinchi foydalanuvchi: `uv run python manage.py createsuperuser`. Dizayn tizimi: http://127.0.0.1:8000/ui/ (faqat dev).
+
+`make dev` birinchi marta Tailwind CSS binarini GitHub'dan yuklab oladi (`.django_tailwind_cli/`, internet kerak).
 
 `.env` eski bo'lsa (sayt `missing settings` deb to'xtasa): `rm .env` va `make setup`.
 

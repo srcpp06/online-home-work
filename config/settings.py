@@ -33,11 +33,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "django_tailwind_cli",
     "apps.accounts",
+    "apps.ui",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,6 +84,24 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # Hashed, compressed names in production (served by WhiteNoise, cached for a year);
+    # plain names while developing, so nothing needs collectstatic.
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        if DEBUG
+        else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
+}
+
+# Tailwind CSS v4 standalone CLI (no Node): assets/source.css -> static/css/app.css.
+# The pinned binary is downloaded once into .django_tailwind_cli/.
+TAILWIND_CLI_VERSION = "4.3.3"
+TAILWIND_CLI_SRC_CSS = "assets/source.css"
+TAILWIND_CLI_DIST_CSS = "css/app.css"
 # Uploads are served only by views that check permissions (SPEC §5), so no MEDIA_URL.
 # A relative path is under the repository; production uses an absolute one.
 MEDIA_ROOT = BASE_DIR / env.text("MEDIA_ROOT")

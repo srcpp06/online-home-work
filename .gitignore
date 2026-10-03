@@ -12,9 +12,12 @@ htmlcov/
 .env.*
 !.env.example
 
-# Django (Phase 1)
+# Django
 /media/
 /staticfiles/
+# Built by `make css` from assets/source.css; the Tailwind binary lives next to it.
+/static/css/app.css
+/.django_tailwind_cli/
 
 # Dart / Flutter
 .dart_tool/

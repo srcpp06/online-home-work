@@ -7,13 +7,17 @@ requires-python = "==3.12.*"
 dependencies = [
     "dj-database-url>=3.0",
     "django>=5.2,<5.3",
+    "django-tailwind-cli>=4",
     "docker>=7.2.0",
     "psycopg[binary]>=3.2",
     "pyyaml>=6.0.3",
+    "whitenoise>=6.9",
 ]
 
 [dependency-groups]
 dev = [
+    "djlint>=1.36",
+    "fonttools[woff]>=4.55",
     "pre-commit>=4.6",
     "pytest>=9.1",
     "pytest-django>=4.11",
@@ -56,6 +60,13 @@ addopts = ["--import-mode=importlib", "--strict-markers", "--strict-config", "-r
 # pytest-django; the test database lives next to the development one (`make db`).
 DJANGO_SETTINGS_MODULE = "config.settings"
 xfail_strict = true
+# WhiteNoise warns that STATIC_ROOT is missing until collectstatic runs (production only).
+filterwarnings = ["ignore:No directory at.*staticfiles:UserWarning"]
 markers = [
     "docker: needs a running Docker daemon (run with `make test-docker`)",
 ]
+
+[tool.djlint]
+profile = "django"
+indent = 2
+max_line_length = 120

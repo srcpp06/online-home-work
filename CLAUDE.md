@@ -106,6 +106,7 @@ make setup         # uv sync, pre-commit, .env (yangi DJANGO_SECRET_KEY bilan)
 make db            # dev PostgreSQL 17 (compose.dev.yml); make db-down — to'xtatish
 make migrate       # migratsiyalarni qo'llash
 make dev           # Postgres (compose.dev.yml) + migrate + runserver + tailwind watch
+make css           # assets/source.css -> static/css/app.css (Tailwind standalone, Node'siz)
 make worker        # python manage.py judge_worker
 make base-images   # profiles/* ni joriy arxitekturada yig'ish
 make poc           # examples/ ni judge orqali ishlatish va o'lchash (Markdown jadval)

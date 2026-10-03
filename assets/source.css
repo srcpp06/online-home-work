@@ -1,0 +1,432 @@
+/*
+ * "Uy vazifasi daftari" design system (docs/UI.md). Tailwind CSS v4 source.
+ * Built into static/css/app.css by `make css` (`make dev` watches it); never edit app.css.
+ */
+
+@import "tailwindcss" source(none);
+@source "../templates";
+@source "../apps";
+
+/* ---- Fonts: self-hosted woff2, Latin, Latin Extended and Cyrillic (docs/UI.md §2) ----
+ * Golos Text and JetBrains Mono have no ʻ (U+02BB, as in oʻ and gʻ): the browser takes that
+ * one letter from "OHW Marks", Inter's ʻ alone (static/fonts/ohw-marks-400.woff2).
+ */
+
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/golos-text-cyrillic-400-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/golos-text-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/golos-text-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/golos-text-cyrillic-600-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/golos-text-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Golos Text";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/golos-text-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/literata-cyrillic-600-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/literata-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../fonts/literata-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/jetbrains-mono-cyrillic-400-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/jetbrains-mono-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "OHW Marks";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../fonts/ohw-marks-400.woff2") format("woff2");
+  unicode-range: U+02BB;
+}
+
+/* ---- Tokens (docs/UI.md §2). Utilities such as bg-desk or text-ink use them; a later
+ * "Doska" dark theme redefines only these variables. ---- */
+
+:root {
+  --desk: #eef1f6;
+  --paper: #ffffff;
+  --grid: #d9e6f2;
+  --margin: #e2574c;
+  --ink: #1d2b6b;
+  --text: #1e2433;
+  --text-2: #5b6478;
+  --pen-red: #c62828;
+  --pass: #1b7a4b;
+  --warn: #a86400;
+  --cell: 24px;
+}
+
+@theme inline {
+  /* Only the design system's colours exist: no stray Tailwind palette in templates. */
+  --color-*: initial;
+  --color-desk: var(--desk);
+  --color-paper: var(--paper);
+  --color-grid: var(--grid);
+  --color-margin: var(--margin);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-pen-red: var(--pen-red);
+  --color-pass: var(--pass);
+  --color-warn: var(--warn);
+  --color-white: #ffffff;
+
+  --font-sans: "Golos Text", "OHW Marks", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Literata", "OHW Marks", Georgia, serif;
+  --font-mono: "JetBrains Mono", "OHW Marks", ui-monospace, monospace;
+
+  /* Type scale 14 / 16 / 19 / 24 / 32 px; body text 1.6, serif headings 1.25. */
+  --text-*: initial;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.6;
+  --text-base: 16px;
+  --text-base--line-height: 1.6;
+  --text-lg: 19px;
+  --text-lg--line-height: 1.25;
+  --text-xl: 24px;
+  --text-xl--line-height: 1.25;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 1.25;
+
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --radius-page: 4px;
+}
+
+@layer base {
+  html {
+    background: var(--desk);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  h1 {
+    font-size: 32px;
+  }
+  h2 {
+    font-size: 24px;
+  }
+  h3 {
+    font-size: 19px;
+  }
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+    /* Students must see the characters they typed: no => drawn as an arrow. */
+    font-variant-ligatures: none;
+  }
+}
+
+@layer components {
+  /* Panels and cards: flat, a hairline border, no shadow (the notebook page has the only one). */
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--grid);
+    border-radius: var(--radius-panel);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-control);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-secondary {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 6px 12px;
+    background: var(--paper);
+    border: 1px solid var(--text-2);
+    border-radius: var(--radius-control);
+    color: var(--text);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--pen-red);
+  }
+  .field-error {
+    color: var(--pen-red);
+    font-size: 14px;
+  }
+
+  /* The signature component (docs/UI.md §3): squared paper with a red margin line.
+   * Rows sit on the 24 px grid; the margin column holds the teacher's marks. */
+  .notebook {
+    /* Two cells of margin on phones, where students mostly read results; three above. */
+    --margin-x: calc(var(--cell) * 2);
+    position: relative;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: var(--cell) var(--cell);
+    background-position: -1px -1px;
+    border-radius: var(--radius-page);
+    box-shadow:
+      0 1px 2px rgb(29 43 107 / 0.08),
+      0 8px 24px rgb(29 43 107 / 0.1);
+    padding: var(--cell) var(--cell) calc(var(--cell) * 2) calc(var(--margin-x) + 12px);
+    line-height: var(--cell);
+  }
+  @media (width >= 40rem) {
+    .notebook {
+      --margin-x: calc(var(--cell) * 3);
+    }
+  }
+  .notebook::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--margin-x);
+    width: 2px;
+    background: var(--margin);
+  }
+  .notebook-title {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: var(--cell);
+    color: var(--ink);
+    margin-bottom: var(--cell);
+  }
+  .notebook-row {
+    position: relative;
+    min-height: var(--cell);
+  }
+  .notebook-mark {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * var(--margin-x) - 12px);
+    width: var(--margin-x);
+    height: var(--cell);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notebook-note {
+    color: var(--pen-red);
+  }
+
+  /* The final verdict as a stamp: double frame, turned by -2°. */
+  .stamp {
+    display: inline-block;
+    padding: 4px 14px;
+    border: 4px double currentColor;
+    border-radius: var(--radius-control);
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: var(--cell);
+    transform: rotate(-2deg);
+  }
+
+  /* A status is an icon and words, never colour alone (docs/UI.md §5). */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+  .tone-pass {
+    color: var(--pass);
+  }
+  .tone-fail {
+    color: var(--pen-red);
+  }
+  .tone-warn {
+    color: var(--warn);
+  }
+  .tone-ink {
+    color: var(--ink);
+  }
+  .tone-neutral {
+    color: var(--text-2);
+  }
+
+  /* The journal (docs/UI.md §4): thin lines, the meaning is in the mark, the tint helps. */
+  .journal {
+    border-collapse: collapse;
+    background: var(--paper);
+  }
+  .journal th,
+  .journal td {
+    border: 1px solid var(--grid);
+    padding: 4px 10px;
+    text-align: center;
+  }
+  .journal th:first-child,
+  .journal td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: var(--paper);
+  }
+  .journal thead th {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .journal .cell-pass {
+    background: color-mix(in srgb, var(--pass) 12%, var(--paper));
+    color: var(--pass);
+  }
+  .journal .cell-fail {
+    background: color-mix(in srgb, var(--pen-red) 10%, var(--paper));
+    color: var(--pen-red);
+  }
+}
+
+@layer utilities {
+  /* The one animation (docs/UI.md §7): a test row appearing when its result arrives. */
+  .row-appear {
+    animation: row-appear 150ms ease-out both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .row-appear {
+      animation: none;
+    }
+  }
+}
+
+@keyframes row-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

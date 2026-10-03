@@ -10,7 +10,7 @@ Foydalanuvchilar: o'quvchilar (ko'pincha telefon yoki zaif kompyuter), o'qituvch
 
 ## 2. Tokenlar
 
-Ranglar (`static/css` da CSS o'zgaruvchilari):
+Ranglar (`assets/source.css` dagi `:root` CSS o'zgaruvchilari; `make css` ularni `static/css/app.css` ga yig'adi, Tailwind'da `bg-desk`, `text-ink` kabi; boshqa ranglar yo'q):
 
 | Token | Hex | Vazifasi |
 |---|---|---|
@@ -26,9 +26,10 @@ Ranglar (`static/css` da CSS o'zgaruvchilari):
 | `--warn` | `#A86400` | vaqt yoki xotira limiti |
 
 Shriftlar (self-hosted woff2; Latin, Latin Extended va Kirill subsetlari):
-- Sarlavhalar: maktab darsligi uslubidagi serif — **TeX Gyre Schola** (Century Schoolbook oilasi). Litsenziyasini va `ʻ` (U+02BB) glifini tekshir; muammo bo'lsa **Literata**.
-- Interfeys va matn: **Golos Text**.
-- Kod va fayl yo'llari: **JetBrains Mono** (faqat shu yerda; kichik yorliqlar uchun monospace ishlatilmaydi).
+- Sarlavhalar: **Literata** (600). TeX Gyre Schola tekshirildi: unda `ʻ` (U+02BB), `ʼ` (U+02BC) va kirill yo'q, shuning uchun shu yerdagi zaxira tanlov ishlatildi.
+- Interfeys va matn: **Golos Text** (400, 600).
+- Kod va fayl yo'llari: **JetBrains Mono** (faqat shu yerda; kichik yorliqlar uchun monospace ishlatilmaydi); ligaturalar o'chiq — `=>` o'quvchi yozgandek ko'rinadi.
+- Golos Text va JetBrains Mono'da `ʻ` yo'q: bu bitta harf "OHW Marks" dan (Inter'ning faqat `ʻ` glifi, ~1 KB) chiziladi. Testlar (`tests/apps/ui/test_fonts.py`) har bir shrift to'plami `ʻ ʼ`, lotin va kirillni o'zi chizishini tekshiradi.
 
 O'lchamlar:
 - Shrift shkalasi: 14 / 16 / 19 / 24 / 32 px. Matn qator balandligi 1.6, serif sarlavhalar 1.25.
@@ -113,7 +114,7 @@ Kirish sahifasi: sokin, markazda daftar sahifasi ichidagi forma. Birinchi kirish
 - Mobil-first (o'quvchilar natijani telefonda ko'radi); jurnal desktop uchun optimallashtiriladi.
 - Kirish imkoniyati: WCAG AA kontrast; ko'rinadigan fokus (2 px `--ink`); hamma narsa klaviatura bilan boshqariladi; jonli natija ro'yxatida `aria-live="polite"`.
 - Dark mode — "Doska" mavzusi (to'q yashil-qora fon, bo'r rangidagi matn, xira katak to'r) — Phase 2.
-- Har bir sahifani yaratgach skrinshot olib, shu hujjatga mosligini tekshir.
+- Har bir sahifani yaratgach skrinshot olib, shu hujjatga mosligini tekshir. Barcha komponentlar bitta sahifada: `/ui/` (faqat `DJANGO_DEBUG=true` da).
 
 ## 8. Matn yozish qoidalari
 

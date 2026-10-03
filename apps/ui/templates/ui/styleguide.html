@@ -1,0 +1,141 @@
+{% extends "layouts/app.html" %}
+{% load ui %}
+{% block title %}
+  Dizayn tizimi
+{% endblock title %}
+{% block content %}
+  <h1>Dizayn tizimi</h1>
+  <p class="mt-2 max-w-[72ch] text-text-2">
+    "Uy vazifasi daftari" komponentlari bir sahifada. Har bir oʻzgarishdan keyin shu sahifani docs/UI.md bilan solishtiring.
+  </p>
+  <section class="mt-10" aria-labelledby="colors">
+    <h2 id="colors">Ranglar</h2>
+    <ul class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+      {% for name, hex in colors %}
+        <li class="panel p-3 text-sm">
+          {# The swatch shows the token itself, so its colour comes from a variable. #}
+          {# djlint:off H021 #}
+          <span class="block h-10 rounded-control border border-grid"
+                style="background: var(--{{ name }})"></span>
+          {# djlint:on #}
+          <span class="mt-2 block font-semibold">--{{ name }}</span>
+          <span class="text-text-2">{{ hex }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="mt-10" aria-labelledby="type">
+    <h2 id="type">Shriftlar</h2>
+    <div class="panel mt-4 p-6 space-y-4">
+      <p class="font-serif font-semibold text-2xl text-ink">Oʻqituvchining topshirigʻi</p>
+      <p class="font-serif font-semibold text-xl text-ink">Boshlangʻich loyiha</p>
+      <p class="font-serif font-semibold text-lg text-ink">Taʼlim markazi jurnali</p>
+      <p class="max-w-[72ch]">
+        Oʻquvchi yechimini yuboradi, platforma uni alohida konteynerda tekshiradi va har bir test natijasini darhol koʻrsatadi. Harflar: oʻ, gʻ, Oʻ, Gʻ, tutuq belgisi — taʼlim, maʼlumot.
+      </p>
+      <p class="text-sm text-text-2">Ikkinchi darajali matn, 14 px: Muddat 12-oktabr, 18:00 gacha.</p>
+      <p lang="ru">Русский текст для проверки кириллицы: Проверка решений.</p>
+      <pre class="panel p-3 text-sm overflow-x-auto"><code>void main() =&gt; print('Salom, dunyo!'); // lib/main.dart</code></pre>
+    </div>
+  </section>
+  <section class="mt-10" aria-labelledby="controls">
+    <h2 id="controls">Tugmalar va forma</h2>
+    <div class="panel mt-4 p-6 space-y-6">
+      <div class="flex flex-wrap gap-3">
+        <button class="btn btn-primary" type="button">{% icon "upload" %}Yechimni yuborish</button>
+        <button class="btn btn-secondary" type="button">Boshlangʻich loyihani yuklab olish</button>
+        <button class="btn btn-primary" type="button" disabled>Yechimni yuborish (42 s)</button>
+      </div>
+      <div class="max-w-sm">
+        <label class="block font-semibold" for="sg-username">Login</label>
+        <input class="field mt-1"
+               id="sg-username"
+               name="username"
+               value="ali"
+               aria-invalid="true"
+               aria-describedby="sg-username-error">
+        <p class="field-error mt-1" id="sg-username-error">Login yoki parol notoʻgʻri. Qayta kiriting.</p>
+      </div>
+    </div>
+  </section>
+  <section class="mt-10" aria-labelledby="statuses">
+    <h2 id="statuses">Holat belgilari</h2>
+    <ul class="panel mt-4 p-6 grid sm:grid-cols-2 gap-3">
+      {% for status in statuses %}
+        <li>{% status_badge status %}</li>
+      {% endfor %}
+      <li>{% status_badge "wrong_answer" 3 %}</li>
+    </ul>
+  </section>
+  <section class="mt-10" aria-labelledby="notebook">
+    <h2 id="notebook">Daftar sahifasi va muhr</h2>
+    <p class="mt-2 text-text-2">Navbatda. Oldingizda 3 ta yechim.</p>
+    <div class="notebook mt-4 max-w-2xl">
+      <div class="notebook-title flex justify-between gap-4">
+        <span>Savat hisobi</span>
+        <span class="font-sans font-normal text-base text-text-2">Urinish 3</span>
+      </div>
+      <ol aria-live="polite">
+        <li class="notebook-row row-appear">
+          <span class="notebook-mark tone-pass">{% icon "check" %}<span class="sr-only">Oʻtdi:</span></span>
+          1. Savat boʻsh boʻlsa jami 0 ga teng
+        </li>
+        <li class="notebook-row row-appear">
+          <span class="notebook-mark tone-pass">{% icon "check" %}<span class="sr-only">Oʻtdi:</span></span>
+          2. Mahsulot qoʻshilganda jami ortadi
+        </li>
+        <li class="notebook-row row-appear">
+          <span class="notebook-mark tone-fail">{% icon "x" %}<span class="sr-only">Xato:</span></span>
+          3. Chegirma 10% dan oshmasligi kerak
+          <div class="notebook-note">Kutilgan: 90, olingan: 85</div>
+        </li>
+      </ol>
+      <div class="mt-6 text-right">
+        <span class="stamp tone-fail">3-testda xato</span>
+      </div>
+    </div>
+    <div class="mt-8 flex flex-wrap gap-8">
+      <span class="stamp tone-pass">Qabul qilindi</span>
+      <span class="stamp tone-warn">Vaqt limiti oshdi</span>
+    </div>
+  </section>
+  <section class="mt-10" aria-labelledby="journal">
+    <h2 id="journal">Jurnal</h2>
+    <div class="mt-4 overflow-x-auto">
+      <table class="journal">
+        <thead>
+          <tr>
+            <th scope="col">Oʻquvchi</th>
+            <th scope="col" title="Savat hisobi">A</th>
+            <th scope="col" title="Vazifalar roʻyxati">B</th>
+            <th scope="col" title="Kalkulyator">C</th>
+            <th scope="col" title="Ob-havo">D</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Aliyev Vali</th>
+            <td class="cell-pass">+</td>
+            <td class="cell-pass">+2</td>
+            <td class="cell-fail">−1</td>
+            <td></td>
+          </tr>
+          <tr>
+            <th scope="row">Karimova Sora</th>
+            <td class="cell-pass">+1</td>
+            <td class="cell-pass">+</td>
+            <td>…</td>
+            <td></td>
+          </tr>
+          <tr>
+            <th scope="row">Toshev Anvar</th>
+            <td></td>
+            <td class="cell-fail">−3</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock content %}

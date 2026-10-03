@@ -1,0 +1,9 @@
+<ul class="space-y-1">
+  {% for item in nav_items %}
+    <li>
+      <a href="{{ item.url }}"
+         class="block rounded-control px-3 py-2 no-underline {% if item.active %}bg-desk text-ink font-semibold{% else %}text-text hover:bg-desk{% endif %}"
+         {% if item.active %}aria-current="page"{% endif %}>{{ item.label }}</a>
+    </li>
+  {% endfor %}
+</ul>

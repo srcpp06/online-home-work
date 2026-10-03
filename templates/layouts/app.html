@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block body %}
+  <div class="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
+    {# Phones: a top bar whose menu opens below it. #}
+    <header class="md:hidden bg-paper border-b border-grid">
+      <details class="group">
+        <summary class="flex items-center justify-between px-4 h-14 cursor-pointer list-none">
+          <span class="font-serif font-semibold text-lg text-ink">Online Home Work</span>
+          <span class="inline-flex items-center gap-2 text-ink">{% icon "menu" %}<span>Menyu</span></span>
+        </summary>
+        <nav class="px-2 pb-3" aria-label="Asosiy menyu">
+          {% include "layouts/_nav.html" %}
+        </nav>
+      </details>
+    </header>
+    {# Desktop: a side menu that depends on the role (docs/UI.md §5). #}
+    <aside class="hidden md:flex md:flex-col md:sticky md:top-0 md:h-dvh bg-paper border-r border-grid">
+      <div class="px-5 h-16 flex items-center font-serif font-semibold text-lg text-ink">Online Home Work</div>
+      <nav class="flex-1 px-2" aria-label="Asosiy menyu">
+        {% include "layouts/_nav.html" %}
+      </nav>
+      {% if user.is_authenticated %}
+        <div class="px-5 py-4 border-t border-grid text-sm">
+          <div class="font-semibold">{{ user.get_full_name|default:user.username }}</div>
+          <div class="text-text-2">{{ user.get_role_display }}</div>
+        </div>
+      {% endif %}
+    </aside>
+    <main class="px-4 py-6 md:px-10 md:py-10 max-w-6xl w-full">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+{% endblock %}
